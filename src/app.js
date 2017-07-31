@@ -48,9 +48,6 @@ function processEvent(event) {
                 let intent = response.result.metadata.intentId;
 
                 console.log(response.result);
-                response.result.fulfillment.messages.forEach(function(element) {
-                    console.log(element);
-                }, this);
 
                 if (isDefined(responseData) && isDefined(responseData.facebook)) {
                     if (!Array.isArray(responseData.facebook)) {
@@ -144,6 +141,16 @@ function processEvent(event) {
                         sendFBMessage(sender, message, callback);
                     });
                 }
+
+                response.result.fulfillment.messages.forEach(function(message) {
+                    let payload = message.payload;
+                    if (isDefined(payload)) {
+                        let followUp = payload.followUp;
+                        let apiaiRequest = apiAiService.eventRequest({
+                            name: followUp,
+                        });
+                    }
+                }, this);
 
             }
         });
