@@ -8,6 +8,7 @@ const request = require('request');
 const JSONbig = require('json-bigint');
 const async = require('async');
 const pg = require('pg');
+const util = require('util');
 
 const REST_PORT = (process.env.PORT || 5000);
 const APIAI_ACCESS_TOKEN = process.env.APIAI_ACCESS_TOKEN;
@@ -151,6 +152,10 @@ function processEvent(event) {
                             name: followUp,
                         }},{ 
                             sessionId: sessionIds.get(sender)
+                        });
+                        
+                        request.on('response', function(response) {
+                            console.log(util.inspect(response, false, null));
                         });
                     }
                 }, this);
