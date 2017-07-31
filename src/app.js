@@ -123,9 +123,9 @@ function handleResponse(response, sender) {
                         if (err) throw err;
 
                         client
-                            .query('INSERT INTO vragenlijsten(`user`, `vragenlijst`) VALUES($1, $2)', [sender, parameters.vragenlijst])
+                            .query('INSERT INTO vragenlijsten(user, vragenlijst) VALUES($1, $2)', [sender, parameters.vragenlijst])
                             .then(res => console.log(res.rows[0]))
-                            .catch(e => console.error(e.stack));
+                            .catch(e => console.error(e, e.stack));
                     });
                     break;
                 default:
