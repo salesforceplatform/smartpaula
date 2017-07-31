@@ -1,0 +1,29 @@
+{
+  "name": "API.AI Facebook integration",
+  "description": "Api.ai Facebook integration allows you to create Facebook bots with natural language understanding based on Api.ai technology.",
+  "repository": "https://github.com/api-ai/api-ai-facebook",
+  "logo": "http://xvir.github.io/img/apiai.png",
+  "keywords": ["api.ai", "facebook", "natural language"],
+  "env": {
+    "APIAI_ACCESS_TOKEN": {
+      "description": "Client access token for Api.ai",
+      "value": "ee9ab651fb8941d9956a497ba0e95e6d"
+    },
+    "FB_VERIFY_TOKEN": {
+      "description": "Verification code",
+      "value": “paula”
+    },
+    "FB_PAGE_ACCESS_TOKEN": {
+      "description": "Page Access Token",
+      "value": “EAATrh50Oh20BABOM8DU3diaGZBIzCzqELnXJPhnJV0ZCZCL5eNNes7n49Wfw87sZCDy5qrVzsqxFaKBgN7ZBbqqezKGG1wkCoC2546FHsl3oMqZCJtK6o1u40aSiwGHVZCauZCaC6S0DOY5lCZAwUX0LOQNJCv8CBZAzce3l4n8qDEqQZDZD”
+    },
+    "APIAI_LANG": {
+      "description": "Agent language",
+      "value": “nl”,
+      "required": false
+    }
+  },
+  "engines": {
+    "node": "5.10.1"
+  }
+}
