@@ -123,7 +123,7 @@ function handleResponse(response, sender) {
                         if (err) throw err;
 
                         client
-                            .query('INSERT INTO vragenlijsten (user, vragenlijst) VALUES($1, $2)', [sender, parameters.vragenlijst])
+                            .query({ text: 'INSERT INTO vragenlijsten (user, vragenlijst) VALUES($1, $2)', values: [sender, parameters.vragenlijst] })
                             .then(res => console.log(res.rows[0]))
                             .catch(e => console.error(e, e.stack));
                     });
