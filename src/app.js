@@ -46,14 +46,6 @@ function processEvent(event) {
                 let intent = response.result.metadata.intentId;
 
                 if (isDefined(responseData) && isDefined(responseData.facebook)) {
-                    console.log(responseData);
-                    console.log(intent);
-                    if(DEFAULT_INTENTS.includes(intent)){
-                        getFBProfile(sender, (profile) => {
-                            sendFBMessage(DEFAULT_INTENT_REFER_TO, 'Hallo, ik heb een vraag gekregen van ' + profile.first_name + ' ' + profile.last_name + ' die ik niet kan beantwoorden')
-                        });
-                    }
-                    console.log(responseData.facebook);
                     if (!Array.isArray(responseData.facebook)) {
                         try {
                             console.log('Response as formatted message');
@@ -81,6 +73,15 @@ function processEvent(event) {
                 //hier komen de standaard tekst antwoorden van api.ai terecht
                 } else if (isDefined(responseText)) {
                     console.log('Response as text message');
+
+                    console.log(responseData);
+                    console.log(intent);
+                    if(DEFAULT_INTENTS.includes(intent)){
+                        getFBProfile(sender, (profile) => {
+                            sendFBMessage(DEFAULT_INTENT_REFER_TO, 'Hallo, ik heb een vraag gekregen van ' + profile.first_name + ' ' + profile.last_name + ' die ik niet kan beantwoorden')
+                        });
+                    }
+
                     //achterhaal of er intelligentie nodig is
                     var speech ="";
                         switch(action) {
