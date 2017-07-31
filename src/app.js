@@ -126,11 +126,6 @@ function handleResponse(response, sender) {
                             .query('INSERT INTO vragenlijsten (user, vragenlijst) VALUES ($1, $2)', [sender, parameters.vragenlijst])
                             .then(res => console.log(res.rows[0]))
                             .catch(e => console.error(e.stack))
-                        client
-                            .query('SELECT table_schema,table_name FROM information_schema.tables;')
-                            .on('row', function(row) {
-                                console.log(JSON.stringify(row));
-                            });
                     });
                     break;
                 default:
