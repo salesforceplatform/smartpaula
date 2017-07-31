@@ -7,6 +7,7 @@ const uuid = require('node-uuid');
 const request = require('request');
 const JSONbig = require('json-bigint');
 const async = require('async');
+const pg = require('pg');
 
 const REST_PORT = (process.env.PORT || 5000);
 const APIAI_ACCESS_TOKEN = process.env.APIAI_ACCESS_TOKEN;
@@ -78,6 +79,34 @@ function processEvent(event) {
                     }
                 //hier komen de standaard tekst antwoorden van api.ai terecht
                 } else if (isDefined(responseText)) {
+                    let message = {text: responseText};
+                    let quickReplies = [
+                        {
+                            "content_type":"text",
+                            "title":"😁",
+                            "payload":"4"
+                        },
+                        {
+                            "content_type":"text",
+                            "title":"🙂",
+                            "payload":"3"
+                        },
+                        {
+                            "content_type":"text",
+                            "title":"😞",
+                            "payload":"2"
+                        },
+                        {
+                            "content_type":"text",
+                            "title":"😡",
+                            "payload":"1"
+                        },
+                        {
+                            "content_type":"text",
+                            "title":"N.v.t",
+                            "payload":"0"
+                        }
+                    ];
                     console.log('Response as text message');
 
                     // Controleer of het antwoord uit de default intents voortkomt. Zo ja, stuur de vraag dan door.
@@ -91,18 +120,19 @@ function processEvent(event) {
 
                     //achterhaal of er intelligentie nodig is
                     var speech ="";
-                        switch(action) {
+                    switch(action) {
                         case "who_are_you": //check if user is known
                             speech += action;
                         break;
                         case "pam_sum": //calculate PAM score
                             speech += response.result.parameters.pam_score;
+                            
                             //hoe geef je waarde aan api.ai variabele?
                             //apiaiRequest.contexts.pam_sum.paramaters.pam_total += response.result.parameters.pam_score
                         break;
                         default:
-                        speech += 'Sorry, de actie is niet bekend.';
-                        }
+                            speech += 'Sorry, de actie is niet bekend.';
+                    }
   
                     // facebook API limit for text length is 640,
                     // so we must split message if needed
@@ -110,7 +140,7 @@ function processEvent(event) {
 
                     async.eachSeries(splittedText, (textPart, callback) => {
                         //sendFBMessage(sender, {text: textPart + ' debug callback: ' + speech}, callback);
-                        sendFBMessage(sender, {text: textPart}, callback);
+                        sendFBMessage(sender, message, callback);
                     });
                 }
 
@@ -249,6 +279,8 @@ const frontofficeid = 1533050426761050;
 app.use(bodyParser.text({type: 'application/json'})); //geen response als deze weggelaten wordt
 app.use(bodyParser.urlencoded({extended: false})); //toegevoegd: heeft invloed verwerking event
 app.use(bodyParser.json()); //toegevoegd: corrigeert de werking weer
+
+pg.defaults.ssl = true; //
 
 var debugtekst = "";
 
