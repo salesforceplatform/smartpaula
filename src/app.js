@@ -46,6 +46,8 @@ function processEvent(event) {
                 let action = response.result.action; //actie in intent
                 let intent = response.result.metadata.intentId;
 
+                console.log(sender);
+
                 if (isDefined(responseData) && isDefined(responseData.facebook)) {
                     if (!Array.isArray(responseData.facebook)) {
                         try {
