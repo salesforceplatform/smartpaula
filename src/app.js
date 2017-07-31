@@ -155,9 +155,7 @@ function processEvent(event) {
                     if (isDefined(payload)) {
                         let followUp = payload.followUp;
                         let request = apiAiService.eventRequest({
-                            event: {
-                                name: followUp,
-                            }
+                            name: followUp
                         }, {
                             sessionId: sessionIds.get(sender)
                         });
