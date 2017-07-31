@@ -43,7 +43,7 @@ function processEvent(event) {
                 console.log(response.result);
 
                 getFBName(sender, (name) => {
-                        sendFBMessage(sender, 'Hallo ' + name + '!');
+                        console.log(sender, 'Hallo ' + name + '!');
                     });
 
                 if (isDefined(responseData) && isDefined(responseData.facebook)) {
