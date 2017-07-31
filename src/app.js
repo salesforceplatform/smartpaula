@@ -146,7 +146,7 @@ function processEvent(event) {
                     let payload = message.payload;
                     if (isDefined(payload)) {
                         let followUp = payload.followUp;
-                        let apiaiRequest = apiAiService.eventRequest({
+                        let request = apiAiService.eventRequest({
                             name: followUp,
                         });
                     }
