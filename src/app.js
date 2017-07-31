@@ -17,6 +17,9 @@ const FB_PAGE_ACCESS_TOKEN = process.env.FB_PAGE_ACCESS_TOKEN;
 const apiAiService = apiai(APIAI_ACCESS_TOKEN, {language: APIAI_LANG, requestSource: "fb"});
 const sessionIds = new Map();
 
+const DEFAULT_INTENTS = ['57b82498-053c-4776-8be9-228c420e6c13', 'b429ecdc-21f4-4a07-8165-3620023185ba'];
+const DEFAULT_INTENT_REFER_TO = '1648152645194926';
+
 function processEvent(event) {
     var sender = event.sender.id.toString();
 
@@ -41,12 +44,14 @@ function processEvent(event) {
                 let responseData = response.result.fulfillment.data;
                 let action = response.result.action; //actie in intent
                 let intent = response.result.metadata.intentId;
-                let name;
-                console.log(response.result);
-                console.log(intent);
 
                 if (isDefined(responseData) && isDefined(responseData.facebook)) {
-                    
+                    if(DEFAULT_INTENTS.includes(intent)){
+                        getFBProfile(sender, (profile) => {
+                            sendFBMessage(DEFAULT_INTENT_REFER_TO, 'Hallo, ik heb een vraag gekregen van ' + profile.first_name + ' ' + profile.last_name + ' die ik niet kan beantwoorden')
+                        });
+                    }
+                    console.log(responseData.facebook);
                     if (!Array.isArray(responseData.facebook)) {
                         try {
                             console.log('Response as formatted message');
