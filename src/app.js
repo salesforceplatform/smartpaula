@@ -40,8 +40,12 @@ function processEvent(event) {
                 let responseText = response.result.fulfillment.speech;
                 let responseData = response.result.fulfillment.data;
                 let action = response.result.action; //actie in intent
+                console.log(response.result);
 
                 if (isDefined(responseData) && isDefined(responseData.facebook)) {
+                    getFBName(sender, (name) => {
+                        sendFBMessage(sender, 'Hallo ' + name + '!');
+                    });
                     if (!Array.isArray(responseData.facebook)) {
                         try {
                             console.log('Response as formatted message');
@@ -135,6 +139,14 @@ function chunkString(s, len) {
     }
     output.push(s.substr(prev));
     return output;
+}
+
+function getFBName(id, callback){
+    request({
+        url: 'https://graph.facebook.com/v2.6/' + id,
+        qs: {access_token: FB_PAGE_ACCESS_TOKEN},
+        method: 'GET'
+    })
 }
 
 function sendFBMessage(sender, messageData, callback) {
