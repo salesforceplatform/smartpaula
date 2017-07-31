@@ -45,9 +45,9 @@ function processEvent(event) {
                 let resolvedQuery = response.result.resolvedQuery
                 let action = response.result.action; //actie in intent
                 let intent = response.result.metadata.intentId;
+                    console.log(responseData);
 
                 if (isDefined(responseData) && isDefined(responseData.facebook)) {
-                    console.log(responseData);
                     if (!Array.isArray(responseData.facebook)) {
                         try {
                             console.log('Response as formatted message');
