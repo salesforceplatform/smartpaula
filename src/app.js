@@ -155,6 +155,7 @@ function getFBProfile (facebookId, success, error) {
         method: 'GET'
     }, (err, response, body) => {
         if(success){
+            console.log(body, JSON.parse(body))
             success(JSON.parse(body));
         }
 
