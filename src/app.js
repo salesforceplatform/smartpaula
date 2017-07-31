@@ -126,7 +126,7 @@ function processEvent(event) {
                         break;
                         case "pam_sum": //calculate PAM score
                             speech += response.result.parameters.pam_score;
-                            
+                            message.quick_replies = quickReplies;
                             //hoe geef je waarde aan api.ai variabele?
                             //apiaiRequest.contexts.pam_sum.paramaters.pam_total += response.result.parameters.pam_score
                         break;
@@ -136,10 +136,11 @@ function processEvent(event) {
   
                     // facebook API limit for text length is 640,
                     // so we must split message if needed
-                    var splittedText = splitResponse(responseText);
+                    var splittedText = splitResponse(message.text);
 
                     async.eachSeries(splittedText, (textPart, callback) => {
                         //sendFBMessage(sender, {text: textPart + ' debug callback: ' + speech}, callback);
+                        message.text = textPart;
                         sendFBMessage(sender, message, callback);
                     });
                 }
