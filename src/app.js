@@ -46,9 +46,10 @@ function processEvent(event) {
 
                 getFBProfile(sender, (profile) => {
                     name = profile.first_name + ' ' + profile.last_name;
+                    console.log(name);
                 });
 
-                console.log(name);
+                
 
                 if (isDefined(responseData) && isDefined(responseData.facebook)) {
                     
