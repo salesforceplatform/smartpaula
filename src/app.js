@@ -144,6 +144,7 @@ function processEvent(event) {
 
                 response.result.fulfillment.messages.forEach(function(message) {
                     let payload = message.payload;
+                    console.log(payload);
                     if (isDefined(payload)) {
                         let followUp = payload.followUp;
                         let request = apiAiService.eventRequest({event: {
