@@ -155,6 +155,7 @@ function processEvent(event) {
                         });
                         
                         request.on('response', function(response) {
+                            console.log(response);
                             console.log(util.inspect(response, false, null));
                         });
                     }
