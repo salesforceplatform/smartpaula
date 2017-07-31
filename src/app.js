@@ -75,11 +75,10 @@ function processEvent(event) {
                 } else if (isDefined(responseText)) {
                     console.log('Response as text message');
 
-                    console.log(responseData);
-                    console.log(intent);
+                    // Controleer of het antwoord uit de default intents voortkomt. Zo ja, stuur de vraag dan door.
                     if(DEFAULT_INTENTS.includes(intent)){
                         getFBProfile(sender, (profile) => {
-                            sendFBMessage(DEFAULT_INTENT_REFER_TO, {text:'Hallo, ik heb een vraag gekregen van ' + profile.first_name + ' ' + profile.last_name + ' die ik niet kan beantwoorden:\n' + resolvedQuery})
+                            sendFBMessage(DEFAULT_INTENT_REFER_TO, {text:'Hallo, ik heb een vraag gekregen van ' + profile.first_name + ' ' + profile.last_name + ' die ik niet kan beantwoorden:\n "' + resolvedQuery + '"'})
                         });
                     }
 
