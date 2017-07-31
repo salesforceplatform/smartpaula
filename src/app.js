@@ -40,7 +40,7 @@ function processEvent(event) {
                 let responseText = response.result.fulfillment.speech;
                 let responseData = response.result.fulfillment.data;
                 let action = response.result.action; //actie in intent
-                let action = response.result.metadata.
+                let intent = response.result.metadata.intentId;
                 console.log(response.result);
 
                 getFBName(sender, (name) => {
