@@ -40,6 +40,7 @@ function processEvent(event) {
                 let responseText = response.result.fulfillment.speech;
                 let responseData = response.result.fulfillment.data;
                 let action = response.result.action; //actie in intent
+                let action = response.result.metadata.
                 console.log(response.result);
 
                 getFBName(sender, (name) => {
@@ -144,12 +145,13 @@ function chunkString(s, len) {
 }
 
 function getFBName(id, callback){
+    console.log('id:', id);
     request({
         url: 'https://graph.facebook.com/v2.6/' + id + '?fields=name',
         qs: {access_token: FB_PAGE_ACCESS_TOKEN},
         method: 'GET'
     }, (error, response, body) => {
-        console.log(error);
+        console.log(error, body);
         if(callback){
             callback(body.name)
         }
