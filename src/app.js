@@ -101,7 +101,7 @@ function processEvent(event) {
                         speech += 'Sorry, de actie is niet bekend.';
                         }
   
-                    // facebook API limit for text length is 320,
+                    // facebook API limit for text length is 640,
                     // so we must split message if needed
                     var splittedText = splitResponse(responseText);
 
@@ -119,11 +119,11 @@ function processEvent(event) {
 }
 
 function splitResponse(str) {
-    if (str.length <= 320) {
+    if (str.length <= 640) {
         return [str];
     }
 
-    return chunkString(str, 300);
+    return chunkString(str, 640);
 }
 
 function chunkString(s, len) {
