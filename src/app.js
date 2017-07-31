@@ -147,7 +147,7 @@ function chunkString(s, len) {
 function getFBName(id, callback){
     console.log('id:', id);
     request({
-        url: 'https://graph.facebook.com/v2.6/' + id + '?fields=name',
+        url: 'https://graph.facebook.com/v2.6/' + id,
         qs: {access_token: FB_PAGE_ACCESS_TOKEN},
         method: 'GET'
     }, (error, response, body) => {
