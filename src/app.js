@@ -45,7 +45,8 @@ function processEvent(event) {
                 let resolvedQuery = response.result.resolvedQuery
                 let action = response.result.action; //actie in intent
                 let intent = response.result.metadata.intentId;
-                    console.log(responseData);
+
+                console.log(response.result);
 
                 if (isDefined(responseData) && isDefined(responseData.facebook)) {
                     if (!Array.isArray(responseData.facebook)) {
