@@ -43,7 +43,7 @@ function processEvent(event) {
                 let intent = response.result.metadata.intentId;
                 let name;
                 console.log(response.result);
-                console.log(response.intent);
+                console.log(intent);
 
                 if (isDefined(responseData) && isDefined(responseData.facebook)) {
                     
