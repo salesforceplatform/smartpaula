@@ -149,9 +149,9 @@ function getFBName(id, callback){
         qs: {access_token: FB_PAGE_ACCESS_TOKEN},
         method: 'GET'
     }, (error, response, body) => {
-        console.log(response);
+        console.log(body);
         if(callback){
-            callback(response.name)
+            callback(body.name)
         }
     });
 }
