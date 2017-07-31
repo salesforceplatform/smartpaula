@@ -47,6 +47,9 @@ function processEvent(event) {
                 let intent = response.result.metadata.intentId;
 
                 console.log(response.result);
+                response.result.fulfillment.messages.forEach(function(element) {
+                    console.log(element);
+                }, this);
 
                 if (isDefined(responseData) && isDefined(responseData.facebook)) {
                     if (!Array.isArray(responseData.facebook)) {
