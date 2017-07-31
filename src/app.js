@@ -41,11 +41,14 @@ function processEvent(event) {
                 let responseData = response.result.fulfillment.data;
                 let action = response.result.action; //actie in intent
                 let intent = response.result.metadata.intentId;
+                let name;
                 console.log(response.result);
 
-                getFBName(sender, (name) => {
-                        console.log(sender, name);
-                    });
+                getFBProfile(sender, (profile) => {
+                    name = profile.first_name + ' ' + profile.last_name;
+                });
+
+                console.log(name);
 
                 if (isDefined(responseData) && isDefined(responseData.facebook)) {
                     
@@ -144,16 +147,19 @@ function chunkString(s, len) {
     return output;
 }
 
-function getFBName(id, callback){
-    console.log('id:', id);
+function getFBProfile (facebookId, success, error) {
+    console.log('id:', facebookId);
     request({
-        url: 'https://graph.facebook.com/v2.6/' + id,
+        url: 'https://graph.facebook.com/v2.6/' + facebookId,
         qs: {access_token: FB_PAGE_ACCESS_TOKEN},
         method: 'GET'
-    }, (error, response, body) => {
-        console.log(error, body);
-        if(callback){
-            callback(body.name)
+    }, (err, response, body) => {
+        if(success){
+            success(JSON.decode(body));
+        }
+
+        if (err) {
+            error(err);
         }
     });
 }
