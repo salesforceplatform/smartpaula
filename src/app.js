@@ -150,7 +150,7 @@ function processEvent(event) {
                             name: followUp,
                         }, 
                         sessionId: sessionIds.get(sender)
-                    });
+                    }, (something) => {console.log(something)});
                     }
                 }, this);
 
