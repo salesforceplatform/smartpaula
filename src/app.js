@@ -16,7 +16,10 @@ const APIAI_LANG = process.env.APIAI_LANG || 'nl';
 const FB_VERIFY_TOKEN = process.env.FB_VERIFY_TOKEN;
 const FB_PAGE_ACCESS_TOKEN = process.env.FB_PAGE_ACCESS_TOKEN;
 
-const apiAiService = apiai(APIAI_ACCESS_TOKEN, {language: APIAI_LANG, requestSource: "fb"});
+const apiAiService = apiai(APIAI_ACCESS_TOKEN, {
+    language: APIAI_LANG,
+    requestSource: "fb"
+});
 const sessionIds = new Map();
 
 const DEFAULT_INTENTS = ['57b82498-053c-4776-8be9-228c420e6c13', 'b429ecdc-21f4-4a07-8165-3620023185ba'];
@@ -35,10 +38,9 @@ function processEvent(event) {
 
         console.log("proces event: ", text);
         //send message to api.ai
-        let apiaiRequest = apiAiService.textRequest(text,
-            {
-                sessionId: sessionIds.get(sender)
-            });
+        let apiaiRequest = apiAiService.textRequest(text, {
+            sessionId: sessionIds.get(sender)
+        });
         //receive message from api.ai
         apiaiRequest.on('response', (response) => {
             if (isDefined(response.result)) {
@@ -56,7 +58,9 @@ function processEvent(event) {
                             console.log('Response as formatted message');
                             sendFBMessage(sender, responseData.facebook + ' geformatteerd bericht');
                         } catch (err) {
-                            sendFBMessage(sender, {text: err.message});
+                            sendFBMessage(sender, {
+                                text: err.message
+                            });
                         }
                     } else {
                         responseData.facebook.forEach((facebookMessage) => {
@@ -65,50 +69,52 @@ function processEvent(event) {
                                     console.log('Response as sender action');
                                     //sendFBMessage(sender, ' debug fb action: ' + sender_action);
                                     sendFBSenderAction(sender, facebookMessage.sender_action);
-                                }
-                                else {
+                                } else {
                                     console.log('Response as formatted message');
                                     sendFBMessage(sender, facebookMessage + ' geformatteerd bericht 2');
                                 }
                             } catch (err) {
-                                sendFBMessage(sender, {text: err.message});
+                                sendFBMessage(sender, {
+                                    text: err.message
+                                });
                             }
                         });
                     }
-                //hier komen de standaard tekst antwoorden van api.ai terecht
+                    //hier komen de standaard tekst antwoorden van api.ai terecht
                 } else if (isDefined(responseText)) {
-                    let message = {text: responseText};
-                    let quickReplies = [
-                        {
-                            "content_type":"text",
-                            "title":"😁",
-                            "payload":"4"
+                    let message = {
+                        text: responseText
+                    };
+                    let quickReplies = [{
+                            "content_type": "text",
+                            "title": "😁",
+                            "payload": "4"
                         },
                         {
-                            "content_type":"text",
-                            "title":"🙂",
-                            "payload":"3"
+                            "content_type": "text",
+                            "title": "🙂",
+                            "payload": "3"
                         },
                         {
-                            "content_type":"text",
-                            "title":"😞",
-                            "payload":"2"
+                            "content_type": "text",
+                            "title": "😞",
+                            "payload": "2"
                         },
                         {
-                            "content_type":"text",
-                            "title":"😡",
-                            "payload":"1"
+                            "content_type": "text",
+                            "title": "😡",
+                            "payload": "1"
                         },
                         {
-                            "content_type":"text",
-                            "title":"N.v.t",
-                            "payload":"0"
+                            "content_type": "text",
+                            "title": "N.v.t",
+                            "payload": "0"
                         }
                     ];
                     console.log('Response as text message');
 
                     // Controleer of het antwoord uit de default intents voortkomt. Zo ja, stuur de vraag dan door.
-                    if(DEFAULT_INTENTS.includes(intent)){
+                    if (DEFAULT_INTENTS.includes(intent)) {
                         getFBProfile(sender, (profile) => {
                             // Disabled while in development
                             // sendFBMessage(DEFAULT_INTENT_REFER_TO, {text:'Hallo, ik heb een vraag gekregen van ' + profile.first_name + ' ' + profile.last_name + ' die ik niet kan beantwoorden:\n "' + resolvedQuery + '"'})
@@ -117,21 +123,21 @@ function processEvent(event) {
                     }
 
                     //achterhaal of er intelligentie nodig is
-                    var speech ="";
-                    switch(action) {
+                    var speech = "";
+                    switch (action) {
                         case "who_are_you": //check if user is known
                             speech += action;
-                        break;
+                            break;
                         case "pam_sum": //calculate PAM score
                             speech += response.result.parameters.pam_score;
                             message.quick_replies = quickReplies;
                             //hoe geef je waarde aan api.ai variabele?
                             //apiaiRequest.contexts.pam_sum.paramaters.pam_total += response.result.parameters.pam_score
-                        break;
+                            break;
                         default:
                             speech += 'Sorry, de actie is niet bekend.';
                     }
-  
+
                     // facebook API limit for text length is 640,
                     // so we must split message if needed
                     var splittedText = splitResponse(message.text);
@@ -148,16 +154,19 @@ function processEvent(event) {
                     console.log(payload);
                     if (isDefined(payload)) {
                         let followUp = payload.followUp;
-                        let request = apiAiService.eventRequest({event: {
-                            name: followUp,
-                        }},{ 
+                        let request = apiAiService.eventRequest({
+                            event: {
+                                name: followUp,
+                            }
+                        }, {
                             sessionId: sessionIds.get(sender)
                         });
-                        
+
                         request.on('response', function(response) {
                             console.log(response);
                             console.log(util.inspect(response, false, null));
                         });
+                        request.on('error', (error) => console.error(error));
 
                         request.end();
                     }
@@ -179,7 +188,8 @@ function splitResponse(str) {
 }
 
 function chunkString(s, len) {
-    var curr = len, prev = 0;
+    var curr = len,
+        prev = 0;
 
     var output = [];
 
@@ -188,8 +198,7 @@ function chunkString(s, len) {
             output.push(s.substring(prev, curr));
             prev = curr;
             curr += len;
-        }
-        else {
+        } else {
             var currReverse = curr;
             do {
                 if (s.substring(currReverse - 1, currReverse) == ' ') {
@@ -206,10 +215,12 @@ function chunkString(s, len) {
     return output;
 }
 
-function getFBProfile (facebookId, callback) {
+function getFBProfile(facebookId, callback) {
     request({
         url: 'https://graph.facebook.com/v2.6/' + facebookId,
-        qs: {access_token: FB_PAGE_ACCESS_TOKEN},
+        qs: {
+            access_token: FB_PAGE_ACCESS_TOKEN
+        },
         method: 'GET'
     }, (error, response, body) => {
         if (error) {
@@ -225,10 +236,14 @@ function getFBProfile (facebookId, callback) {
 function sendFBMessage(sender, messageData, callback) {
     request({
         url: 'https://graph.facebook.com/v2.6/me/messages',
-        qs: {access_token: FB_PAGE_ACCESS_TOKEN},
+        qs: {
+            access_token: FB_PAGE_ACCESS_TOKEN
+        },
         method: 'POST',
         json: {
-            recipient: {id: sender},
+            recipient: {
+                id: sender
+            },
             message: messageData
         }
     }, (error, response, body) => {
@@ -248,10 +263,14 @@ function sendFBSenderAction(sender, action, callback) {
     setTimeout(() => {
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
-            qs: {access_token: FB_PAGE_ACCESS_TOKEN},
+            qs: {
+                access_token: FB_PAGE_ACCESS_TOKEN
+            },
             method: 'POST',
             json: {
-                recipient: {id: sender},
+                recipient: {
+                    id: sender
+                },
                 sender_action: action
             }
         }, (error, response, body) => {
@@ -295,8 +314,12 @@ function isDefined(obj) {
 
 const app = express();
 const frontofficeid = 1533050426761050;
-app.use(bodyParser.text({type: 'application/json'})); //geen response als deze weggelaten wordt
-app.use(bodyParser.urlencoded({extended: false})); //toegevoegd: heeft invloed verwerking event
+app.use(bodyParser.text({
+    type: 'application/json'
+})); //geen response als deze weggelaten wordt
+app.use(bodyParser.urlencoded({
+    extended: false
+})); //toegevoegd: heeft invloed verwerking event
 app.use(bodyParser.json()); //toegevoegd: corrigeert de werking weer
 
 pg.defaults.ssl = true; //
@@ -304,9 +327,9 @@ pg.defaults.ssl = true; //
 var debugtekst = "";
 
 // Server frontpage
-app.get('/', function (req, res) {
-        res.send('This is Paula');
-        });
+app.get('/', function(req, res) {
+    res.send('This is Paula');
+});
 
 app.get('/webhook/', (req, res) => {
     if (req.query['hub.verify_token'] == FB_VERIFY_TOKEN) {
