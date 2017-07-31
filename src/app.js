@@ -32,6 +32,7 @@ function handleResponse(response, sender) {
         let resolvedQuery = response.result.resolvedQuery
         let action = response.result.action; //actie in intent
         let intent = response.result.metadata.intentId;
+        let parameters = response.result.parameters;
 
         console.log(response.result);
 
@@ -116,6 +117,21 @@ function handleResponse(response, sender) {
                     message.quick_replies = quickReplies;
                     //hoe geef je waarde aan api.ai variabele?
                     //apiaiRequest.contexts.pam_sum.paramaters.pam_total += response.result.parameters.pam_score
+                    break;
+                case "start_vragenlijst":
+                    pg.connect(process.env.DATABASE_URL, function(err, client) {
+                        if (err) throw err;
+
+                        client
+                            .query('INSERT INTO vragenlijsten(user, vragenlijst, gestart) VALUES ($1, $2, $3)', [sender, parameters.vragenlijst, Date.now()])
+                            .then(res => console.log(res.rows[0]))
+                            .catch(e => console.error(e.stack))
+                        client
+                            .query('SELECT table_schema,table_name FROM information_schema.tables;')
+                            .on('row', function(row) {
+                                console.log(JSON.stringify(row));
+                            });
+                    });
                     break;
                 default:
                     speech += 'Sorry, de actie is niet bekend.';
