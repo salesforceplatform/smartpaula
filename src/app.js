@@ -146,11 +146,11 @@ function processEvent(event) {
                     let payload = message.payload;
                     if (isDefined(payload)) {
                         let followUp = payload.followUp;
-                        let request = apiAiService.QueryRequest({event: {
+                        let request = apiAiService.eventRequest({event: {
                             name: followUp,
-                        }, 
-                        sessionId: sessionIds.get(sender)
-                    }, (something) => {console.log(something)});
+                        }},{ 
+                            sessionId: sessionIds.get(sender)
+                        });
                     }
                 }, this);
 
