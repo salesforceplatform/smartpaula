@@ -44,13 +44,6 @@ function processEvent(event) {
                 let name;
                 console.log(response.result);
 
-                getFBProfile(sender, (profile) => {
-                    name = profile.first_name + ' ' + profile.last_name;
-                    console.log(name);
-                });
-
-                
-
                 if (isDefined(responseData) && isDefined(responseData.facebook)) {
                     
                     if (!Array.isArray(responseData.facebook)) {
@@ -149,7 +142,6 @@ function chunkString(s, len) {
 }
 
 function getFBProfile (facebookId, callback) {
-    console.log('id:', facebookId);
     request({
         url: 'https://graph.facebook.com/v2.6/' + facebookId,
         qs: {access_token: FB_PAGE_ACCESS_TOKEN},
