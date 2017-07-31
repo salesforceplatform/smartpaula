@@ -25,6 +25,137 @@ const sessionIds = new Map();
 const DEFAULT_INTENTS = ['57b82498-053c-4776-8be9-228c420e6c13', 'b429ecdc-21f4-4a07-8165-3620023185ba'];
 const DEFAULT_INTENT_REFER_TO = '1581441435202307';
 
+function handleResponse(response, sender) {
+    if (isDefined(response.result)) {
+        let responseText = response.result.fulfillment.speech;
+        let responseData = response.result.fulfillment.data;
+        let resolvedQuery = response.result.resolvedQuery
+        let action = response.result.action; //actie in intent
+        let intent = response.result.metadata.intentId;
+
+        console.log(response.result);
+
+        if (isDefined(responseData) && isDefined(responseData.facebook)) {
+            if (!Array.isArray(responseData.facebook)) {
+                try {
+                    console.log('Response as formatted message');
+                    sendFBMessage(sender, responseData.facebook + ' geformatteerd bericht');
+                } catch (err) {
+                    sendFBMessage(sender, {
+                        text: err.message
+                    });
+                }
+            } else {
+                responseData.facebook.forEach((facebookMessage) => {
+                    try {
+                        if (facebookMessage.sender_action) {
+                            console.log('Response as sender action');
+                            //sendFBMessage(sender, ' debug fb action: ' + sender_action);
+                            sendFBSenderAction(sender, facebookMessage.sender_action);
+                        } else {
+                            console.log('Response as formatted message');
+                            sendFBMessage(sender, facebookMessage + ' geformatteerd bericht 2');
+                        }
+                    } catch (err) {
+                        sendFBMessage(sender, {
+                            text: err.message
+                        });
+                    }
+                });
+            }
+            //hier komen de standaard tekst antwoorden van api.ai terecht
+        } else if (isDefined(responseText)) {
+            let message = {
+                text: responseText
+            };
+            let quickReplies = [{
+                    "content_type": "text",
+                    "title": "😁",
+                    "payload": "4"
+                },
+                {
+                    "content_type": "text",
+                    "title": "🙂",
+                    "payload": "3"
+                },
+                {
+                    "content_type": "text",
+                    "title": "😞",
+                    "payload": "2"
+                },
+                {
+                    "content_type": "text",
+                    "title": "😡",
+                    "payload": "1"
+                },
+                {
+                    "content_type": "text",
+                    "title": "N.v.t",
+                    "payload": "0"
+                }
+            ];
+            console.log('Response as text message');
+
+            // Controleer of het antwoord uit de default intents voortkomt. Zo ja, stuur de vraag dan door.
+            if (DEFAULT_INTENTS.includes(intent)) {
+                getFBProfile(sender, (profile) => {
+                    // Disabled while in development
+                    // sendFBMessage(DEFAULT_INTENT_REFER_TO, {text:'Hallo, ik heb een vraag gekregen van ' + profile.first_name + ' ' + profile.last_name + ' die ik niet kan beantwoorden:\n "' + resolvedQuery + '"'})
+                    console.log('Default intent')
+                });
+            }
+
+            //achterhaal of er intelligentie nodig is
+            var speech = "";
+            switch (action) {
+                case "who_are_you": //check if user is known
+                    speech += action;
+                    break;
+                case "pam_sum": //calculate PAM score
+                    speech += response.result.parameters.pam_score;
+                    message.quick_replies = quickReplies;
+                    //hoe geef je waarde aan api.ai variabele?
+                    //apiaiRequest.contexts.pam_sum.paramaters.pam_total += response.result.parameters.pam_score
+                    break;
+                default:
+                    speech += 'Sorry, de actie is niet bekend.';
+            }
+
+            // facebook API limit for text length is 640,
+            // so we must split message if needed
+            var splittedText = splitResponse(message.text);
+
+            async.eachSeries(splittedText, (textPart, callback) => {
+                //sendFBMessage(sender, {text: textPart + ' debug callback: ' + speech}, callback);
+                message.text = textPart;
+                sendFBMessage(sender, message, callback);
+            });
+        }
+
+        response.result.fulfillment.messages.forEach(function(message) {
+            let payload = message.payload;
+            console.log(payload);
+            if (isDefined(payload)) {
+                let followUp = payload.followUp;
+                let request = apiAiService.eventRequest({
+                    name: followUp
+                }, {
+                    sessionId: sessionIds.get(sender)
+                });
+
+                request.on('response', function(response) {
+                    console.log(response);
+                    console.log(util.inspect(response, false, null));
+                });
+                request.on('error', (error) => console.error(error));
+
+                request.end();
+            }
+        }, this);
+
+    }
+}
+
 function processEvent(event) {
     var sender = event.sender.id.toString();
 
@@ -42,137 +173,8 @@ function processEvent(event) {
             sessionId: sessionIds.get(sender)
         });
         //receive message from api.ai
-        apiaiRequest.on('response', (response) => {
-            if (isDefined(response.result)) {
-                let responseText = response.result.fulfillment.speech;
-                let responseData = response.result.fulfillment.data;
-                let resolvedQuery = response.result.resolvedQuery
-                let action = response.result.action; //actie in intent
-                let intent = response.result.metadata.intentId;
-
-                console.log(response.result);
-
-                if (isDefined(responseData) && isDefined(responseData.facebook)) {
-                    if (!Array.isArray(responseData.facebook)) {
-                        try {
-                            console.log('Response as formatted message');
-                            sendFBMessage(sender, responseData.facebook + ' geformatteerd bericht');
-                        } catch (err) {
-                            sendFBMessage(sender, {
-                                text: err.message
-                            });
-                        }
-                    } else {
-                        responseData.facebook.forEach((facebookMessage) => {
-                            try {
-                                if (facebookMessage.sender_action) {
-                                    console.log('Response as sender action');
-                                    //sendFBMessage(sender, ' debug fb action: ' + sender_action);
-                                    sendFBSenderAction(sender, facebookMessage.sender_action);
-                                } else {
-                                    console.log('Response as formatted message');
-                                    sendFBMessage(sender, facebookMessage + ' geformatteerd bericht 2');
-                                }
-                            } catch (err) {
-                                sendFBMessage(sender, {
-                                    text: err.message
-                                });
-                            }
-                        });
-                    }
-                    //hier komen de standaard tekst antwoorden van api.ai terecht
-                } else if (isDefined(responseText)) {
-                    let message = {
-                        text: responseText
-                    };
-                    let quickReplies = [{
-                            "content_type": "text",
-                            "title": "😁",
-                            "payload": "4"
-                        },
-                        {
-                            "content_type": "text",
-                            "title": "🙂",
-                            "payload": "3"
-                        },
-                        {
-                            "content_type": "text",
-                            "title": "😞",
-                            "payload": "2"
-                        },
-                        {
-                            "content_type": "text",
-                            "title": "😡",
-                            "payload": "1"
-                        },
-                        {
-                            "content_type": "text",
-                            "title": "N.v.t",
-                            "payload": "0"
-                        }
-                    ];
-                    console.log('Response as text message');
-
-                    // Controleer of het antwoord uit de default intents voortkomt. Zo ja, stuur de vraag dan door.
-                    if (DEFAULT_INTENTS.includes(intent)) {
-                        getFBProfile(sender, (profile) => {
-                            // Disabled while in development
-                            // sendFBMessage(DEFAULT_INTENT_REFER_TO, {text:'Hallo, ik heb een vraag gekregen van ' + profile.first_name + ' ' + profile.last_name + ' die ik niet kan beantwoorden:\n "' + resolvedQuery + '"'})
-                            console.log('Default intent')
-                        });
-                    }
-
-                    //achterhaal of er intelligentie nodig is
-                    var speech = "";
-                    switch (action) {
-                        case "who_are_you": //check if user is known
-                            speech += action;
-                            break;
-                        case "pam_sum": //calculate PAM score
-                            speech += response.result.parameters.pam_score;
-                            message.quick_replies = quickReplies;
-                            //hoe geef je waarde aan api.ai variabele?
-                            //apiaiRequest.contexts.pam_sum.paramaters.pam_total += response.result.parameters.pam_score
-                            break;
-                        default:
-                            speech += 'Sorry, de actie is niet bekend.';
-                    }
-
-                    // facebook API limit for text length is 640,
-                    // so we must split message if needed
-                    var splittedText = splitResponse(message.text);
-
-                    async.eachSeries(splittedText, (textPart, callback) => {
-                        //sendFBMessage(sender, {text: textPart + ' debug callback: ' + speech}, callback);
-                        message.text = textPart;
-                        sendFBMessage(sender, message, callback);
-                    });
-                }
-
-                response.result.fulfillment.messages.forEach(function(message) {
-                    let payload = message.payload;
-                    console.log(payload);
-                    if (isDefined(payload)) {
-                        let followUp = payload.followUp;
-                        let request = apiAiService.eventRequest({
-                            name: followUp
-                        }, {
-                            sessionId: sessionIds.get(sender)
-                        });
-
-                        request.on('response', function(response) {
-                            console.log(response);
-                            console.log(util.inspect(response, false, null));
-                        });
-                        request.on('error', (error) => console.error(error));
-
-                        request.end();
-                    }
-                }, this);
-
-            }
-        });
-        apiaiRequest.on('error', (error) => console.error(error));
+        apiaiRequest.on('response', (response) => { handleResponse(response, sender); });
+        apiaiRequest.on('error', (error) => console.error('Error: ' + error));
         apiaiRequest.end();
     }
 }
