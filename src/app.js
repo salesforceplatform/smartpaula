@@ -158,6 +158,8 @@ function processEvent(event) {
                             console.log(response);
                             console.log(util.inspect(response, false, null));
                         });
+
+                        request.end();
                     }
                 }, this);
 
