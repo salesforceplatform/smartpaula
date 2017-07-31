@@ -148,20 +148,19 @@ function chunkString(s, len) {
     return output;
 }
 
-function getFBProfile (facebookId, success, error) {
+function getFBProfile (facebookId, callback) {
     console.log('id:', facebookId);
     request({
         url: 'https://graph.facebook.com/v2.6/' + facebookId,
         qs: {access_token: FB_PAGE_ACCESS_TOKEN},
         method: 'GET'
-    }, (err, response, body) => {
-        if(success){
-            console.log(body, JSON.parse(body));
-            success(JSON.parse(body));
-        }
-
-        if (err) {
-            error(err);
+    }, (error, response, body) => {
+        if (error) {
+            console.log('Error sending message: ', error);
+        } else if (response.body.error) {
+            console.log('Error: ', response.body.error);
+        } else if (callback) {
+            callback(JSON.parse(body));
         }
     });
 }
