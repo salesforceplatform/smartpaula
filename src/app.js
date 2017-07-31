@@ -43,7 +43,7 @@ function processEvent(event) {
                 console.log(response.result);
 
                 getFBName(sender, (name) => {
-                        console.log(sender, 'Hallo ' + name + '!');
+                        console.log(sender, name);
                     });
 
                 if (isDefined(responseData) && isDefined(responseData.facebook)) {
@@ -145,10 +145,15 @@ function chunkString(s, len) {
 
 function getFBName(id, callback){
     request({
-        url: 'https://graph.facebook.com/v2.6/' + id,
+        url: 'https://graph.facebook.com/v2.6/' + id + '?fields=name',
         qs: {access_token: FB_PAGE_ACCESS_TOKEN},
         method: 'GET'
-    })
+    }, (error, response, body) => {
+        console.log(response);
+        if(callback){
+            callback(response.name)
+        }
+    });
 }
 
 function sendFBMessage(sender, messageData, callback) {
