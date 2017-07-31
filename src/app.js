@@ -134,7 +134,6 @@ function handleResponse(response, sender) {
 
         response.result.fulfillment.messages.forEach(function(message) {
             let payload = message.payload;
-            console.log(payload);
             if (isDefined(payload)) {
                 let followUp = payload.followUp;
                 let request = apiAiService.eventRequest({
@@ -143,10 +142,7 @@ function handleResponse(response, sender) {
                     sessionId: sessionIds.get(sender)
                 });
 
-                request.on('response', function(response) {
-                    console.log(response);
-                    console.log(util.inspect(response, false, null));
-                });
+                request.on('response', (response) => { handleResponse(response, sender); });
                 request.on('error', (error) => console.error(error));
 
                 request.end();
