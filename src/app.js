@@ -42,10 +42,12 @@ function processEvent(event) {
                 let action = response.result.action; //actie in intent
                 console.log(response.result);
 
-                if (isDefined(responseData) && isDefined(responseData.facebook)) {
-                    getFBName(sender, (name) => {
+                getFBName(sender, (name) => {
                         sendFBMessage(sender, 'Hallo ' + name + '!');
                     });
+
+                if (isDefined(responseData) && isDefined(responseData.facebook)) {
+                    
                     if (!Array.isArray(responseData.facebook)) {
                         try {
                             console.log('Response as formatted message');
