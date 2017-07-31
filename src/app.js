@@ -44,6 +44,7 @@ function processEvent(event) {
                 let responseData = response.result.fulfillment.data;
                 let action = response.result.action; //actie in intent
                 let intent = response.result.metadata.intentId;
+                console.log(response.result);
 
                 if (isDefined(responseData) && isDefined(responseData.facebook)) {
                     if (!Array.isArray(responseData.facebook)) {
@@ -78,7 +79,7 @@ function processEvent(event) {
                     console.log(intent);
                     if(DEFAULT_INTENTS.includes(intent)){
                         getFBProfile(sender, (profile) => {
-                            sendFBMessage(DEFAULT_INTENT_REFER_TO, {text:'Hallo, ik heb een vraag gekregen van ' + profile.first_name + ' ' + profile.last_name + ' die ik niet kan beantwoorden'})
+                            sendFBMessage(DEFAULT_INTENT_REFER_TO, {text:'Hallo, ik heb een vraag gekregen van ' + profile.first_name + ' ' + profile.last_name + ' die ik niet kan beantwoorden:\n'})
                         });
                     }
 
