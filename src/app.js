@@ -122,7 +122,7 @@ function handleResponse(response, sender) {
                             client.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', [sender])
                                 .then(res => {
                                     let vragenlijst = res.rows[0].id;
-                                    client.query('SELECT COUNT(*) FROM antwoorden WHERE vragenlijst = $1', [vragenlijst]).then(res => {
+                                    client.query('SELECT * FROM antwoorden WHERE vragenlijst = $1', [vragenlijst]).then(res => {
                                         console.log(res);
                                         //client.query('INSERT INTO antwoorden (vragenlijst, waarde, antwoord_op, vraag');
                                     });
