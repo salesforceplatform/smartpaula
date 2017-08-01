@@ -117,7 +117,9 @@ function handleResponse(response, sender) {
                     if (isDefined(score)) {
                         console.log(action, 'score is defined', score);
                         pg.connect(process.env.DATABASE_URL, (err, client) => {
-                            if (err) throw err;
+                            let payload = message.payload;
+
+                            if (err) throw err;             
 
                             client.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', [sender])
                                 .then(res => {
@@ -127,6 +129,13 @@ function handleResponse(response, sender) {
                                         client.query('INSERT INTO antwoorden (vragenlijst, waarde, antwoord_op, vraag) VALUES ($1, $2, (SELECT NOW()), $3)', [vragenlijst, score, answer_no]);
                                     });
                                 });
+
+                            if (isDefined(payload) && payload.vragenlijst_end) {
+                                client.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', [sender]).then(res => {
+                                    let vragenlijst = res.rows[0].id;
+                                    client.query('UPDATE vragenlijsten set gestopt = (SELECT NOW()) WHERE id = $1', [vragenlijst]);
+                                });
+                            }
                         });
                     }
                     message.quick_replies = quickReplies;
@@ -147,10 +156,7 @@ function handleResponse(response, sender) {
                     pg.connect(process.env.DATABASE_URL, (err, client) => {
                         if (err) throw err;
 
-                        client.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', [sender]).then(res => {
-                            let vragenlijst = res.rows[0].id;
-                            client.query('UPDATE vragenlijsten set gestopt = (SELECT NOW()) WHERE id = $1', [vragenlijst]);
-                        });
+                        
                     });
                     break;
                 default:
