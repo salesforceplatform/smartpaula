@@ -364,9 +364,7 @@ app.use(bodyParser.text({
 app.use(bodyParser.urlencoded({
     extended: false
 })); //toegevoegd: heeft invloed verwerking event
-app.use(bodyParser.json()); //toegevoegd: corrigeert de werking weer
-
-pg.defaults.ssl = true; //
+app.use(bodyParser.json()); //toegevoegd: corrigeert de werking weer                    
 
 var debugtekst = "";
 
