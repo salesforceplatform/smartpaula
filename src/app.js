@@ -148,8 +148,6 @@ function handleResponse(response, sender) {
                     }                                                                                                                      
                     break;
                 case "start_vragenlijst":
-                    pg.connect(process.env.DATABASE_URL, function (err, client) {
-                        if (err) throw err;
 
                         pool
                             .query({ text: 'INSERT INTO vragenlijsten (fbuser, vragenlijst) VALUES($1, $2)', values: [sender, parameters.vragenlijst] })
@@ -161,8 +159,7 @@ function handleResponse(response, sender) {
                             if (err) {
                                 console.log('error during disconnection', err.stack)
                             }
-                        })
-                    });
+                        })     
                     break;
                 default:
                     speech += 'Sorry, de actie is niet bekend.';
