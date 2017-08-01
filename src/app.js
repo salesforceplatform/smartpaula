@@ -139,12 +139,7 @@ function handleResponse(response, sender) {
                                 console.log(payload.vragenlijst_end);
                             }
                         }
-                        if (isDefined(payload) && isDefined(payload.vragenlijst_end) && payload.vragenlijst_end) {
-                                pool.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', [sender]).then(res => {
-                                    let vragenlijst = res.rows[0].id;
-                                    pool.query('UPDATE vragenlijsten set gestopt = (SELECT NOW()) WHERE id = $1', [vragenlijst])
-                                });
-                        }
+                        
                         
                     }
 
@@ -179,6 +174,7 @@ function handleResponse(response, sender) {
             console.log(message)
             if (isDefined(payload)) {
                 let followUp = payload.followUp;
+                let vragenlijst_end = payload.vragenlijst_end;
                 if (isDefined(followUp)) {
                     let request = apiAiService.eventRequest({
                         name: followUp
@@ -190,6 +186,13 @@ function handleResponse(response, sender) {
                     request.on('error', (error) => console.error(error));
 
                     request.end();
+                }
+
+                if (isDefined(vragenlijst_end) && vragenlijst_end) {
+                    pool.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', [sender]).then(res => {
+                        let vragenlijst = res.rows[0].id;
+                        pool.query('UPDATE vragenlijsten set gestopt = (SELECT NOW()) WHERE id = $1', [vragenlijst])
+                    });
                 }
             }
         }, this);
