@@ -71,7 +71,7 @@ function handleResponse(response, sender) {
             }
             //hier komen de standaard tekst antwoorden van api.ai terecht
         } else if (isDefined(responseText)) {
-            let q = async.queue((task, callback) => { console.log('performing:', task); task(); callback(); }, 1);
+            let q = async.queue((task, callback) => { console.log('performing:', task); task(callback);}, 1);
             let message = {
                 text: responseText
             };
@@ -169,7 +169,7 @@ function handleResponse(response, sender) {
                                     HOSTNAME + '/connect/nokia/' + sender,
                                     'HMAC-SHA1'
                                 );
-                                q.push(async.asyncify(oa.getOAuthRequestToken), (error, oAuthToken, oAuthTokenSecret, results) => {
+                                q.push(oa.getOAuthRequestToken, (error, oAuthToken, oAuthTokenSecret, results) => {
                                     let authUrl = 'https://developer.health.nokia.com/account/authorize?'
                                         + 'oauth_consumer_key=' + NOKIA_API_KEY
                                         + '&oauth_token=' + oAuthToken;
