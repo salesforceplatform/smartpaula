@@ -7,7 +7,7 @@ const uuid = require('node-uuid');
 const request = require('request');
 const JSONbig = require('json-bigint');
 const async = require('async');
-const pg = require('pg');
+const { Pool, Client } = require('pg');
 const util = require('util');
 
 const REST_PORT = (process.env.PORT || 5000);
@@ -15,6 +15,7 @@ const APIAI_ACCESS_TOKEN = process.env.APIAI_ACCESS_TOKEN;
 const APIAI_LANG = process.env.APIAI_LANG || 'nl';
 const FB_VERIFY_TOKEN = process.env.FB_VERIFY_TOKEN;
 const FB_PAGE_ACCESS_TOKEN = process.env.FB_PAGE_ACCESS_TOKEN;
+const pool = new Pool({ connectionString: process.env.DATABASE_URL});
 
 const apiAiService = apiai(APIAI_ACCESS_TOKEN, {
     language: APIAI_LANG,
@@ -119,31 +120,27 @@ function handleResponse(response, sender) {
 
                     if (isDefined(score)) {
                         console.log(action, 'score is defined', score);
-                        pg.connect(process.env.DATABASE_URL, (err, client) => {
-                            if (err) throw err;             
 
-                            client.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', [sender])
-                                .then(res => {
-                                    let vragenlijst = res.rows[0].id;
-                                    client.query('SELECT * FROM antwoorden WHERE vragenlijst = $1', [vragenlijst]).then(res => {
+                        pool.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', [sender])
+                            .then(res => {
+                                let vragenlijst = res.rows[0].id;
+                                pool.query('SELECT * FROM antwoorden WHERE vragenlijst = $1', [vragenlijst])
+                                    .then(res => {
                                         let answer_no = res.rowCount + 1;
                                         client.query('INSERT INTO antwoorden (vragenlijst, waarde, antwoord_op, vraag) VALUES ($1, $2, (SELECT NOW()), $3)', [vragenlijst, score, answer_no]);
+                                        pool.end();
                                     });
-                                });
+                                pool.end();
+                            });
 
-                            if (isDefined(payload) && isDefined(payload.vragenlijst_end) && payload.vragenlijst_end) {
-                                    client.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', [sender]).then(res => {
-                                        let vragenlijst = res.rows[0].id;
-                                        client.query('UPDATE vragenlijsten set gestopt = (SELECT NOW()) WHERE id = $1', [vragenlijst]);
-                                    });
-                            }
-                            client.end((err) => {
-                                console.log('client has disconnected')
-                                if (err) {
-                                    console.log('error during disconnection', err.stack)
-                                }
-                            })
-                        });
+                        if (isDefined(payload) && isDefined(payload.vragenlijst_end) && payload.vragenlijst_end) {
+                                pool.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', [sender]).then(res => {
+                                    let vragenlijst = res.rows[0].id;
+                                    pool.query('UPDATE vragenlijsten set gestopt = (SELECT NOW()) WHERE id = $1', [vragenlijst]).then(resc => { pool.end() });
+                                    pool.end();
+                                });
+                        }
+                        
                     }
 
                     if (!(isDefined(payload) && isDefined(payload.vragenlijst_end) && payload.vragenlijst_end)) {
@@ -154,9 +151,9 @@ function handleResponse(response, sender) {
                     pg.connect(process.env.DATABASE_URL, function (err, client) {
                         if (err) throw err;
 
-                        client
+                        pool
                             .query({ text: 'INSERT INTO vragenlijsten (fbuser, vragenlijst) VALUES($1, $2)', values: [sender, parameters.vragenlijst] })
-                            .then(res => console.log(res))
+                            .then(res => { console.log(res); pool.end() })
                             .catch(e => console.error(e, e.stack));
 
                         client.end((err) => {
@@ -363,6 +360,7 @@ function isDefined(obj) {
 
 const app = express();
 const frontofficeid = 1533050426761050;
+
 app.use(bodyParser.text({
     type: 'application/json'
 })); //geen response als deze weggelaten wordt
