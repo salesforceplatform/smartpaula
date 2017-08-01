@@ -160,17 +160,15 @@ function handleResponse(response, sender) {
                     if (isDefined(service)) {
                         switch (service) {
                             case "Nokia":
-                                q.push(() => {
-                                    let oa = new OAuth.OAuth(
-                                        'https://developer.health.nokia.com/account/request_token',
-                                        'https://developer.health.nokia.com/account/access_token',
-                                        NOKIA_API_KEY,
-                                        NOKIA_API_SECRET,
-                                        '1.0',
-                                        HOSTNAME + '/connect/nokia/' + sender,
-                                        'HMAC-SHA1'
-                                    );
-                                });
+                                let oa = new OAuth.OAuth(
+                                    'https://developer.health.nokia.com/account/request_token',
+                                    'https://developer.health.nokia.com/account/access_token',
+                                    NOKIA_API_KEY,
+                                    NOKIA_API_SECRET,
+                                    '1.0',
+                                    HOSTNAME + '/connect/nokia/' + sender,
+                                    'HMAC-SHA1'
+                                );
                                 q.push(async.asyncify(oa.getOAuthRequestToken), (error, oAuthToken, oAuthTokenSecret, results) => {
                                     let authUrl = 'https://developer.health.nokia.com/account/authorize?'
                                         + 'oauth_consumer_key=' + NOKIA_API_KEY
@@ -178,7 +176,6 @@ function handleResponse(response, sender) {
                                     pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret)', [sender, oAuthToken, oAuthTokenSecret]);
                                     message.text = message.text.replace('@@link', authUrl);
                                     console.log(message);
-
                                 });                   
                         break;
                     }
