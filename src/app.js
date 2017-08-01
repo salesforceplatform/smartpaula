@@ -71,6 +71,7 @@ function handleResponse(response, sender) {
             }
             //hier komen de standaard tekst antwoorden van api.ai terecht
         } else if (isDefined(responseText)) {
+            let q = async.queue();
             let message = {
                 text: responseText
             };
@@ -143,8 +144,6 @@ function handleResponse(response, sender) {
                                 console.log(payload.vragenlijst_end);
                             }
                         }
-                        
-                        
                     }
 
                     if (!(isDefined(payload) && isDefined(payload.vragenlijst_end) && payload.vragenlijst_end)) {
@@ -175,7 +174,7 @@ function handleResponse(response, sender) {
                                         + 'oauth_consumer_key=' + NOKIA_API_KEY
                                         + '&oauth_token=' + oAuthToken;
                                     pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret)', [sender, oAuthToken, oAuthTokenSecret]);
-                                    message.text = message.text.replace('@@link', authUrl);
+                                    q.push({}=>{ message.text = message.text.replace('@@link', authUrl) });;
 
                                 })
                                 break;
@@ -189,11 +188,12 @@ function handleResponse(response, sender) {
             // facebook API limit for text length is 640,
             // so we must split message if needed
             var splittedText = splitResponse(message.text);
-
-            async.eachSeries(splittedText, (textPart, callback) => {
-                //sendFBMessage(sender, {text: textPart + ' debug callback: ' + speech}, callback);
-                message.text = textPart;
-                sendFBMessage(sender, message, callback);
+            q.push(() => {
+                async.eachSeries(splittedText, (textPart, callback) => {
+                    //sendFBMessage(sender, {text: textPart + ' debug callback: ' + speech}, callback);
+                    message.text = textPart;
+                    sendFBMessage(sender, message, callback);
+                })
             });
         }
 
