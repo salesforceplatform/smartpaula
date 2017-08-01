@@ -171,67 +171,66 @@ function handleResponse(response, sender) {
                                         'HMAC-SHA1'
                                     );
                                 });
-                                q.push(async.asyncify(oa.getOAuthRequestToken),(error, oAuthToken, oAuthTokenSecret, results) => {
-                                        let authUrl = 'https://developer.health.nokia.com/account/authorize?'
-                                            + 'oauth_consumer_key=' + NOKIA_API_KEY
-                                            + '&oauth_token=' + oAuthToken;
-                                        pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret)', [sender, oAuthToken, oAuthTokenSecret]);
-                                        message.text = message.text.replace('@@link', authUrl);
-                                        console.log(message);
+                                q.push(async.asyncify(oa.getOAuthRequestToken), (error, oAuthToken, oAuthTokenSecret, results) => {
+                                    let authUrl = 'https://developer.health.nokia.com/account/authorize?'
+                                        + 'oauth_consumer_key=' + NOKIA_API_KEY
+                                        + '&oauth_token=' + oAuthToken;
+                                    pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret)', [sender, oAuthToken, oAuthTokenSecret]);
+                                    message.text = message.text.replace('@@link', authUrl);
+                                    console.log(message);
 
-                                    });
-                                });
-                                break;
-                        }
+                                });                   
+                        break;
                     }
-                    break;
-                default:
-                    speech += 'Sorry, de actie is niet bekend.';
             }
-
-            
-            q.push(() => {
-                // facebook API limit for text length is 640,
-                // so we must split message if needed
-                let splittedText = splitResponse(message.text);
-
-                async.eachSeries(splittedText, (textPart, callback) => {
-                    //sendFBMessage(sender, {text: textPart + ' debug callback: ' + speech}, callback);
-                    message.text = textPart;
-                    sendFBMessage(sender, message, callback);
-                })
-            });
+            break;
+                default:
+            speech += 'Sorry, de actie is niet bekend.';
         }
 
-        response.result.fulfillment.messages.forEach(function (message) {
-            let payload = message.payload
-            console.log(message)
-            if (isDefined(payload)) {
-                let followUp = payload.followUp;
-                let vragenlijst_end = payload.vragenlijst_end;
-                if (isDefined(followUp)) {
-                    let request = apiAiService.eventRequest({
-                        name: followUp
-                    }, {
-                            sessionId: sessionIds.get(sender)
-                        });
 
-                    request.on('response', (response) => { handleResponse(response, sender); });
-                    request.on('error', (error) => console.error(error));
+        q.push(() => {
+            // facebook API limit for text length is 640,
+            // so we must split message if needed
+            let splittedText = splitResponse(message.text);
 
-                    request.end();
-                }
-
-                if (isDefined(vragenlijst_end) && vragenlijst_end) {
-                    pool.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', [sender]).then(res => {
-                        let vragenlijst = res.rows[0].id;
-                        pool.query('UPDATE vragenlijsten set gestopt = (SELECT NOW()) WHERE id = $1', [vragenlijst])
-                    });
-                }
-            }
-        }, this);
-
+            async.eachSeries(splittedText, (textPart, callback) => {
+                //sendFBMessage(sender, {text: textPart + ' debug callback: ' + speech}, callback);
+                message.text = textPart;
+                sendFBMessage(sender, message, callback);
+            })
+        });
     }
+
+    response.result.fulfillment.messages.forEach(function (message) {
+        let payload = message.payload
+        console.log(message)
+        if (isDefined(payload)) {
+            let followUp = payload.followUp;
+            let vragenlijst_end = payload.vragenlijst_end;
+            if (isDefined(followUp)) {
+                let request = apiAiService.eventRequest({
+                    name: followUp
+                }, {
+                        sessionId: sessionIds.get(sender)
+                    });
+
+                request.on('response', (response) => { handleResponse(response, sender); });
+                request.on('error', (error) => console.error(error));
+
+                request.end();
+            }
+
+            if (isDefined(vragenlijst_end) && vragenlijst_end) {
+                pool.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', [sender]).then(res => {
+                    let vragenlijst = res.rows[0].id;
+                    pool.query('UPDATE vragenlijsten set gestopt = (SELECT NOW()) WHERE id = $1', [vragenlijst])
+                });
+            }
+        }
+    }, this);
+
+}
 }
 
 function processEvent(event) {
