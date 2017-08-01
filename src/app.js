@@ -113,7 +113,17 @@ function handleResponse(response, sender) {
                     speech += action;
                     break;
                 case "pam_sum": //calculate PAM score
-                    speech += response.result.parameters.pam_score;
+                    let score = parameters.pam_score;
+                    pg.connect(process.env.DATABASE_URL, (err, client) => {
+                        if (err) throw err;
+
+                        client.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', sender)
+                            .then(res => {
+                                res.rows.forEach(row => {
+                                    console.log(row);
+                                })
+                            });
+                    });
                     message.quick_replies = quickReplies;
                     //hoe geef je waarde aan api.ai variabele?
                     //apiaiRequest.contexts.pam_sum.paramaters.pam_total += response.result.parameters.pam_score
