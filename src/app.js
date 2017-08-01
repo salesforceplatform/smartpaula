@@ -174,7 +174,7 @@ function handleResponse(response, sender) {
                                         + 'oauth_consumer_key=' + NOKIA_API_KEY
                                         + '&oauth_token=' + oAuthToken;
                                     pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret)', [sender, oAuthToken, oAuthTokenSecret]);
-                                    q.push({}=>{ message.text = message.text.replace('@@link', authUrl) });;
+                                    q.push(()=>{ message.text = message.text.replace('@@link', authUrl) });;
 
                                 })
                                 break;
