@@ -123,8 +123,8 @@ function handleResponse(response, sender) {
                                 .then(res => {
                                     let vragenlijst = res.rows[0].id;
                                     client.query('SELECT * FROM antwoorden WHERE vragenlijst = $1', [vragenlijst]).then(res => {
-                                        console.log(res);
-                                        //client.query('INSERT INTO antwoorden (vragenlijst, waarde, antwoord_op, vraag');
+                                        let answer_no = res.rowCount + 1;
+                                        client.query('INSERT INTO antwoorden (vragenlijst, waarde, antwoord_op, vraag) VALUES ($1, $2, (SELECT NOW()), $3)', [vragenlijst, score, answer_no]);
                                     });
                                 });
                         });
