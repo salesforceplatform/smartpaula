@@ -115,10 +115,11 @@ function handleResponse(response, sender) {
                 case "pam_sum": //calculate PAM score
                     let score = parameters.pam_score;
                     if (isDefined(score)) {
+                        console.log(action, 'score is defined', score);
                         pg.connect(process.env.DATABASE_URL, (err, client) => {
                             if (err) throw err;
 
-                            client.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', sender)
+                            client.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', [sender])
                                 .then(res => {
                                     res.rows.forEach(row => {
                                         console.log(row);
