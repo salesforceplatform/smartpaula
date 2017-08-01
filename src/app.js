@@ -170,7 +170,7 @@ function handleResponse(response, sender) {
                                         HOSTNAME + '/connect/nokia/' + sender,
                                         'HMAC-SHA1'
                                     );
-                                }
+                                });
                                 q.push(async.asyncify(oa.getOAuthRequestToken)((error, oAuthToken, oAuthTokenSecret, results) => {
                                         let authUrl = 'https://developer.health.nokia.com/account/authorize?'
                                             + 'oauth_consumer_key=' + NOKIA_API_KEY
