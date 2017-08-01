@@ -113,7 +113,7 @@ function handleResponse(response, sender) {
                     speech += action;
                     break;
                 case "pam_sum": //calculate PAM score
-                    let payload = response.payload;
+                    let payload = response.result.payload;
                     let score = parameters.pam_score;
 
 
@@ -171,6 +171,7 @@ function handleResponse(response, sender) {
 
         response.result.fulfillment.messages.forEach(function (message) {
             let payload = message.payload
+            console.log(message)
             if (isDefined(payload)) {
                 let followUp = payload.followUp;
                 if (isDefined(followUp)) {
