@@ -188,10 +188,12 @@ function handleResponse(response, sender) {
                     speech += 'Sorry, de actie is niet bekend.';
             }
 
-            // facebook API limit for text length is 640,
-            // so we must split message if needed
-            var splittedText = splitResponse(message.text);
+            
             q.push(() => {
+                // facebook API limit for text length is 640,
+                // so we must split message if needed
+                var splittedText = splitResponse(message.text);
+
                 async.eachSeries(splittedText, (textPart, callback) => {
                     //sendFBMessage(sender, {text: textPart + ' debug callback: ' + speech}, callback);
                     message.text = textPart;
