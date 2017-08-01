@@ -9,6 +9,7 @@ const JSONbig = require('json-bigint');
 const async = require('async');
 const { Pool, Client } = require('pg');
 const util = require('util');
+const OAuth = require('oauth');
 
 const REST_PORT = (process.env.PORT || 5000);
 const APIAI_ACCESS_TOKEN = process.env.APIAI_ACCESS_TOKEN;
@@ -151,12 +152,35 @@ function handleResponse(response, sender) {
                     }                                                                                                                      
                     break;
                 case "start_vragenlijst":
-                    pool
-                        .query({ text: 'INSERT INTO vragenlijsten (fbuser, vragenlijst) VALUES($1, $2)', values: [sender, parameters.vragenlijst] })
+                    pool.query({ text: 'INSERT INTO vragenlijsten (fbuser, vragenlijst) VALUES($1, $2)', values: [sender, parameters.vragenlijst] })
                         .then(res => { console.log(res);})
                         .catch(e => console.error(e, e.stack));   
                     break;
                 case "connect_service":
+                    let service = response.result.parameters.service;
+                    if (isDefined(service)) {
+                        switch (service) {
+                            case "Nokia":
+                                let oa = new OAuth.OAuth(
+                                    'https://developer.health.nokia.com/account/request_token',
+                                    'https://developer.health.nokia.com/account/access_token',
+                                    NOKIA_API_KEY,
+                                    NOKIA_API_SECRET,
+                                    '1.0',
+                                    HOSTNAME + '/connect/nokia/' + sender,
+                                    'HMAC-SHA1',
+                                );
+                                oa.getOAuthRequestToken((error, oAuthToken, oAuthTokenSecret, results) => {
+                                    let authUrl = 'https://developer.health.nokia.com/account/authorize?'
+                                        + 'oauth_consumer_key=' + NOKIA_API_KEY
+                                        + '&oauth_token=' + oAuthToken;
+                                    pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret)', [sender, oAuthToken, oAuthTokenSecret]);
+                                    message.text = str.replace('@@link', authUrl);
+
+                                })
+                                break;
+                        }
+                    }
                     break;
                 default:
                     speech += 'Sorry, de actie is niet bekend.';
@@ -378,7 +402,44 @@ app.get('/', function (req, res) {
     res.send('This is Paula');
 });
 
-app.get('/connect/nokia/', (req, res) => {
+app.get('/connect/nokia/:fbUserId', (req, res) => {
+    let fbUser = reqs.params.fbUserId;
+    let userid = req.params.userid;
+    let oAuthToken = req.params.oauth_token;
+    let oAuthVerifier = req.params.oauth_verifier;
+
+    let oa = new OAuth.OAuth(
+        'https://developer.health.nokia.com/account/request_token',
+        'https://developer.health.nokia.com/account/access_token',
+        NOKIA_API_KEY,
+        NOKIA_API_SECRET,
+        '1.0',
+        HOSTNAME + '/connect/nokia/' + sender,
+        'HMAC-SHA1',
+    );
+    pool.query("SELECT * FROM connect_nokia WHERE fbuser = $1", [fbUser]).then(res => {
+        let userOAuth = res.rows[0];
+        oa.getOAuthAccessToken(
+            userOAuth.oauth_request_token,
+            userOAuth.oauth_request_secret,
+            oAuthVerifier,
+
+            (error, oAuthToken, oAuthTokenSecret, results) => {
+                if (error) {
+                    console.log(error);
+                    response.end(JSON.stringify({
+                        message: 'Error occured while getting access token',
+                        error: error
+                    }));
+                    return;
+                }
+
+                pool.query('UPDATE connect_nokia SET oauth_access_token = $1, oauth_access_secret = $2', [oAuthToken, oAuthTokenSecret]).then();
+            
+        })
+    })
+    
+
     console.log('')
 });
 
