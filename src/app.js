@@ -136,6 +136,7 @@ function handleResponse(response, sender) {
                                     client.query('UPDATE vragenlijsten set gestopt = (SELECT NOW()) WHERE id = $1', [vragenlijst]);
                                 });
                             }
+                            client.end();
                         });
                     }
                     message.quick_replies = quickReplies;
@@ -150,13 +151,7 @@ function handleResponse(response, sender) {
                             .query({ text: 'INSERT INTO vragenlijsten (fbuser, vragenlijst) VALUES($1, $2)', values: [sender, parameters.vragenlijst] })
                             .then(res => console.log(res))
                             .catch(e => console.error(e, e.stack));
-                    });
-                    break;
-                case "end_vragenlijst":
-                    pg.connect(process.env.DATABASE_URL, (err, client) => {
-                        if (err) throw err;
-
-                        
+                        client.end();
                     });
                     break;
                 default:
