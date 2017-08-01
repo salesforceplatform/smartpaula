@@ -71,7 +71,7 @@ function handleResponse(response, sender) {
             }
             //hier komen de standaard tekst antwoorden van api.ai terecht
         } else if (isDefined(responseText)) {
-            let q = async.queue((task, callback) => { task(); callback(); });
+            let q = async.queue((task, callback) => { console.log('performing:', task); task(); callback(); });
             let message = {
                 text: responseText
             };
@@ -176,6 +176,7 @@ function handleResponse(response, sender) {
                                             + '&oauth_token=' + oAuthToken;
                                         pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret)', [sender, oAuthToken, oAuthTokenSecret]);
                                         message.text = message.text.replace('@@link', authUrl);
+                                        console.log(message);
 
                                     })
                                 });
