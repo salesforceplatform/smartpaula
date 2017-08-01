@@ -171,8 +171,8 @@ function handleResponse(response, sender) {
 
         response.result.fulfillment.messages.forEach(function (message) {
             let payload = message.payload;
-            if (isDefined(payload)) {
-                let followUp = payload.followUp;
+            let followUp = payload.followUp;
+            if (isDefined(followUp)) {
                 let request = apiAiService.eventRequest({
                     name: followUp
                 }, {
