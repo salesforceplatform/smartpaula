@@ -136,7 +136,11 @@ function handleResponse(response, sender) {
                                     client.query('UPDATE vragenlijsten set gestopt = (SELECT NOW()) WHERE id = $1', [vragenlijst]);
                                 });
                             }
-                            client.end();
+                            client.end(err => {
+                                if (err) {
+                                    console.log('Error in database connection:', err);
+                                }
+                            });
                         });
                     }
                     message.quick_replies = quickReplies;
