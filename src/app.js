@@ -137,6 +137,9 @@ function handleResponse(response, sender) {
                                         client.query('UPDATE vragenlijsten set gestopt = (SELECT NOW()) WHERE id = $1', [vragenlijst]);
                                     });
                             }
+                            client.end()
+                                .then(() => console.log('client has disconnected'))
+                                .catch(err => console.error('error during disconnection', err.stack))
                         });
                     }
 
@@ -151,7 +154,11 @@ function handleResponse(response, sender) {
                         client
                             .query({ text: 'INSERT INTO vragenlijsten (fbuser, vragenlijst) VALUES($1, $2)', values: [sender, parameters.vragenlijst] })
                             .then(res => console.log(res))
-                            .catch(e => console.error(e, e.stack));            
+                            .catch(e => console.error(e, e.stack));
+
+                        client.end()
+                            .then(() => console.log('client has disconnected'))
+                            .catch(err => console.error('error during disconnection', err.stack))
                     });
                     break;
                 default:
