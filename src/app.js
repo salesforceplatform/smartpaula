@@ -128,16 +128,13 @@ function handleResponse(response, sender) {
                                     .then(res => {
                                         let answer_no = res.rowCount + 1;
                                         pool.query('INSERT INTO antwoorden (vragenlijst, waarde, antwoord_op, vraag) VALUES ($1, $2, (SELECT NOW()), $3)', [vragenlijst, score, answer_no]);
-                                        pool.end();
                                     });
-                                pool.end();
                             });
 
                         if (isDefined(payload) && isDefined(payload.vragenlijst_end) && payload.vragenlijst_end) {
                                 pool.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', [sender]).then(res => {
                                     let vragenlijst = res.rows[0].id;
-                                    pool.query('UPDATE vragenlijsten set gestopt = (SELECT NOW()) WHERE id = $1', [vragenlijst]).then(resc => { pool.end() });
-                                    pool.end();
+                                    pool.query('UPDATE vragenlijsten set gestopt = (SELECT NOW()) WHERE id = $1', [vragenlijst])
                                 });
                         }
                         
