@@ -151,7 +151,7 @@ function handleResponse(response, sender) {
                         client
                             .query({ text: 'INSERT INTO vragenlijsten (fbuser, vragenlijst) VALUES($1, $2)', values: [sender, parameters.vragenlijst] })
                             .then(res => console.log(res))
-                            .catch(e => console.error(e, e.stack));            \
+                            .catch(e => console.error(e, e.stack));            
                     });
                     break;
                 default:
