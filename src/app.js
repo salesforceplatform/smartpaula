@@ -141,7 +141,7 @@ function handleResponse(response, sender) {
                     }
 
                     if (!(isDefined(payload) && isDefined(payload.vragenlijst_end) && payload.vragenlijst_end)) {
-                        message.quickReplies = quickReplies;
+                        message.quick_replies = quickReplies;
                     }                                                                                                                      
                     break;
                 case "start_vragenlijst":
