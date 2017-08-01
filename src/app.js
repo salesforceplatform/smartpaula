@@ -127,7 +127,7 @@ function handleResponse(response, sender) {
                                 pool.query('SELECT * FROM antwoorden WHERE vragenlijst = $1', [vragenlijst])
                                     .then(res => {
                                         let answer_no = res.rowCount + 1;
-                                        client.query('INSERT INTO antwoorden (vragenlijst, waarde, antwoord_op, vraag) VALUES ($1, $2, (SELECT NOW()), $3)', [vragenlijst, score, answer_no]);
+                                        pool.query('INSERT INTO antwoorden (vragenlijst, waarde, antwoord_op, vraag) VALUES ($1, $2, (SELECT NOW()), $3)', [vragenlijst, score, answer_no]);
                                         pool.end();
                                     });
                                 pool.end();
@@ -152,14 +152,7 @@ function handleResponse(response, sender) {
                         pool
                             .query({ text: 'INSERT INTO vragenlijsten (fbuser, vragenlijst) VALUES($1, $2)', values: [sender, parameters.vragenlijst] })
                             .then(res => { console.log(res); pool.end() })
-                            .catch(e => console.error(e, e.stack));
-
-                        client.end((err) => {
-                            console.log('client has disconnected')
-                            if (err) {
-                                console.log('error during disconnection', err.stack)
-                            }
-                        })     
+                            .catch(e => console.error(e, e.stack));   
                     break;
                 default:
                     speech += 'Sorry, de actie is niet bekend.';
