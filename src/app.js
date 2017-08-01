@@ -161,7 +161,7 @@ function handleResponse(response, sender) {
                     if (isDefined(service)) {
                         switch (service) {
                             case "Nokia":
-                                queue.push(() => {
+                                queue.push(async.asyncify(() => {
                                     let deferred = q.defer();
                                     let oa = new OAuth.OAuth(
                                         'https://developer.health.nokia.com/account/request_token',
@@ -186,7 +186,7 @@ function handleResponse(response, sender) {
                                         deferred.resolve();
                                     });
                                     return deferred;
-                                });
+                                }));
                                 break;
                         }
                     }
