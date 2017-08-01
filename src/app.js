@@ -151,7 +151,8 @@ function handleResponse(response, sender) {
                             let vragenlijst = res.rows[0].id;
                             client.query('UPDATE vragenlijsten set gestopt = (SELECT NOW()) WHERE id = $1', [vragenlijst]);
                         });
-                        break;
+                    });
+                    break;
                 default:
                     speech += 'Sorry, de actie is niet bekend.';
             }
