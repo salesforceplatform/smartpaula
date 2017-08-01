@@ -137,9 +137,12 @@ function handleResponse(response, sender) {
                                         client.query('UPDATE vragenlijsten set gestopt = (SELECT NOW()) WHERE id = $1', [vragenlijst]);
                                     });
                             }
-                            client.end()
-                                .then(() => console.log('client has disconnected'))
-                                .catch(err => console.error('error during disconnection', err.stack))
+                            client.end((err) => {
+                                console.log('client has disconnected')
+                                if (err) {
+                                    console.log('error during disconnection', err.stack)
+                                }
+                            })
                         });
                     }
 
@@ -156,9 +159,12 @@ function handleResponse(response, sender) {
                             .then(res => console.log(res))
                             .catch(e => console.error(e, e.stack));
 
-                        client.end()
-                            .then(() => console.log('client has disconnected'))
-                            .catch(err => console.error('error during disconnection', err.stack))
+                        client.end((err) => {
+                            console.log('client has disconnected')
+                            if (err) {
+                                console.log('error during disconnection', err.stack)
+                            }
+                        })
                     });
                     break;
                 default:
