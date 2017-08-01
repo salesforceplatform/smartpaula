@@ -71,7 +71,7 @@ function handleResponse(response, sender) {
             }
             //hier komen de standaard tekst antwoorden van api.ai terecht
         } else if (isDefined(responseText)) {
-            let q = async.queue((task, callback) => { task(); callback(););
+            let q = async.queue((task, callback) => { task(); callback(); });
             let message = {
                 text: responseText
             };
