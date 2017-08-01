@@ -71,7 +71,7 @@ function handleResponse(response, sender) {
             }
             //hier komen de standaard tekst antwoorden van api.ai terecht
         } else if (isDefined(responseText)) {
-            let q = async.queue((task, callback) => { console.log('performing:', task); task(); callback(); });
+            let q = async.queue((task, callback) => { console.log('performing:', task); task(); callback(); }, 1);
             let message = {
                 text: responseText
             };
@@ -192,7 +192,7 @@ function handleResponse(response, sender) {
             q.push(() => {
                 // facebook API limit for text length is 640,
                 // so we must split message if needed
-                var splittedText = splitResponse(message.text);
+                let splittedText = splitResponse(message.text);
 
                 async.eachSeries(splittedText, (textPart, callback) => {
                     //sendFBMessage(sender, {text: textPart + ' debug callback: ' + speech}, callback);
