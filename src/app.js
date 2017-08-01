@@ -133,6 +133,12 @@ function handleResponse(response, sender) {
                                     });
                             });
 
+                        if (isDefined(payload)) {
+                            console.log(payload);
+                            if (isDefined(payload.vragenlijst_end)) {
+                                console.log(payload.vragenlijst_end);
+                            }
+                        }
                         if (isDefined(payload) && isDefined(payload.vragenlijst_end) && payload.vragenlijst_end) {
                                 pool.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', [sender]).then(res => {
                                     let vragenlijst = res.rows[0].id;
