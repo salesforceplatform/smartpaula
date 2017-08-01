@@ -15,6 +15,9 @@ const APIAI_ACCESS_TOKEN = process.env.APIAI_ACCESS_TOKEN;
 const APIAI_LANG = process.env.APIAI_LANG || 'nl';
 const FB_VERIFY_TOKEN = process.env.FB_VERIFY_TOKEN;
 const FB_PAGE_ACCESS_TOKEN = process.env.FB_PAGE_ACCESS_TOKEN;
+const NOKIA_API_KEY = process.env.NOKIA_API_KEY;
+const NOKIA_API_SECRET = process.env.NOKIA_API_SECRET;
+const HOSTNAME = process.enc.HOSTNAME;
 const pool = new Pool({ connectionString: process.env.DATABASE_URL});
 
 const apiAiService = apiai(APIAI_ACCESS_TOKEN, {
@@ -148,11 +151,12 @@ function handleResponse(response, sender) {
                     }                                                                                                                      
                     break;
                 case "start_vragenlijst":
-
-                        pool
-                            .query({ text: 'INSERT INTO vragenlijsten (fbuser, vragenlijst) VALUES($1, $2)', values: [sender, parameters.vragenlijst] })
-                            .then(res => { console.log(res);})
-                            .catch(e => console.error(e, e.stack));   
+                    pool
+                        .query({ text: 'INSERT INTO vragenlijsten (fbuser, vragenlijst) VALUES($1, $2)', values: [sender, parameters.vragenlijst] })
+                        .then(res => { console.log(res);})
+                        .catch(e => console.error(e, e.stack));   
+                    break;
+                case "connect_service":
                     break;
                 default:
                     speech += 'Sorry, de actie is niet bekend.';
@@ -372,6 +376,10 @@ var debugtekst = "";
 // Server frontpage
 app.get('/', function (req, res) {
     res.send('This is Paula');
+});
+
+app.get('/connect/nokia/', (req, res) => {
+    console.log('')
 });
 
 app.get('/webhook/', (req, res) => {
