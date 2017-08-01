@@ -171,7 +171,7 @@ function handleResponse(response, sender) {
                                         'HMAC-SHA1'
                                     );
                                 });
-                                q.push(async.asyncify(oa.getOAuthRequestToken)((error, oAuthToken, oAuthTokenSecret, results) => {
+                                q.push(async.asyncify(oa.getOAuthRequestToken),(error, oAuthToken, oAuthTokenSecret, results) => {
                                         let authUrl = 'https://developer.health.nokia.com/account/authorize?'
                                             + 'oauth_consumer_key=' + NOKIA_API_KEY
                                             + '&oauth_token=' + oAuthToken;
@@ -179,7 +179,7 @@ function handleResponse(response, sender) {
                                         message.text = message.text.replace('@@link', authUrl);
                                         console.log(message);
 
-                                    }));
+                                    });
                                 });
                                 break;
                         }
