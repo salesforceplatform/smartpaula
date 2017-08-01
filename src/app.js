@@ -70,30 +70,30 @@ function handleResponse(response, sender) {
                 text: responseText
             };
             let quickReplies = [{
-                    "content_type": "text",
-                    "title": "😁",
-                    "payload": "4"
-                },
-                {
-                    "content_type": "text",
-                    "title": "🙂",
-                    "payload": "3"
-                },
-                {
-                    "content_type": "text",
-                    "title": "😞",
-                    "payload": "2"
-                },
-                {
-                    "content_type": "text",
-                    "title": "😡",
-                    "payload": "1"
-                },
-                {
-                    "content_type": "text",
-                    "title": "N.v.t",
-                    "payload": "0"
-                }
+                "content_type": "text",
+                "title": "😁",
+                "payload": "4"
+            },
+            {
+                "content_type": "text",
+                "title": "🙂",
+                "payload": "3"
+            },
+            {
+                "content_type": "text",
+                "title": "😞",
+                "payload": "2"
+            },
+            {
+                "content_type": "text",
+                "title": "😡",
+                "payload": "1"
+            },
+            {
+                "content_type": "text",
+                "title": "N.v.t",
+                "payload": "0"
+            }
             ];
             console.log('Response as text message');
 
@@ -134,7 +134,7 @@ function handleResponse(response, sender) {
                     //apiaiRequest.contexts.pam_sum.paramaters.pam_total += response.result.parameters.pam_score
                     break;
                 case "start_vragenlijst":
-                    pg.connect(process.env.DATABASE_URL, function(err, client) {
+                    pg.connect(process.env.DATABASE_URL, function (err, client) {
                         if (err) throw err;
 
                         client
@@ -143,6 +143,15 @@ function handleResponse(response, sender) {
                             .catch(e => console.error(e, e.stack));
                     });
                     break;
+                case "end_vragenlijst":
+                    pg.connect(process.env.DATABASE_URL, (err, client) => {
+                        if (err) throw err;
+
+                        client.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', [sender]).then(res => {
+                            let vragenlijst = res.rows[0].id;
+                            client.query('UPDATE vragenlijsten set gestopt = (SELECT NOW()) WHERE id = $1', [vragenlijst]);
+                        });
+                        break;
                 default:
                     speech += 'Sorry, de actie is niet bekend.';
             }
@@ -158,15 +167,15 @@ function handleResponse(response, sender) {
             });
         }
 
-        response.result.fulfillment.messages.forEach(function(message) {
+        response.result.fulfillment.messages.forEach(function (message) {
             let payload = message.payload;
             if (isDefined(payload)) {
                 let followUp = payload.followUp;
                 let request = apiAiService.eventRequest({
                     name: followUp
                 }, {
-                    sessionId: sessionIds.get(sender)
-                });
+                        sessionId: sessionIds.get(sender)
+                    });
 
                 request.on('response', (response) => { handleResponse(response, sender); });
                 request.on('error', (error) => console.error(error));
@@ -310,9 +319,9 @@ function sendFBSenderAction(sender, action, callback) {
 
 function doSubscribeRequest() {
     request({
-            method: 'POST',
-            uri: "https://graph.facebook.com/v2.6/me/subscribed_apps?access_token=" + FB_PAGE_ACCESS_TOKEN
-        },
+        method: 'POST',
+        uri: "https://graph.facebook.com/v2.6/me/subscribed_apps?access_token=" + FB_PAGE_ACCESS_TOKEN
+    },
         (error, response, body) => {
             if (error) {
                 console.error('Error while subscription: ', error);
@@ -349,7 +358,7 @@ pg.defaults.ssl = true; //
 var debugtekst = "";
 
 // Server frontpage
-app.get('/', function(req, res) {
+app.get('/', function (req, res) {
     res.send('This is Paula');
 });
 
