@@ -130,16 +130,15 @@ function handleResponse(response, sender) {
                                     });
                                 });
 
-                            if (isDefined(payload)) {
-                                if (isDefined(payload.vragenlijst_end) && payload.vragenlijst_end) {
+                            if (isDefined(payload) && isDefined(payload.vragenlijst_end) && payload.vragenlijst_end) {
+
                                     client.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', [sender]).then(res => {
                                         let vragenlijst = res.rows[0].id;
                                         client.query('UPDATE vragenlijsten set gestopt = (SELECT NOW()) WHERE id = $1', [vragenlijst]);
                                     });
-                                } else {
-                                    message.quick_replies = quickReplies;
-                                }
-                            } 
+                            } else {
+                                message.quickReplies = quickReplies;
+                            }
                         });
                     }
                     
