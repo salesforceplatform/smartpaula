@@ -168,7 +168,7 @@ function handleResponse(response, sender) {
                                     NOKIA_API_SECRET,
                                     '1.0',
                                     HOSTNAME + '/connect/nokia/' + sender,
-                                    'HMAC-SHA1',
+                                    'HMAC-SHA1'
                                 );
                                 oa.getOAuthRequestToken((error, oAuthToken, oAuthTokenSecret, results) => {
                                     let authUrl = 'https://developer.health.nokia.com/account/authorize?'
