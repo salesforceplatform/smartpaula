@@ -17,7 +17,7 @@ const FB_VERIFY_TOKEN = process.env.FB_VERIFY_TOKEN;
 const FB_PAGE_ACCESS_TOKEN = process.env.FB_PAGE_ACCESS_TOKEN;
 const NOKIA_API_KEY = process.env.NOKIA_API_KEY;
 const NOKIA_API_SECRET = process.env.NOKIA_API_SECRET;
-const HOSTNAME = process.enc.HOSTNAME;
+const HOSTNAME = process.env.HOSTNAME;
 const pool = new Pool({ connectionString: process.env.DATABASE_URL});
 
 const apiAiService = apiai(APIAI_ACCESS_TOKEN, {
