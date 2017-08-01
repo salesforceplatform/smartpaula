@@ -136,10 +136,10 @@ function handleResponse(response, sender) {
                                         let vragenlijst = res.rows[0].id;
                                         client.query('UPDATE vragenlijsten set gestopt = (SELECT NOW()) WHERE id = $1', [vragenlijst]);
                                     });
+                                } else {
+                                    message.quick_replies = quickReplies;
                                 }
-                            } else {
-                                message.quick_replies = quickReplies;
-                            }
+                            } 
                         });
                     }
                     
