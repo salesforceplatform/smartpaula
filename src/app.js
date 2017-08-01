@@ -174,19 +174,21 @@ function handleResponse(response, sender) {
         }
 
         response.result.fulfillment.messages.forEach(function (message) {
-            let payload = message.payload;
-            let followUp = payload.followUp;
-            if (isDefined(followUp)) {
-                let request = apiAiService.eventRequest({
-                    name: followUp
-                }, {
-                        sessionId: sessionIds.get(sender)
-                    });
+            let payload = message.payload
+            if (isDefined(payload)) {
+                let followUp = payload.followUp;
+                if (isDefined(followUp)) {
+                    let request = apiAiService.eventRequest({
+                        name: followUp
+                    }, {
+                            sessionId: sessionIds.get(sender)
+                        });
 
-                request.on('response', (response) => { handleResponse(response, sender); });
-                request.on('error', (error) => console.error(error));
+                    request.on('response', (response) => { handleResponse(response, sender); });
+                    request.on('error', (error) => console.error(error));
 
-                request.end();
+                    request.end();
+                }
             }
         }, this);
 
