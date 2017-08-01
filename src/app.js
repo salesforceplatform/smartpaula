@@ -113,8 +113,9 @@ function handleResponse(response, sender) {
                     speech += action;
                     break;
                 case "pam_sum": //calculate PAM score
-                    let payload = message.payload;
+                    let payload = response.payload;
                     let score = parameters.pam_score;
+
 
                     if (isDefined(score)) {
                         console.log(action, 'score is defined', score);
@@ -141,10 +142,7 @@ function handleResponse(response, sender) {
 
                     if (!(isDefined(payload) && isDefined(payload.vragenlijst_end) && payload.vragenlijst_end)) {
                         message.quickReplies = quickReplies;
-                    }
-                    
-                    //hoe geef je waarde aan api.ai variabele?
-                    //apiaiRequest.contexts.pam_sum.paramaters.pam_total += response.result.parameters.pam_score
+                    }                                                                                                                      
                     break;
                 case "start_vragenlijst":
                     pg.connect(process.env.DATABASE_URL, function (err, client) {
