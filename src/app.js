@@ -185,7 +185,7 @@ function handleResponse(response, sender) {
                                         console.log(message);
                                         deferred.resolve();
                                     });
-                                    return deferred;
+                                    return deferred.nodeify();
                                 }));
                                 break;
                         }
