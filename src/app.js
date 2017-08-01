@@ -19,7 +19,7 @@ const FB_PAGE_ACCESS_TOKEN = process.env.FB_PAGE_ACCESS_TOKEN;
 const NOKIA_API_KEY = process.env.NOKIA_API_KEY;
 const NOKIA_API_SECRET = process.env.NOKIA_API_SECRET;
 const HOSTNAME = process.env.HOSTNAME;
-const pool = new Pool({ connectionString: process.env.DATABASE_URL});
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 const apiAiService = apiai(APIAI_ACCESS_TOKEN, {
     language: APIAI_LANG,
@@ -148,35 +148,37 @@ function handleResponse(response, sender) {
 
                     if (!(isDefined(payload) && isDefined(payload.vragenlijst_end) && payload.vragenlijst_end)) {
                         message.quick_replies = quickReplies;
-                    }                                                                                                                      
+                    }
                     break;
                 case "start_vragenlijst":
                     pool.query({ text: 'INSERT INTO vragenlijsten (fbuser, vragenlijst) VALUES($1, $2)', values: [sender, parameters.vragenlijst] })
-                        .then(res => { console.log(res);})
-                        .catch(e => console.error(e, e.stack));   
+                        .then(res => { console.log(res); })
+                        .catch(e => console.error(e, e.stack));
                     break;
                 case "connect_service":
                     let service = response.result.parameters.service;
                     if (isDefined(service)) {
                         switch (service) {
                             case "Nokia":
-                                let oa = new OAuth.OAuth(
-                                    'https://developer.health.nokia.com/account/request_token',
-                                    'https://developer.health.nokia.com/account/access_token',
-                                    NOKIA_API_KEY,
-                                    NOKIA_API_SECRET,
-                                    '1.0',
-                                    HOSTNAME + '/connect/nokia/' + sender,
-                                    'HMAC-SHA1'
-                                );
-                                oa.getOAuthRequestToken((error, oAuthToken, oAuthTokenSecret, results) => {
-                                    let authUrl = 'https://developer.health.nokia.com/account/authorize?'
-                                        + 'oauth_consumer_key=' + NOKIA_API_KEY
-                                        + '&oauth_token=' + oAuthToken;
-                                    pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret)', [sender, oAuthToken, oAuthTokenSecret]);
-                                    q.push(()=>{ message.text = message.text.replace('@@link', authUrl) });;
+                                q.push(() => {
+                                    let oa = new OAuth.OAuth(
+                                        'https://developer.health.nokia.com/account/request_token',
+                                        'https://developer.health.nokia.com/account/access_token',
+                                        NOKIA_API_KEY,
+                                        NOKIA_API_SECRET,
+                                        '1.0',
+                                        HOSTNAME + '/connect/nokia/' + sender,
+                                        'HMAC-SHA1'
+                                    );
+                                    oa.getOAuthRequestToken((error, oAuthToken, oAuthTokenSecret, results) => {
+                                        let authUrl = 'https://developer.health.nokia.com/account/authorize?'
+                                            + 'oauth_consumer_key=' + NOKIA_API_KEY
+                                            + '&oauth_token=' + oAuthToken;
+                                        pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret)', [sender, oAuthToken, oAuthTokenSecret]);
+                                        message.text = message.text.replace('@@link', authUrl);
 
-                                })
+                                    })
+                                });
                                 break;
                         }
                     }
@@ -435,10 +437,10 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
                 }
 
                 pool.query('UPDATE connect_nokia SET oauth_access_token = $1, oauth_access_secret = $2', [oAuthToken, oAuthTokenSecret]).then();
-            
-        })
+
+            })
     })
-    
+
 
     console.log('')
 });
