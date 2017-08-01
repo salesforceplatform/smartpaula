@@ -135,15 +135,12 @@ function handleResponse(response, sender) {
                                     let vragenlijst = res.rows[0].id;
                                     client.query('UPDATE vragenlijsten set gestopt = (SELECT NOW()) WHERE id = $1', [vragenlijst]);
                                 });
+                            } else {
+                                message.quick_replies = quickReplies;
                             }
-                            client.end(err => {
-                                if (err) {
-                                    console.log('Error in database connection:', err);
-                                }
-                            });
                         });
                     }
-                    message.quick_replies = quickReplies;
+                    
                     //hoe geef je waarde aan api.ai variabele?
                     //apiaiRequest.contexts.pam_sum.paramaters.pam_total += response.result.parameters.pam_score
                     break;
@@ -154,8 +151,7 @@ function handleResponse(response, sender) {
                         client
                             .query({ text: 'INSERT INTO vragenlijsten (fbuser, vragenlijst) VALUES($1, $2)', values: [sender, parameters.vragenlijst] })
                             .then(res => console.log(res))
-                            .catch(e => console.error(e, e.stack));
-                        client.end();
+                            .catch(e => console.error(e, e.stack));            \
                     });
                     break;
                 default:
