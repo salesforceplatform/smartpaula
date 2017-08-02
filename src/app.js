@@ -379,7 +379,8 @@ function subscribeToNokia(fbuser) {
         res.rows.forEach(row => {
             let url = 'https://api.health.nokia.com/notify'
                 + '?action=subscribe'
-                + '&userid=' + row.nokia_user;
+                + '&userid=' + row.nokia_user
+                + '&callbackurl=' + HOSTNAME + 'webhook/nokia';
             let signedUrl = nokiaAPI.signUrl(url, row.oauth_access_token, row.oauth_access_secret);
             console.log('subscribing: ', row, url);
 
