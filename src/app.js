@@ -380,7 +380,8 @@ function subscribeToNokia(fbuser) {
             let url = 'https://api.health.nokia.com/notify'
                 + '?action=subscribe'
                 + '&userid=' + row.nokia_user
-                + '&callbackurl=' + HOSTNAME + 'webhook/nokia';
+                + '&callbackurl=' + HOSTNAME + 'webhook/nokia'
+                + '&appli=4';
             let signedUrl = nokiaAPI.signUrl(url, row.oauth_access_token, row.oauth_access_secret);
             console.log('subscribing: ', row, signedUrl);
 
@@ -542,6 +543,9 @@ app.post('/webhook/', (req, res) => {
 
 app.all('/webhook/nokia', (req, res) => {
     try {
+        let startDate = req.query.startdate;
+        let enddate = req.query.enddate;
+
         console.log(req.params, req.query);
         return res.status(200).end();
     } catch (err) {
