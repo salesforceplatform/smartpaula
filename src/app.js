@@ -375,14 +375,14 @@ function subscribeToNokia() {
         NOKIA_API_KEY,
         NOKIA_API_SECRET,
         '1.0',
-        HOSTNAME + '/webhook/nokia',
+        HOSTNAME + 'webhook/nokia',
         'HMAC-SHA1'
     );
     pool.query('SELECT * FROM connect_nokia').then(res => {
         res.rows.forEach(row => {
             let url = 'https://api.health.nokia.com/notify?action=subscribe'
                 + '&userid=' + row.nokia_user
-                + '&callbackurl=' + HOSTNAME + '/webhook/nokia'
+                + '&callbackurl=' + HOSTNAME + 'webhook/nokia'
                 + '&comment=Paula op de hoogte houden van je gezondheid';
             console.log('subscribing: ', row, url);
             oa.get(url, row.oauth_access_token, row.oauth_access_secret,
