@@ -385,7 +385,14 @@ function subscribeToNokia() {
                 + '&callbackurl=' + HOSTNAME + '/webhook/nokia'
                 + '&comment=Paula op de hoogte houden van je gezondheid';
             console.log('subscribing: ', row, url);
-            oa.get(url, row.oauth_access_token, row.oauth_access_secret, (error, twitterResponseData, result) => { console.log('subscribed:', error, twitterResponseData, result) });
+            oa.get(url, row.oauth_access_token, row.oauth_access_secret, (error, responseData, result) => {
+                console.log('subscribed:', error);
+                try {
+                    console.log(JSON.parse(twitterResponseData));
+                } catch (parseError) {
+                    console.log(parseError);
+                }
+            });
         });
     })
 }
