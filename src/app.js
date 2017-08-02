@@ -379,7 +379,7 @@ function subscribeToNokia() {
         'HMAC-SHA1'
     );
     pool.query('SELECT * FROM connect_nokia').then(res => {
-        res.forEach(row => {
+        res.rows.forEach(row => {
             let url = 'https://api.health.nokia.com/notify?action=subscribe'
                 + '&userid=' + row.nokia_user
                 + '&callbackurl=' + HOSTNAME + '/webhook/nokia'
