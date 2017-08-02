@@ -10,7 +10,7 @@ const async = require('async');
 const { Pool, Client } = require('pg');
 const util = require('util');
 const OAuth = require('oauth');
-const q = require('q');
+const Q = require('q');
 
 const REST_PORT = (process.env.PORT || 5000);
 const APIAI_ACCESS_TOKEN = process.env.APIAI_ACCESS_TOKEN;
@@ -72,7 +72,7 @@ function handleResponse(response, sender) {
             }
             //hier komen de standaard tekst antwoorden van api.ai terecht
         } else if (isDefined(responseText)) {
-            let queue = async.queue((task, callback) => { console.log('performing:', task); task(callback); }, 1);
+            let beforeSending = [];
             let message = {
                 text: responseText
             };
@@ -161,32 +161,7 @@ function handleResponse(response, sender) {
                     if (isDefined(service)) {
                         switch (service) {
                             case "Nokia":
-                                queue.push(async.asyncify(() => {
-                                    let deferred = q.defer();
-                                    let oa = new OAuth.OAuth(
-                                        'https://developer.health.nokia.com/account/request_token',
-                                        'https://developer.health.nokia.com/account/access_token',
-                                        NOKIA_API_KEY,
-                                        NOKIA_API_SECRET,
-                                        '1.0',
-                                        HOSTNAME + '/connect/nokia/' + sender,
-                                        'HMAC-SHA1'
-                                    );
-                                    oa.getOAuthRequestToken((error, oAuthToken, oAuthTokenSecret, results) => {
-                                        let authUrl = 'https://developer.health.nokia.com/account/authorize?'
-                                            + 'oauth_consumer_key=' + NOKIA_API_KEY
-                                            + '&oauth_token=' + oAuthToken;
-                                        if (error) {
-                                            deferred.reject(error);
-                                            return;
-                                        }
-                                        pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret)', [sender, oAuthToken, oAuthTokenSecret]);
-                                        message.text = message.text.replace('@@link', authUrl);
-                                        console.log(message);
-                                        deferred.resolve();
-                                    });
-                                    return deferred.nodeify();
-                                }));
+                                beforeSending.push(getNokiaRequestToken(sender, message));
                                 break;
                         }
                     }
@@ -195,8 +170,7 @@ function handleResponse(response, sender) {
                     speech += 'Sorry, de actie is niet bekend.';
             }
 
-
-            queue.push(() => {
+            Q.all(beforeSending).done(() => {
                 // facebook API limit for text length is 640,
                 // so we must split message if needed
                 let splittedText = splitResponse(message.text);
@@ -205,7 +179,7 @@ function handleResponse(response, sender) {
                     //sendFBMessage(sender, {text: textPart + ' debug callback: ' + speech}, callback);
                     message.text = textPart;
                     sendFBMessage(sender, message, callback);
-                })
+                });
             });
         }
 
@@ -368,6 +342,34 @@ function sendFBSenderAction(sender, action, callback) {
             }
         });
     }, 1000);
+}
+
+function getNokiaRequestToken(fbUser, message) {
+        let deferred = Q.defer();
+        let oa = new OAuth.OAuth(
+            'https://developer.health.nokia.com/account/request_token',
+            'https://developer.health.nokia.com/account/access_token',
+            NOKIA_API_KEY,
+            NOKIA_API_SECRET,
+            '1.0',
+            HOSTNAME + '/connect/nokia/' + sender,
+            'HMAC-SHA1'
+        );
+        oa.getOAuthRequestToken((error, oAuthToken, oAuthTokenSecret, results) => {
+            let authUrl = 'https://developer.health.nokia.com/account/authorize?'
+                + 'oauth_consumer_key=' + NOKIA_API_KEY
+                + '&oauth_token=' + oAuthToken;
+            if (error) {
+                deferred.reject(error);
+                return;
+            }
+            pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret)', [fbUser, oAuthToken, oAuthTokenSecret]);
+            message.text = message.text.replace('@@link', authUrl);
+            console.log(message);
+            deferred.resolve();
+        });
+        return deferred.nodeify();
+    }
 }
 
 function doSubscribeRequest() {
