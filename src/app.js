@@ -368,6 +368,17 @@ function getNokiaRequestToken(fbUser, callback) {
     });
 }
 
+function getNokiaMeasurements(user, callback) {
+    pool.query('SELECT * FROM connect_nokia WHERE fbuser = $1', [user]).then(res => {
+        let user = res.rows[0];
+        let url = 'https://api.health.nokia.com/measure' + '?action=getmeas' + '&userid=' + user.nokia_user + '&lastupdate=' + user.last_update;
+        let signedUrl = nokiaAPI.signUrl(url, user.oauth_access_token, user.oauth_access_secret)
+        nokiaAPI.get(signedUrl, null, null, (error, responseData) => {
+            console.log(responseData);
+        })
+    });
+}
+
 function nokiaSubscriptionUrl(user, appli){
     return 'https://api.health.nokia.com/notify'
         + '?action=subscribe'
@@ -463,7 +474,7 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
                             return;
                         }
 
-                        pool.query('UPDATE connect_nokia SET oauth_access_token = $1, oauth_access_secret = $2, nokia_user= $3 WHERE fbuser = $4', [oAuthToken, oAuthTokenSecret, userid, fbUser]).then(() => {
+                        pool.query('UPDATE connect_nokia SET oauth_access_token = $1, oauth_access_secret = $2, nokia_user = $3, last_update = 0 WHERE fbuser = $4', [oAuthToken, oAuthTokenSecret, userid, fbUser]).then(() => {
                             let request = apiAiService.eventRequest({
                                 name: 'nokia_connected'
                             }, {
@@ -476,6 +487,8 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
                             request.end();
                             subscribeToNokia(fbUser);
                         });
+
+                        getNokiaMeasurements(fbUser);
 
                     });
             })
