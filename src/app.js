@@ -389,7 +389,7 @@ function subscribeToNokia(fbuser) {
             console.log('subscribing: ', row, url);
             oa.post(url, row.oauth_access_token, row.oauth_access_secret,
                 {
-                    'action': 'subscribe';
+                    'action': 'subscribe',
                     'userid': row.nokia_user,
                     'callbackurl': HOSTNAME + 'webhook/nokia',
                     'comment': 'Paula op de hoogte houden van je gezondheid',
