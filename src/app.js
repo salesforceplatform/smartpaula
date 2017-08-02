@@ -456,7 +456,7 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
         let oAuthToken = req.params.oauth_token;
         let oAuthVerifier = req.params.oauth_verifier;
 
-        console.log(req.params)
+        console.log(req.params);
 
         let oa = new OAuth.OAuth(
             'https://developer.health.nokia.com/account/request_token',
@@ -489,14 +489,14 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
                             let request = apiAiService.eventRequest({
                                 name: 'nokia_connected'
                             }, {
-                                    sessionId: sessionIds.get(sender)
+                                    sessionId: sessionIds.get(fbUser)
                                 });
 
-                            request.on('response', (response) => { handleResponse(response, sender); });
+                            request.on('response', (response) => { handleResponse(response, fbUser); });
                             request.on('error', (error) => console.error(error));
 
                             request.end();
-                            subscribeToNokia(sender);
+                            subscribeToNokia(fbUser);
                         });
 
                     });
