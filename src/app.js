@@ -361,7 +361,7 @@ function getNokiaRequestToken(fbUser, callback) {
             callback(error);
             return;
         }
-        pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret)', [fbUser, oAuthToken, oAuthTokenSecret]);
+        pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret) VALUES ($1, $2, $3)', [fbUser, oAuthToken, oAuthTokenSecret]);
         callback(null, authUrl);
     });
 }
