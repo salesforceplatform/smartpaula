@@ -382,7 +382,7 @@ function subscribeToNokia(fbuser) {
 
             nokiaAPI.get('http://api.health.nokia.com/measure', row.oauth_access_token, row.oauth_access_secret,
                 {
-                    action: getmeas,
+                    action: 'getmeas',
                     userid: row.nokia_user
                 }, (error, responseData, result) => {
 
