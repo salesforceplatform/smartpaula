@@ -368,6 +368,14 @@ function getNokiaRequestToken(fbUser, callback) {
     });
 }
 
+function nokiaSubscriptionUrl(user, appli){
+    return 'https://api.health.nokia.com/notify'
+        + '?action=subscribe'
+        + '&userid=' + user
+        + '&callbackurl=' + HOSTNAME + 'webhook/nokia'
+        + '&appli=' + appli;
+}
+
 function subscribeToNokia(fbuser) {
     
     let query = { text: 'SELECT * FROM connect_nokia' };
@@ -377,23 +385,11 @@ function subscribeToNokia(fbuser) {
     }
     pool.query(query).then(res => {
         res.rows.forEach(row => {
-            let url = 'https://api.health.nokia.com/notify'
-                + '?action=subscribe'
-                + '&userid=' + row.nokia_user
-                + '&callbackurl=' + HOSTNAME + 'webhook/nokia'
-                + '&appli=4';
-            let signedUrl = nokiaAPI.signUrl(url, row.oauth_access_token, row.oauth_access_secret);
-            console.log('subscribing: ', row, signedUrl);
+            let signedUrl = nokiaAPI.signUrl(nokiaSubscriptionUrl(row.nokia_user, 4), row.oauth_access_token, row.oauth_access_secret);
+            nokiaAPI.get(signedUrl, null, null, (error, responseData) => { if (error) console.log(error); });
+            signedUrl = nokiaAPI.signUrl(nokiaSubscriptionUrl(row.nokia_user, 1), row.oauth_access_token, row.oauth_access_secret);
+            nokiaAPI.get(signedUrl, null, null, (error, responseData) => { if (error) console.log(error); });
 
-            nokiaAPI.get(signedUrl, null, null,
-                (error, responseData) => {
-
-                    if (error) {
-                        console.log(error);
-                        return;
-                    }
-                    console.log('subscribed:', JSON.parse(responseData));                
-            });
         });
     })
 }
@@ -543,10 +539,11 @@ app.post('/webhook/', (req, res) => {
 
 app.all('/webhook/nokia', (req, res) => {
     try {
-        let startDate = req.query.startdate;
-        let enddate = req.query.enddate;
+        let startDate = req.body.startdate;
+        let enddate = req.body.enddate;
 
-        console.log(req.params, req.query);
+        console.log(req.params, req.body);
+
         return res.status(200).end();
     } catch (err) {
         return res.status(400).json({
