@@ -401,6 +401,8 @@ function subscribeToNokia(fbuser) {
             signedUrl = nokiaAPI.signUrl(nokiaSubscriptionUrl(row.nokia_user, 1), row.oauth_access_token, row.oauth_access_secret);
             nokiaAPI.get(signedUrl, null, null, (error, responseData) => { if (error) console.log(error); });
 
+            getNokiaMeasurements(row.fbuser);
+
         });
     })
 }
@@ -487,8 +489,6 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
                             request.end();
                             subscribeToNokia(fbUser);
                         });
-
-                        getNokiaMeasurements(fbUser);
 
                     });
             })
