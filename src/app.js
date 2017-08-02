@@ -368,6 +368,28 @@ function getNokiaRequestToken(fbUser, callback) {
     });
 }
 
+function subscribeToNokia() {
+    oa = new OAuth.OAuth(
+        'https://developer.health.nokia.com/account/request_token',
+        'https://developer.health.nokia.com/account/access_token',
+        NOKIA_API_KEY,
+        NOKIA_API_SECRET,
+        '1.0',
+        HOSTNAME + '/webhook/nokia',
+        'HMAC-SHA1'
+    );
+    pool.query('SELECT * FROM connect_nokia').then(res => {
+        res.forEach(row => {
+            let url = 'https://api.health.nokia.com/notify?action=subscribe'
+                + '&userid=' + row.nokia_user
+                + '&callbackurl=' + HOSTNAME + '/webhook/nokia'
+                + '&comment=Paula op de hoogte houden van je gezondheid';
+            console.log('subscribing: ', row, url);
+            oa.get(url, row.oauth_access_token, row.oauth_access_secret, res => { console.log('subscribed:', res) });
+        });
+    })
+}
+
 function doSubscribeRequest() {
     request({
         method: 'POST',
@@ -413,54 +435,64 @@ app.get('/', function (req, res) {
 });
 
 app.get('/connect/nokia/:fbUserId', (req, res) => {
-    let fbUser = req.params.fbUserId;
-    let userid = req.params.userid;
-    let oAuthToken = req.params.oauth_token;
-    let oAuthVerifier = req.params.oauth_verifier;
+    try {
+        let fbUser = req.params.fbUserId;
+        let userid = req.params.userid;
+        let oAuthToken = req.params.oauth_token;
+        let oAuthVerifier = req.params.oauth_verifier;
 
-    let oa = new OAuth.OAuth(
-        'https://developer.health.nokia.com/account/request_token',
-        'https://developer.health.nokia.com/account/access_token',
-        NOKIA_API_KEY,
-        NOKIA_API_SECRET,
-        '1.0',
-        HOSTNAME + '/connect/nokia/' + fbUser,
-        'HMAC-SHA1'
-    );
-    pool.query("SELECT * FROM connect_nokia WHERE fbuser = $1", [fbUser])
-        .then(result => {
-            let userOAuth = result.rows[0];
-            console.log(userOAuth);
-            oa.getOAuthAccessToken(
-                userOAuth.oauth_request_token,
-                userOAuth.oauth_request_secret,
-                oAuthVerifier,
-                (error, oAuthToken, oAuthTokenSecret, results) => {
-                    if (error) {
-                        console.log(error);
-                        response.end(JSON.stringify({
-                            message: 'Error occured while getting access token',
-                            error: error
-                        }));
-                        return;
-                    }
+        let oa = new OAuth.OAuth(
+            'https://developer.health.nokia.com/account/request_token',
+            'https://developer.health.nokia.com/account/access_token',
+            NOKIA_API_KEY,
+            NOKIA_API_SECRET,
+            '1.0',
+            HOSTNAME + '/connect/nokia/' + fbUser,
+            'HMAC-SHA1'
+        );
+        pool.query("SELECT * FROM connect_nokia WHERE fbuser = $1", [fbUser])
+            .then(result => {
+                let userOAuth = result.rows[0];
+                console.log(userOAuth);
+                oa.getOAuthAccessToken(
+                    userOAuth.oauth_request_token,
+                    userOAuth.oauth_request_secret,
+                    oAuthVerifier,
+                    (error, oAuthToken, oAuthTokenSecret, results) => {
+                        if (error) {
+                            console.log(error);
+                            response.end(JSON.stringify({
+                                message: 'Error occured while getting access token',
+                                error: error
+                            }));
+                            return;
+                        }
 
-                    pool.query('UPDATE connect_nokia SET oauth_access_token = $1, oauth_access_secret = $2', [oAuthToken, oAuthTokenSecret]).then(() => {
-                        let request = apiAiService.eventRequest({
-                            name: 'nokia_connected'
-                        }, {
-                                sessionId: sessionIds.get(sender)
-                            });
+                        pool.query('UPDATE connect_nokia SET oauth_access_token = $1, oauth_access_secret = $2, nokia_user= $3', [oAuthToken, oAuthTokenSecret, userid]).then(() => {
+                            let request = apiAiService.eventRequest({
+                                name: 'nokia_connected'
+                            }, {
+                                    sessionId: sessionIds.get(sender)
+                                });
 
-                        request.on('response', (response) => { handleResponse(response, sender); });
-                        request.on('error', (error) => console.error(error));
+                            request.on('response', (response) => { handleResponse(response, sender); });
+                            request.on('error', (error) => console.error(error));
 
-                        request.end();
+                            request.end();
+                        });
+
                     });
+            })
+        return res.status(200).json({
+            status: "ok"
+        });
+    } catch (err) {
+        return res.status(400).json({
+            status: "error",
+            error: err
+        });
+    }
 
-                });
-        })
-    res.send('');
 });
 
 app.get('/webhook/', (req, res) => {
@@ -509,6 +541,10 @@ app.post('/webhook/', (req, res) => {
 
 });
 
+app.post('/webhook/nokia', (req, res) => {
+
+});
+
 
 //bewerking van api.ai vanuit webhook alvorens terug te sturen
 //app.post('/herokuai', function (req1, res1) {
@@ -527,3 +563,4 @@ app.listen(REST_PORT, () => {
 });
 
 doSubscribeRequest();
+subscribeToNokia();
