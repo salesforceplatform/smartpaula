@@ -379,6 +379,20 @@ function subscribeToNokia(fbuser) {
         res.rows.forEach(row => {
             let url = 'https://api.health.nokia.com/notify';
             console.log('subscribing: ', row, url);
+
+            nokiaAPI.get('http://api.health.nokia.com/measure', row.oauth_access_token, row.oauth_access_secret,
+                {
+                    action: getmeas,
+                    userid: row.nokia_user
+                }, (error, responseData, result) => {
+
+                    if (error) {
+                        console.log(error);
+                        return;
+                    }
+                    console.log('got:', JSON.parse(responseData));
+                });
+
             nokiaAPI.post(url, row.oauth_access_token, row.oauth_access_secret,
                 {
                     'action': 'subscribe',
