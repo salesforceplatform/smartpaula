@@ -452,9 +452,9 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
     try {
         console.log(req.params);
         let fbUser = req.params.fbUserId;
-        let userid = req.params.userid;
-        let oAuthToken = req.params.oauth_token;
-        let oAuthVerifier = req.params.oauth_verifier;
+        let userid = req.query.userid;
+        let oAuthToken = req.query.oauth_token;
+        let oAuthVerifier = req.query.oauth_verifier;
 
         console.log(req.params);
 
