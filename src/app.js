@@ -161,7 +161,9 @@ function handleResponse(response, sender) {
                     if (isDefined(service)) {
                         switch (service) {
                             case "Nokia":
-                                beforeSending.push(getNokiaRequestToken(sender, message));
+                                getNokiaRequestToken(sender, message).then(
+                                    (url) => { sendFBMessage(sender, { text: url }); }
+                                );
                                 break;
                         }
                     }
@@ -170,17 +172,15 @@ function handleResponse(response, sender) {
                     speech += 'Sorry, de actie is niet bekend.';
             }
 
-            Q.all(beforeSending).then(() => {
-                // facebook API limit for text length is 640,
-                // so we must split message if needed
-                let splittedText = splitResponse(message.text);
+            // facebook API limit for text length is 640,
+            // so we must split message if needed
+            let splittedText = splitResponse(message.text);
 
-                async.eachSeries(splittedText, (textPart, callback) => {
-                    //sendFBMessage(sender, {text: textPart + ' debug callback: ' + speech}, callback);
-                    message.text = textPart;
-                    sendFBMessage(sender, message, callback);
-                });
-            });
+            async.eachSeries(splittedText, (textPart, callback) => {
+                //sendFBMessage(sender, {text: textPart + ' debug callback: ' + speech}, callback);
+                message.text = textPart;
+                sendFBMessage(sender, message, callback);
+            });               
         }
 
         response.result.fulfillment.messages.forEach(function (message) {
@@ -344,7 +344,7 @@ function sendFBSenderAction(sender, action, callback) {
     }, 1000);
 }
 
-function getNokiaRequestToken(fbUser, message) {
+function getNokiaRequestToken(fbUser) {
         let deferred = Q.defer();
         let oa = new OAuth.OAuth(
             'https://developer.health.nokia.com/account/request_token',
@@ -364,9 +364,7 @@ function getNokiaRequestToken(fbUser, message) {
                 return;
             }
             pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret)', [fbUser, oAuthToken, oAuthTokenSecret]);
-            message.text = message.text.replace('@@link', authUrl);
-            console.log(message);
-            deferred.resolve();
+            deferred.resolve(authUrl);
         });
         return deferred;
 }
