@@ -353,7 +353,7 @@ function sendFBSenderAction(sender, action, callback) {
 }
 
 function getNokiaRequestToken(fbUser, callback) {
-    nokia.getOAuthRequestToken((error, oAuthToken, oAuthTokenSecret, results) => {
+    nokiaAPI.getOAuthRequestToken((error, oAuthToken, oAuthTokenSecret, results) => {
         let authUrl = 'https://developer.health.nokia.com/account/authorize?'
             + 'oauth_consumer_key=' + NOKIA_API_KEY
             + '&oauth_token=' + oAuthToken;
@@ -379,7 +379,7 @@ function subscribeToNokia(fbuser) {
         res.rows.forEach(row => {
             let url = 'https://api.health.nokia.com/notify';
             console.log('subscribing: ', row, url);
-            nokia.post(url, row.oauth_access_token, row.oauth_access_secret,
+            nokiaAPI.post(url, row.oauth_access_token, row.oauth_access_secret,
                 {
                     'action': 'subscribe',
                     'userid': row.nokia_user,
@@ -453,7 +453,7 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
             .then(result => {
                 let userOAuth = result.rows[0];
                 console.log(userOAuth);
-                nokia.getOAuthAccessToken(
+                nokiaAPI.getOAuthAccessToken(
                     userOAuth.oauth_request_token,
                     userOAuth.oauth_request_secret,
                     oAuthVerifier,
