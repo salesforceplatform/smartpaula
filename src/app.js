@@ -378,7 +378,7 @@ function subscribeToNokia(fbuser) {
     pool.query(query).then(res => {
         res.rows.forEach(row => {
             let url = 'https://api.health.nokia.com/notify'
-                + '?action = subscribe'
+                + '?action=subscribe'
                 + '&userid=' + row.nokia_user;
             let signedUrl = nokiaAPI.signUrl(url, row.oauth_access_token, row.oauth_access_secret);
             console.log('subscribing: ', row, url);
