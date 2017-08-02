@@ -550,7 +550,32 @@ app.post('/webhook/', (req, res) => {
 });
 
 app.post('/webhook/nokia', (req, res) => {
-    console.log(req, res);
+    try {
+        console.log(req.params);
+        return res.status(200).json({
+            status: "ok"
+        });
+    } catch (err) {
+        return res.status(400).json({
+            status: "error",
+            error: err
+        });
+    }
+
+});
+
+app.get('/webhook/nokia', (req, res) => {
+    try {
+        console.log(req.params);
+        return res.status(200).json({
+            status: "ok"
+        });
+    } catch (err) {
+        return res.status(400).json({
+            status: "error",
+            error: err
+        });
+    }
 
 });
 
