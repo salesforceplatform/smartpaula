@@ -11,6 +11,7 @@ const { Pool, Client } = require('pg');
 const util = require('util');
 const OAuth = require('oauth');
 const Q = require('q');
+const Withings = require('withings-lib')
 
 const REST_PORT = (process.env.PORT || 5000);
 const APIAI_ACCESS_TOKEN = process.env.APIAI_ACCESS_TOKEN;
@@ -27,15 +28,12 @@ const apiAiService = apiai(APIAI_ACCESS_TOKEN, {
     requestSource: "fb"
 });
 
-const nokiaAPI = new OAuth.OAuth(
-    'https://developer.health.nokia.com/account/request_token',
-    'https://developer.health.nokia.com/account/access_token',
-    NOKIA_API_KEY,
-    NOKIA_API_SECRET,
-    '1.0',
-    HOSTNAME + 'webhook/nokia',
-    'HMAC-SHA1'
-);
+const nokiaAPI = new Withings({
+    consumerKey: NOKIA_API_KEY,
+    consumerSecret: NOKIA_API_SECRET,
+    callbackUrl: HOSTNAME + 'webhook/nokia'
+});
+
 const sessionIds = new Map();
 
 const DEFAULT_INTENTS = ['57b82498-053c-4776-8be9-228c420e6c13', 'b429ecdc-21f4-4a07-8165-3620023185ba'];
@@ -353,10 +351,7 @@ function sendFBSenderAction(sender, action, callback) {
 }
 
 function getNokiaRequestToken(fbUser, callback) {
-    nokiaAPI.getOAuthRequestToken((error, oAuthToken, oAuthTokenSecret, results) => {
-        let authUrl = 'https://developer.health.nokia.com/account/authorize?'
-            + 'oauth_consumer_key=' + NOKIA_API_KEY
-            + '&oauth_token=' + oAuthToken;
+    nokiaAPI.getRequestToken((error, oAuthToken, oAuthTokenSecret) => {
         if (error) {
             callback(error);
             return;
@@ -364,7 +359,7 @@ function getNokiaRequestToken(fbUser, callback) {
         pool.query('DELETE FROM connect_nokia WHERE fbuser = $1', [fbUser]).then(() => {
             pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret) VALUES ($1, $2, $3)', [fbUser, oAuthToken, oAuthTokenSecret]);
         });
-        callback(null, authUrl);
+        callback(null, nokiaAPI.authorizeUrl(oAuthToken, oAuthTokenSecret));
     });
 }
 
@@ -378,34 +373,23 @@ function subscribeToNokia(fbuser) {
     pool.query(query).then(res => {
         res.rows.forEach(row => {
             let url = 'https://api.health.nokia.com/notify';
+            let client = new Withings({
+                consumerKey: NOKIA_API_KEY,
+                consumerSecret: NOKIA_API_SECRET,
+                callbackUrl: HOSTNAME + 'webhook/nokia',
+                userID: row.nokia_user
+            });
             console.log('subscribing: ', row, url);
 
-            nokiaAPI.get('https://api.health.nokia.com/measure?action=getmeas&userid=' + row.nokia_user, row.oauth_access_token, row.oauth_access_secret,
-                (error, responseData, result) => {
-
+            client.createNotification(HOSTNAME + 'webhook/nokia', 'Paula op de hoogte houden van je gezondheid', 4,
+                (error, responseData) => {
                     if (error) {
                         console.log(error);
                         return;
                     }
-                    console.log('got:', JSON.parse(responseData));
-                    console.log(result);
+                    console.log('subscribedt:', JSON.parse(responseData));
                 });
 
-            nokiaAPI.post(url, row.oauth_access_token, row.oauth_access_secret,
-                {
-                    'action': 'subscribe',
-                    'userid': row.nokia_user,
-                    'callbackurl': HOSTNAME + 'webhook/nokia',
-                    'comment': 'Paula op de hoogte houden van je gezondheid',
-                },
-                (error, responseData, result) => {
-
-                    if (error) {
-                        console.log(error);
-                        return;
-                    }
-                    console.log('subscribed:', JSON.parse(responseData));                
-            });
         });
     })
 }
@@ -461,15 +445,21 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
         let oAuthToken = req.query.oauth_token;
         let oAuthVerifier = req.query.oauth_verifier;
 
+        let client = new Withings({
+            consumerKey: NOKIA_API_KEY,
+            consumerSecret: NOKIA_API_SECRET,
+            callbackUrl: HOSTNAME + 'webhook/nokia',
+            userID: userid
+        });
+
         pool.query("SELECT * FROM connect_nokia WHERE fbuser = $1", [fbUser])
             .then(result => {
                 let userOAuth = result.rows[0];
-                console.log(userOAuth);
-                nokiaAPI.getOAuthAccessToken(
+                client.getAccessToken(
                     userOAuth.oauth_request_token,
                     userOAuth.oauth_request_secret,
                     oAuthVerifier,
-                    (error, oAuthToken, oAuthTokenSecret, results) => {
+                    (error, oAuthToken, oAuthTokenSecret) => {
                         if (error) {
                             console.log(error);
                             response.end(JSON.stringify({
