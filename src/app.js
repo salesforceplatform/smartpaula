@@ -380,7 +380,7 @@ function subscribeToNokia(fbuser) {
             let url = 'https://api.health.nokia.com/notify'
                 + '?action = subscribe'
                 + '&userid=' + row.nokia_user;
-            let signedUrl = nokiaApi.signUrl(url, row.oauth_access_token, row.oauth_access_secret);
+            let signedUrl = nokiaAPI.signUrl(url, row.oauth_access_token, row.oauth_access_secret);
             console.log('subscribing: ', row, url);
 
             nokiaAPI.get(url, null, null,
