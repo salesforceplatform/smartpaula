@@ -161,8 +161,7 @@ function handleResponse(response, sender) {
                     if (isDefined(service)) {
                         switch (service) {
                             case "Nokia":
-                                getNokiaRequestToken(sender, message, (error, url) => { sendFBMessage(sender, { text: url }); }
-                                );
+                                getNokiaRequestToken(sender, (error, url) => { sendFBMessage(sender, { text: url }); });
                                 break;
                         }
                     }
