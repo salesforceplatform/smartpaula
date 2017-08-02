@@ -375,7 +375,7 @@ function subscribeToNokia(fbuser) {
         NOKIA_API_KEY,
         NOKIA_API_SECRET,
         '1.0',
-        HOSTNAME + 'webhook/nokia',
+        null,
         'HMAC-SHA1'
     );
     let query = { text: 'SELECT * FROM connect_nokia' };
@@ -387,7 +387,7 @@ function subscribeToNokia(fbuser) {
         res.rows.forEach(row => {
             let url = 'https://api.health.nokia.com/notify';
             console.log('subscribing: ', row, url);
-            oa.post(url, row.oauth_access_token, row.oauth_access_secret,
+            oa.post(url, row.oauth_access_token, null,
                 {
                     'action': 'subscribe',
                     'userid': row.nokia_user,
