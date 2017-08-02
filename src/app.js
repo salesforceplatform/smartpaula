@@ -349,7 +349,7 @@ function getNokiaRequestToken(fbUser, callback) {;
             NOKIA_API_KEY,
             NOKIA_API_SECRET,
             '1.0',
-            HOSTNAME + '/connect/nokia/' + fbUser,
+            HOSTNAME + 'connect/nokia/' + fbUser,
             'HMAC-SHA1'
         );
         oa.getOAuthRequestToken((error, oAuthToken, oAuthTokenSecret, results) => {
