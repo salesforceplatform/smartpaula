@@ -170,7 +170,7 @@ function handleResponse(response, sender) {
                     speech += 'Sorry, de actie is niet bekend.';
             }
 
-            Q.all(beforeSending).done(() => {
+            Q.all(beforeSending).then(() => {
                 // facebook API limit for text length is 640,
                 // so we must split message if needed
                 let splittedText = splitResponse(message.text);
