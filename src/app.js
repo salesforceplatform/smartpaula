@@ -369,7 +369,7 @@ function getNokiaRequestToken(fbUser, callback) {
 }
 
 function subscribeToNokia() {
-    oa = new OAuth.OAuth(
+    let oa = new OAuth.OAuth(
         'https://developer.health.nokia.com/account/request_token',
         'https://developer.health.nokia.com/account/access_token',
         NOKIA_API_KEY,
