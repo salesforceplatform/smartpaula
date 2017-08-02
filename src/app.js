@@ -559,9 +559,7 @@ app.post('/webhook/', (req, res) => {
 app.all('/webhook/nokia', (req, res) => {
     try {
         console.log(req.params);
-        return res.status(200).json({
-            status: "ok"
-        });
+        return res.status(200).end();
     } catch (err) {
         return res.status(400).json({
             status: "error",
