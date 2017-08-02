@@ -26,6 +26,16 @@ const apiAiService = apiai(APIAI_ACCESS_TOKEN, {
     language: APIAI_LANG,
     requestSource: "fb"
 });
+
+const nokiaAPI = new OAuth.OAuth(
+    'https://developer.health.nokia.com/account/request_token',
+    'https://developer.health.nokia.com/account/access_token',
+    NOKIA_API_KEY,
+    NOKIA_API_SECRET,
+    '1.0',
+    HOSTNAME + 'webhook/nokia',
+    'HMAC-SHA1'
+);
 const sessionIds = new Map();
 
 const DEFAULT_INTENTS = ['57b82498-053c-4776-8be9-228c420e6c13', 'b429ecdc-21f4-4a07-8165-3620023185ba'];
@@ -343,17 +353,7 @@ function sendFBSenderAction(sender, action, callback) {
 }
 
 function getNokiaRequestToken(fbUser, callback) {
-    ;
-    let oa = new OAuth.OAuth(
-        'https://developer.health.nokia.com/account/request_token',
-        'https://developer.health.nokia.com/account/access_token',
-        NOKIA_API_KEY,
-        NOKIA_API_SECRET,
-        '1.0',
-        HOSTNAME + 'connect/nokia/' + fbUser,
-        'HMAC-SHA1'
-    );
-    oa.getOAuthRequestToken((error, oAuthToken, oAuthTokenSecret, results) => {
+    nokia.getOAuthRequestToken((error, oAuthToken, oAuthTokenSecret, results) => {
         let authUrl = 'https://developer.health.nokia.com/account/authorize?'
             + 'oauth_consumer_key=' + NOKIA_API_KEY
             + '&oauth_token=' + oAuthToken;
@@ -369,15 +369,7 @@ function getNokiaRequestToken(fbUser, callback) {
 }
 
 function subscribeToNokia(fbuser) {
-    let oa = new OAuth.OAuth(
-        'https://developer.health.nokia.com/account/request_token',
-        'https://developer.health.nokia.com/account/access_token',
-        NOKIA_API_KEY,
-        NOKIA_API_SECRET,
-        '1.0',
-        null,
-        'HMAC-SHA1'
-    );
+    
     let query = { text: 'SELECT * FROM connect_nokia' };
     if (isDefined(fbuser)) {
         query.text += ' WHERE fbuser = $1';
@@ -387,7 +379,7 @@ function subscribeToNokia(fbuser) {
         res.rows.forEach(row => {
             let url = 'https://api.health.nokia.com/notify';
             console.log('subscribing: ', row, url);
-            oa.post(url, row.oauth_access_token, null,
+            nokia.post(url, row.oauth_access_token, row.oauth_access_secret,
                 {
                     'action': 'subscribe',
                     'userid': row.nokia_user,
@@ -452,28 +444,16 @@ app.get('/', function (req, res) {
 
 app.get('/connect/nokia/:fbUserId', (req, res) => {
     try {
-        console.log(req.params);
         let fbUser = req.params.fbUserId;
         let userid = req.query.userid;
         let oAuthToken = req.query.oauth_token;
         let oAuthVerifier = req.query.oauth_verifier;
 
-        console.log(req.params);
-
-        let oa = new OAuth.OAuth(
-            'https://developer.health.nokia.com/account/request_token',
-            'https://developer.health.nokia.com/account/access_token',
-            NOKIA_API_KEY,
-            NOKIA_API_SECRET,
-            '1.0',
-            HOSTNAME + '/connect/nokia/' + fbUser,
-            'HMAC-SHA1'
-        );
         pool.query("SELECT * FROM connect_nokia WHERE fbuser = $1", [fbUser])
             .then(result => {
                 let userOAuth = result.rows[0];
                 console.log(userOAuth);
-                oa.getOAuthAccessToken(
+                nokia.getOAuthAccessToken(
                     userOAuth.oauth_request_token,
                     userOAuth.oauth_request_secret,
                     oAuthVerifier,
