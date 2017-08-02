@@ -445,14 +445,22 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
                         return;
                     }
 
-                    pool.query('UPDATE connect_nokia SET oauth_access_token = $1, oauth_access_secret = $2', [oAuthToken, oAuthTokenSecret]).then();
+                    pool.query('UPDATE connect_nokia SET oauth_access_token = $1, oauth_access_secret = $2', [oAuthToken, oAuthTokenSecret]).then(() => {
+                        let request = apiAiService.eventRequest({
+                            name: 'nokia_connected'
+                        }, {
+                                sessionId: sessionIds.get(sender)
+                            });
 
-                }).then(
-                () => { res.send('OK') }
-                );
+                        request.on('response', (response) => { handleResponse(response, sender); });
+                        request.on('error', (error) => console.error(error));
+
+                        request.end();
+                    });
+
+                });
         })
-    console.log('')
-
+    res.send('');
 });
 
 app.get('/webhook/', (req, res) => {
