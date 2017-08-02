@@ -392,7 +392,7 @@ function subscribeToNokia() {
                         console.log(error);
                         return;
                     }
-                    console.log('subscribed:', JSON.parse(twitterResponseData));                
+                    console.log('subscribed:', JSON.parse(responseData));                
             });
         });
     })
