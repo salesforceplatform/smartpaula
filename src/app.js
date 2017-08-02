@@ -385,7 +385,7 @@ function subscribeToNokia() {
                 + '&callbackurl=' + HOSTNAME + '/webhook/nokia'
                 + '&comment=Paula op de hoogte houden van je gezondheid';
             console.log('subscribing: ', row, url);
-            oa.get(url, row.oauth_access_token, row.oauth_access_secret, res => { console.log('subscribed:', res) });
+            oa.get(url, row.oauth_access_token, row.oauth_access_secret, (error, twitterResponseData, result) => { console.log('subscribed:', error, twitterResponseData, result) });
         });
     })
 }
@@ -542,6 +542,7 @@ app.post('/webhook/', (req, res) => {
 });
 
 app.post('/webhook/nokia', (req, res) => {
+    console.log(req, res);
 
 });
 
