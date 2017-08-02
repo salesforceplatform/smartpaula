@@ -161,8 +161,7 @@ function handleResponse(response, sender) {
                     if (isDefined(service)) {
                         switch (service) {
                             case "Nokia":
-                                getNokiaRequestToken(sender, message).then(
-                                    (url) => { sendFBMessage(sender, { text: url }); }
+                                getNokiaRequestToken(sender, message, (error, url) => { sendFBMessage(sender, { text: url }); }
                                 );
                                 break;
                         }
@@ -344,8 +343,7 @@ function sendFBSenderAction(sender, action, callback) {
     }, 1000);
 }
 
-function getNokiaRequestToken(fbUser) {
-        let deferred = Q.defer();
+function getNokiaRequestToken(fbUser, callback) {;
         let oa = new OAuth.OAuth(
             'https://developer.health.nokia.com/account/request_token',
             'https://developer.health.nokia.com/account/access_token',
@@ -360,13 +358,12 @@ function getNokiaRequestToken(fbUser) {
                 + 'oauth_consumer_key=' + NOKIA_API_KEY
                 + '&oauth_token=' + oAuthToken;
             if (error) {
-                deferred.reject(error);
+                callback(error);
                 return;
             }
             pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret)', [fbUser, oAuthToken, oAuthTokenSecret]);
-            deferred.resolve(authUrl);
-        });
-        return deferred;
+            callback(null, authUrl);
+        });                
 }
 
 function doSubscribeRequest() {
