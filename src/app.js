@@ -368,7 +368,7 @@ function getNokiaRequestToken(fbUser, callback) {
     });
 }
 
-function subscribeToNokia() {
+function subscribeToNokia(fbuser) {
     let oa = new OAuth.OAuth(
         'https://developer.health.nokia.com/account/request_token',
         'https://developer.health.nokia.com/account/access_token',
@@ -378,12 +378,18 @@ function subscribeToNokia() {
         HOSTNAME + 'webhook/nokia',
         'HMAC-SHA1'
     );
-    pool.query('SELECT * FROM connect_nokia').then(res => {
+    let query = { text: 'SELECT * FROM connect_nokia' };
+    if (isDefined(fbuser)) {
+        query.text += ' WHERE fbuser = $1';
+        query.values = [fbuser];
+    }
+    pool.query(query).then(res => {
         res.rows.forEach(row => {
             let url = 'https://api.health.nokia.com/notify?action=subscribe'
                 + '&userid=' + row.nokia_user
                 + '&callbackurl=' + HOSTNAME + 'webhook/nokia'
-                + '&comment=Paula op de hoogte houden van je gezondheid';
+                + '&comment=Paula op de hoogte houden van je gezondheid'
+                + '&appli=4';
             console.log('subscribing: ', row, url);
             oa.get(url, row.oauth_access_token, row.oauth_access_secret,
                 (error, responseData, result) => {
@@ -487,6 +493,7 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
                             request.on('error', (error) => console.error(error));
 
                             request.end();
+                            subscribeToNokia(sender);
                         });
 
                     });
