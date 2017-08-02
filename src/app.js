@@ -369,9 +369,9 @@ function getNokiaRequestToken(fbUser, callback) {
 }
 
 function getNokiaMeasurements(user, callback) {
-    pool.query('SELECT * FROM connect_nokia WHERE fbuser = $1', [user]).then(res => {
+    pool.query('SELECT *, extract(epoch from time) as time FROM connect_nokia WHERE fbuser = $1', [user]).then(res => {
         let user = res.rows[0];
-        let url = 'https://api.health.nokia.com/measure' + '?action=getmeas' + '&userid=' + user.nokia_user + '&lastupdate=' + Date.fromISO(user.last_update).Time();
+        let url = 'https://api.health.nokia.com/measure' + '?action=getmeas' + '&userid=' + user.nokia_user + '&lastupdate=' + time;
         let signedUrl = nokiaAPI.signUrl(url, user.oauth_access_token, user.oauth_access_secret);
         console.log(signedUrl);
         nokiaAPI.get(signedUrl, null, null, (error, responseData) => {
