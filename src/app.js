@@ -426,8 +426,8 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
         'HMAC-SHA1'
     );
     pool.query("SELECT * FROM connect_nokia WHERE fbuser = $1", [fbUser])
-        .then(res => {
-            let userOAuth = res.rows[0];
+        .then(result => {
+            let userOAuth = result.rows[0];
             console.log(userOAuth);
             oa.getOAuthAccessToken(
                 userOAuth.oauth_request_token,
