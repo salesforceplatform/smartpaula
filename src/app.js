@@ -368,8 +368,7 @@ function getNokiaRequestToken(fbUser, message) {
             console.log(message);
             deferred.resolve();
         });
-        return deferred.nodeify();
-    }
+        return deferred;
 }
 
 function doSubscribeRequest() {
