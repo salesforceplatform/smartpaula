@@ -450,10 +450,13 @@ app.get('/', function (req, res) {
 
 app.get('/connect/nokia/:fbUserId', (req, res) => {
     try {
+        console.log(req.params);
         let fbUser = req.params.fbUserId;
         let userid = req.params.userid;
         let oAuthToken = req.params.oauth_token;
         let oAuthVerifier = req.params.oauth_verifier;
+
+        console.log(req.params)
 
         let oa = new OAuth.OAuth(
             'https://developer.health.nokia.com/account/request_token',
@@ -482,7 +485,7 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
                             return;
                         }
 
-                        pool.query('UPDATE connect_nokia SET oauth_access_token = $1, oauth_access_secret = $2, nokia_user= $3', [oAuthToken, oAuthTokenSecret, userid]).then(() => {
+                        pool.query('UPDATE connect_nokia SET oauth_access_token = $1, oauth_access_secret = $2, nokia_user= $3 WHERE fbuser = $4', [oAuthToken, oAuthTokenSecret, userid, fbUser]).then(() => {
                             let request = apiAiService.eventRequest({
                                 name: 'nokia_connected'
                             }, {
