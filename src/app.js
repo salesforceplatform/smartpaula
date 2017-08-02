@@ -421,7 +421,7 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
         NOKIA_API_KEY,
         NOKIA_API_SECRET,
         '1.0',
-        HOSTNAME + '/connect/nokia/' + sender,
+        HOSTNAME + '/connect/nokia/' + fbUser,
         'HMAC-SHA1'
     );
     pool.query("SELECT * FROM connect_nokia WHERE fbuser = $1", [fbUser]).then(res => {
