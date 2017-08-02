@@ -382,9 +382,9 @@ function subscribeToNokia(fbuser) {
                 + '&userid=' + row.nokia_user
                 + '&callbackurl=' + HOSTNAME + 'webhook/nokia';
             let signedUrl = nokiaAPI.signUrl(url, row.oauth_access_token, row.oauth_access_secret);
-            console.log('subscribing: ', row, url);
+            console.log('subscribing: ', row, signed);
 
-            nokiaAPI.get(url, null, null,
+            nokiaAPI.get(signedUrl, null, null,
                 (error, responseData) => {
 
                     if (error) {
