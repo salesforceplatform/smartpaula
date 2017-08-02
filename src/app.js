@@ -388,6 +388,7 @@ function subscribeToNokia(fbuser) {
                         return;
                     }
                     console.log('got:', JSON.parse(responseData));
+                    console.log(result);
                 });
 
             nokiaAPI.post(url, row.oauth_access_token, row.oauth_access_secret,
