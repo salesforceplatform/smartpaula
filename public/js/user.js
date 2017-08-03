@@ -9,7 +9,16 @@ $(function () {
                     datasets: [{
                         data: data.lists.data,
                         label: "PAM Score"
-                    }]
+                    }],
+                    axes
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            min: 0,
+                            max: 52
+                        }]
+                    }
                 }
             })
     });
