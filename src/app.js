@@ -353,6 +353,15 @@ function sendFBSenderAction(sender, action, callback) {
 }
 
 function getNokiaRequestToken(fbUser, callback) {
+    const nokiaAPI = new OAuth.OAuth(
+        'https://developer.health.nokia.com/account/request_token',
+        'https://developer.health.nokia.com/account/access_token',
+        NOKIA_API_KEY,
+        NOKIA_API_SECRET,
+        '1.0',
+        HOSTNAME + 'connect/nokia/' + fbuser,
+        'HMAC-SHA1'
+    );
     nokiaAPI.getOAuthRequestToken((error, oAuthToken, oAuthTokenSecret, results) => {
         let authUrl = 'https://developer.health.nokia.com/account/authorize?'
             + 'oauth_consumer_key=' + NOKIA_API_KEY
