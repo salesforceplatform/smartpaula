@@ -433,22 +433,18 @@ function sendMeasurementMessage(types, user) {
         event += 'weight';
     } else {
         event += 'multiple';
-    }
-
-    console.log(event, user);
+    }                           
 
     let request = apiAiService.eventRequest({
         name: event
     }, {
             sessionId: sessionIds.get(user)
-        });
-
-    console.log(request);
+        });                   
 
     request.on('response', (response) => { handleResponse(response, user); });
     request.on('error', (error) => console.error(error));
 
-    request.end
+    request.end();
 }
 
 function nokiaSubscriptionUrl(user, appli){
