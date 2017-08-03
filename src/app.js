@@ -435,7 +435,7 @@ function sendMeasurementMessage(types, user) {
         event += 'multiple';
     }
 
-    console.log(types, user);
+    console.log(types, user, sessionIds);
 
     let request = apiAiService.eventRequest({
         name: event
