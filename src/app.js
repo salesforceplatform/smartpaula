@@ -435,8 +435,8 @@ function sendMeasurementMessage(types, user) {
         event += 'multiple';
     }
 
-    if (!sessionIds.has(sender)) {
-        sessionIds.set(sender, uuid.v1());
+    if (!sessionIds.has(user)) {
+        sessionIds.set(user, uuid.v1());
     }
 
     let request = apiAiService.eventRequest({
