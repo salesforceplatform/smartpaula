@@ -50,9 +50,10 @@ router.get('/:user/data', (req, res) => {
     let userData = {};
     pool.query('SELECT *, (SELECT SUM(waarde) FROM antwoorden WHERE antwoorden.vragenlijst = vragenlijsten.id) FROM vragenlijsten WHERE fbuser = $1', [user]).then(result => {
         console.log(result);
-        userData.lists = { labels: [], data: []};
-    result.rows.forEach((row) => { userData.lists.labels.push(row.gestart); userData.list.data.push( row.sum )
-});
+        userData.lists = { labels: [], data: [] };
+        result.rows.forEach((row) => {
+            userData.lists.labels.push(row.gestart); userData.lists.data.push(row.sum)
+        });
         res.status(200).json(userData);
     });
 });
