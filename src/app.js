@@ -385,16 +385,16 @@ function getNokiaMeasurements(userid, callback) {
                             let type = measurement.type;
                             let value = measurement.value * Math.pow(10, measurement.unit);
                             if (type === 9) {
-                                pool.query("INSERT INTO measure_blood (date, diastolic) VALUES ($1, $2) ON CONFLICT (date) DO UPDATE SET diastolic = excluded.diastolic", [date, value])
+                                pool.query("INSERT INTO measure_blood (user, date, diastolic) VALUES ($1, $2) ON CONFLICT (user, date) DO UPDATE SET diastolic = excluded.diastolic", [user.fbuser, date, value])
                             }
                             if (type === 10) {
-                                pool.query("INSERT INTO measure_blood (date, systolic) VALUES ($1, $2) ON CONFLICT (date) DO UPDATE SET systolic = excluded.systolic", [date, value])
+                                pool.query("INSERT INTO measure_blood (user, date, systolic) VALUES ($1, $2) ON CONFLICT (user, date) DO UPDATE SET systolic = excluded.systolic", [user.fbuser, date, value])
                             }
                             if (type === 11) {
-                                pool.query("INSERT INTO measure_blood (date, pulse) VALUES ($1, $2) ON CONFLICT (date) DO UPDATE SET pulse = excluded.pulse", [date, value])
+                                pool.query("INSERT INTO measure_blood (user, date, pulse) VALUES ($1, $2) ON CONFLICT (user, date) DO UPDATE SET pulse = excluded.pulse", [user.fbuser, date, value])
                             }
                             if (type === 1) {
-                                pool.query("INSERT INTO measure_weight (date, value) VALUES ($1, $2) ON CONFLICT (date) DO UPDATE SET value = excluded.value", [date, value])
+                                pool.query("INSERT INTO measure_weight (user, date, value) VALUES ($1, $2) ON CONFLICT (user, date) DO UPDATE SET value = excluded.value", [user.fbuser, date, value])
                             }
                         });
                     })
