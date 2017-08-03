@@ -1,4 +1,6 @@
 $(function () {
-    console.log(user);
-    console.log(userData);
+    $.get(window.location.href + '/data', function (data) {
+        JSON.parse(data);
+        console.log(data);
+    });
 });
