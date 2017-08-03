@@ -25,7 +25,7 @@ router.get('/', function (req, res) {
 router.post('/', (req, res) => {
     try {
         let user = req.body.user;
-        res.redirect('/portal' + user);
+        res.redirect('/portal/' + user);
     } catch (err) {
         return res.status(400).json({
             status: "error",
