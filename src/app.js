@@ -376,6 +376,27 @@ function getNokiaMeasurements(user, callback) {
         console.log(signedUrl);
         nokiaAPI.get(signedUrl, null, null, (error, responseData) => {
             console.log(responseData);
+            let measureGroups = responseData.body.measuregrps;
+            measureGroups.forEach(group => {
+                let date = group.date;
+                group.measures.forEach(measurement => {
+                    let type = measurement.type;
+                    let value = measurement.value * Math.pow(10, measurement.unit);
+                    if (type === 9) {
+                        pool.query("INSERT INTO measure_blood (date, diastolic) VALUES ($1, $2) ON CONFLICT (date) UPDATE diastolic = excluded.diastolic", [date, value])
+                    }
+                    if (type === 10) {
+                        pool.query("INSERT INTO measure_blood (date, systolic) VALUES ($1, $2) ON CONFLICT (date) UPDATE systolic = excluded.systolic", [date, value])
+                    }
+                    if (type === 11) {
+                        pool.query("INSERT INTO measure_blood (date, pulse) VALUES ($1, $2) ON CONFLICT (date) UPDATE pulse = excluded.pulse", [date, value])
+                    }
+                    if (type === 1) {
+                        pool.query("INSERT INTO measure_weight (date, value) VALUES ($1, $2) ON CONFLICT (date) UPDATE value = excluded.value", [date, value])
+                    }
+                });
+            })
+
         })
     });
 }
