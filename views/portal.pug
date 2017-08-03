@@ -20,8 +20,7 @@ html
                     div.left_col.scroll-view
                         div.navbar.nav_title(style="border: 0;")
                             a.site_title(href='/portal')
-                                i.fa.fa-paw
-                                    span=message
+                                span="Paula"
                         div.clearfix
                         div#sidebar-menu.main_menu_side.hidden_print.main_menu
                             div.menu_section
@@ -30,16 +29,13 @@ html
                                     li
                                         a(href='/portal')
                                             i.fa.fa-home
+                                            span="Home"
                 div.top_nav
                     div.nav_menu
                         nav(role='navigation')
                             div.nav.toggle
                                 a#menu_toggle
                                     i.fa.fa-bars
-                        ul.nav.navbar-nav.navbar-right
-                            li
-                                a
-                                    span='bla'
                 
                 div.right_col(role='main')
                    block content
