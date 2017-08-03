@@ -4,7 +4,7 @@ $(function () {
         pam_chart = new Chart(ctx,
             {
                 type: 'line',
-                labes: data: data.lists.labels,
+                labes: data.lists.labels,
                 data: data.lists.data
             })
     });
