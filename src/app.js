@@ -433,7 +433,9 @@ function sendMeasurementMessage(types, user) {
         event += 'weight';
     } else {
         event += 'multiple';
-    }                           
+    }
+
+    console.log(types, user);
 
     let request = apiAiService.eventRequest({
         name: event
