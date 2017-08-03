@@ -377,27 +377,29 @@ function getNokiaMeasurements(userid, callback) {
             console.log(signedUrl);
             nokiaAPI.get(signedUrl, null, null, (error, response) => {
                 let responseData = JSON.parse(response);
-                let measureGroups = responseData.body.measuregrps;
-                measureGroups.forEach(group => {
-                    let date = new Date(group.date * 1000).toISOString().slice(0, 19).replace('T', ' ');
-                    group.measures.forEach(measurement => {
-                        let type = measurement.type;
-                        let value = measurement.value * Math.pow(10, measurement.unit);
-                        if (type === 9) {
-                            pool.query("INSERT INTO measure_blood (date, diastolic) VALUES ($1, $2) ON CONFLICT (date) DO UPDATE SET diastolic = excluded.diastolic", [date, value])
-                        }
-                        if (type === 10) {
-                            pool.query("INSERT INTO measure_blood (date, systolic) VALUES ($1, $2) ON CONFLICT (date) DO UPDATE SET systolic = excluded.systolic", [date, value])
-                        }
-                        if (type === 11) {
-                            pool.query("INSERT INTO measure_blood (date, pulse) VALUES ($1, $2) ON CONFLICT (date) DO UPDATE SET pulse = excluded.pulse", [date, value])
-                        }
-                        if (type === 1) {
-                            pool.query("INSERT INTO measure_weight (date, value) VALUES ($1, $2) ON CONFLICT (date) DO UPDATE SET value = excluded.value", [date, value])
-                        }
-                    });
-                })
-                pool.query('UPDATE connect_nokia SET last_update = (SELECT NOW()) WHERE fbuser = $1 OR nokia_user = $1', [userid]);
+                if (isDefined(responseData.body){
+                    let measureGroups = responseData.body.measuregrps;
+                    measureGroups.forEach(group => {
+                        let date = new Date(group.date * 1000).toISOString().slice(0, 19).replace('T', ' ');
+                        group.measures.forEach(measurement => {
+                            let type = measurement.type;
+                            let value = measurement.value * Math.pow(10, measurement.unit);
+                            if (type === 9) {
+                                pool.query("INSERT INTO measure_blood (date, diastolic) VALUES ($1, $2) ON CONFLICT (date) DO UPDATE SET diastolic = excluded.diastolic", [date, value])
+                            }
+                            if (type === 10) {
+                                pool.query("INSERT INTO measure_blood (date, systolic) VALUES ($1, $2) ON CONFLICT (date) DO UPDATE SET systolic = excluded.systolic", [date, value])
+                            }
+                            if (type === 11) {
+                                pool.query("INSERT INTO measure_blood (date, pulse) VALUES ($1, $2) ON CONFLICT (date) DO UPDATE SET pulse = excluded.pulse", [date, value])
+                            }
+                            if (type === 1) {
+                                pool.query("INSERT INTO measure_weight (date, value) VALUES ($1, $2) ON CONFLICT (date) DO UPDATE SET value = excluded.value", [date, value])
+                            }
+                        });
+                    })
+                    pool.query('UPDATE connect_nokia SET last_update = (SELECT NOW()) WHERE fbuser = $1 OR nokia_user = $1', [userid]);
+                }
 
             })
         }
