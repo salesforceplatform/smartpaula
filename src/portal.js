@@ -22,7 +22,7 @@ router.post('/', (req, res) => {
 
 route.get('/:user', (res, req) => {
     let user = req.params.fbuser                        
-    res.render('user', {user: user);
+    res.render('user', { user: user });
 
 })
 
