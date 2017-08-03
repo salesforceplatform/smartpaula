@@ -10,7 +10,6 @@ $(function () {
                         data: data.lists.data,
                         label: "PAM Score"
                     }],
-                    axes
                 },
                 options: {
                     scales: {
