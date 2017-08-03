@@ -377,7 +377,7 @@ function getNokiaMeasurements(userid, callback) {
             console.log(signedUrl);
             nokiaAPI.get(signedUrl, null, null, (error, response) => {
                 let responseData = JSON.parse(response);
-                if (isDefined(responseData.body){
+                if (isDefined(responseData.body)){
                     let measureGroups = responseData.body.measuregrps;
                     measureGroups.forEach(group => {
                         let date = new Date(group.date * 1000).toISOString().slice(0, 19).replace('T', ' ');
