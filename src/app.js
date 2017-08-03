@@ -596,7 +596,7 @@ app.use(bodyParser.json()); //toegevoegd: corrigeert de werking weer
 
 var debugtekst = "";
 
-app.user('/portal', './portal');
+app.use('/portal', './portal');
 
 // Server frontpage
 app.get('/', function (req, res) {
