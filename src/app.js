@@ -594,7 +594,8 @@ app.use(bodyParser.text({
 app.use(bodyParser.urlencoded({
     extended: false
 })); //toegevoegd: heeft invloed verwerking event
-app.use(bodyParser.json()); //toegevoegd: corrigeert de werking weer                    
+app.use(bodyParser.json()); //toegevoegd: corrigeert de werking weer       
+app.set('view engine', 'pug')
 
 var debugtekst = "";
 

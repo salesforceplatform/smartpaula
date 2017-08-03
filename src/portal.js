@@ -2,7 +2,7 @@
 const router = express.Router()
 
 router.get('/', function (req, res) {
-    res.send('portal!');
+    res.render('index', { title: 'Hey', message: 'Hello there!' });
 })
 
 module.exports = router;
