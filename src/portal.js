@@ -1,6 +1,8 @@
 ﻿const express = require('express')
-const router = express.Router()
+const portal = express.Router()
 
-router.get('/', function (req, res) {
-    res.send('portal!');
-})
+module.exports = function (portal) {
+    portal.get('/', function (req, res) {
+        res.send('portal!');
+    })
+}
