@@ -413,6 +413,7 @@ function getNokiaMeasurements(userid, callback) {
                         });
                     })
                     pool.query('UPDATE connect_nokia SET last_update = (SELECT NOW()) WHERE fbuser = $1 OR nokia_user = $1', [userid]);
+                    console.log(measureTypes);
                     if (measureTypes.length > 0) {
                         sendMeasurementMessage(measureTypes, user.fbuser);
                     }
@@ -433,6 +434,8 @@ function sendMeasurementMessage(types, user) {
     } else {
         event += 'multiple';
     }
+
+    console.log(event);
 
     let request = apiAiService.eventRequest({
         name: event
