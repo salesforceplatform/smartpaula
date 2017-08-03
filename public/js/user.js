@@ -4,7 +4,8 @@ $(function () {
         pam_chart = new Chart(ctx,
             {
                 type: 'line',
-                data: data.lists
+                labes: data: data.lists.labels,
+                data: data.lists.data
             })
     });
 });
