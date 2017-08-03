@@ -368,8 +368,8 @@ function getNokiaRequestToken(fbUser, callback) {
     });
 }
 
-function getNokiaMeasurements(user, callback) {
-    pool.query('SELECT *, extract(epoch from last_update) as time FROM connect_nokia WHERE fbuser = $1', [user]).then(res => {
+function getNokiaMeasurements(userid, callback) {
+    pool.query('SELECT *, extract(epoch from last_update) as time FROM connect_nokia WHERE fbuser = $1 OR nokia_user= = $1', [userid]).then(res => {
         let user = res.rows[0];
         let url = 'https://api.health.nokia.com/measure' + '?action=getmeas' + '&userid=' + user.nokia_user + '&lastupdate=' + user.time;
         let signedUrl = nokiaAPI.signUrl(url, user.oauth_access_token, user.oauth_access_secret);
@@ -396,7 +396,7 @@ function getNokiaMeasurements(user, callback) {
                     }
                 });
             })
-
+            pool.query('UPDATE connect_nokia SET last_update = (SELECT NOW()) WHERE fbuser = $1 OR nokia_user= = $1', [userid]);
         })
     });
 }
@@ -577,7 +577,9 @@ app.all('/webhook/nokia', (req, res) => {
         let startDate = req.body.startdate;
         let enddate = req.body.enddate;
 
-        console.log(req.params, req.body);
+        console.log(req.query);
+
+        getNokiaMeasurements(req.query.userid);
 
         return res.status(200).end();
     } catch (err) {
