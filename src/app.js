@@ -437,10 +437,10 @@ function sendMeasurementMessage(types, user) {
     let request = apiAiService.eventRequest({
         name: event
     }, {
-            sessionId: sessionIds.get(fbUser)
+            sessionId: sessionIds.get(user)
         });
 
-    request.on('response', (response) => { handleResponse(response, fbUser); });
+    request.on('response', (response) => { handleResponse(response, user); });
     request.on('error', (error) => console.error(error));
 
     request.end
