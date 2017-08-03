@@ -375,7 +375,7 @@ function getNokiaMeasurements(user, callback) {
         let signedUrl = nokiaAPI.signUrl(url, user.oauth_access_token, user.oauth_access_secret);
         console.log(signedUrl);
         nokiaAPI.get(signedUrl, null, null, (error, responseData) => {
-            console.log(responseData);
+            console.log(typeof responseData);
             let measureGroups = responseData.body.measuregrps;
             measureGroups.forEach(group => {
                 let date = group.date;
