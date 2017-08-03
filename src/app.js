@@ -408,7 +408,7 @@ function nokiaSubscriptionUrl(user, appli){
     return 'https://api.health.nokia.com/notify'
         + '?action=subscribe'
         + '&userid=' + user
-        + '&callbackurl=' + HOSTNAME + 'webhook/nokia'
+        + '&callbackurl=' + HOSTNAME + 'webhook/nokia/' + user + '/' + appli
         + '&appli=' + appli;
 }
 
@@ -575,14 +575,12 @@ app.post('/webhook/', (req, res) => {
 
 });
 
-app.all('/webhook/nokia', (req, res) => {
+app.all('/webhook/nokia/:userid/:type', (req, res) => {
     try {
         let startDate = req.body.startdate;
         let enddate = req.body.enddate;
 
-        console.log(req.query);
-
-        getNokiaMeasurements(req.query.userid);
+        getNokiaMeasurements(req.params.userid);
 
         return res.status(200).end();
     } catch (err) {
