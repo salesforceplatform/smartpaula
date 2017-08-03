@@ -385,16 +385,16 @@ function getNokiaMeasurements(userid, callback) {
                             let type = measurement.type;
                             let value = measurement.value * Math.pow(10, measurement.unit);
                             if (type === 9) {
-                                pool.query("INSERT INTO measure_blood (user, date, diastolic) VALUES ($1, $2) ON CONFLICT (user, date) DO UPDATE SET diastolic = excluded.diastolic", [user.fbuser, date, value])
+                                pool.query("INSERT INTO measure_blood (fbuser, measure_date, diastolic) VALUES ($1, $2) ON CONFLICT (fbuser, measure_date) DO UPDATE SET diastolic = excluded.diastolic", [user.fbuser, date, value])
                             }
                             if (type === 10) {
-                                pool.query("INSERT INTO measure_blood (user, date, systolic) VALUES ($1, $2) ON CONFLICT (user, date) DO UPDATE SET systolic = excluded.systolic", [user.fbuser, date, value])
+                                pool.query("INSERT INTO measure_blood (fbuser, measure_date, systolic) VALUES ($1, $2) ON CONFLICT (fbuser, measure_date) DO UPDATE SET systolic = excluded.systolic", [user.fbuser, date, value])
                             }
                             if (type === 11) {
-                                pool.query("INSERT INTO measure_blood (user, date, pulse) VALUES ($1, $2) ON CONFLICT (user, date) DO UPDATE SET pulse = excluded.pulse", [user.fbuser, date, value])
+                                pool.query("INSERT INTO measure_blood (fbuser, measure_date, pulse) VALUES ($1, $2) ON CONFLICT (fbuser, measure_date) DO UPDATE SET pulse = excluded.pulse", [user.fbuser, date, value])
                             }
                             if (type === 1) {
-                                pool.query("INSERT INTO measure_weight (user, date, value) VALUES ($1, $2) ON CONFLICT (user, date) DO UPDATE SET value = excluded.value", [user.fbuser, date, value])
+                                pool.query("INSERT INTO measure_weight (fbuser, measure_date, value) VALUES ($1, $2) ON CONFLICT (fbuser, measure_date) DO UPDATE SET value = excluded.value", [user.fbuser, date, value])
                             }
                         });
                     })
