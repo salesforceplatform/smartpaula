@@ -1,7 +1,12 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\public",
+    "\\public\\css",
+    "\\public\\js",
+    "\\src",
+    "\\views"
   ],
-  "SelectedNode": "\\.gitignore",
+  "SelectedNode": "\\src\\portal.js",
   "PreviewInSolutionExplorer": false
 }

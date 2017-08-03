@@ -1,4 +1,28 @@
 extends portal.pug
 
 block content
-    span=user
+    div.row
+        div.col-md-6.col-sm-6.col-xs-12
+            div.x_panel
+               div.x_title
+                h2="PAM Score
+                ul.nav.navbar-right.panel_toolbox
+                    li
+                        a.collapse-link
+                            i.fa.fa-chevron-up
+                    li.dropdown
+                        a.dropdown-toggle(data-toggle=dropdown" role="button" aria-expanded="false")
+                            i.fa.fa-wrech
+                        ul.dropdown-menu(role="menu")
+                            li
+                                a(href="#")="Settings 1"
+                            li
+                                a(href="#")="Settings 1"
+                    li.close-link
+                        i.fa.fa-close
+                div.clearfix
+                div.x_content
+                    canvas#questionnare_overall
+
+block script
+    script(src="/static/js/user.js")
