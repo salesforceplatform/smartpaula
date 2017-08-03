@@ -17,7 +17,7 @@ router.get('/', function (req, res) {
 
 router.post('/', (req, res) => {
     let user = req.body.user;
-    res.redirect('/' + user);
+    res.redirect('/portal' + user);
 });
 
 router.get('/:user', (res, req) => {

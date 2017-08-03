@@ -7,9 +7,9 @@ block content
                 div.x-title
                     h2='Gebruiker'
                 div.x-content
-                form#demo-form(data-parsley-validate)
+                form#demo-form(data-parsley-validate method="post")
                     label(for="user")="Gebruiker"
-                    select#user.form-control(required)
+                    select#user.form-control(name="user" required)
                         option(value="")="Kies..."
                         each user in users
                             option(value=user)=user
