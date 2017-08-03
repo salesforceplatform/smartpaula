@@ -601,7 +601,7 @@ app.set('view engine', 'pug')
 
 var debugtekst = "";
 
-app.use(express.static(path.join(__dirname, 'public')))
+app.use('/static', express.static(path.join(__dirname, 'public')))
 app.use('/portal', require('./portal'));
 
 // Server frontpage
