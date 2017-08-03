@@ -6,7 +6,7 @@ const { Pool, Client } = require('pg');
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 router.get('/', function (req, res) {
-    pool.query("SELECT fbuser FROM vragenlijsten GROUP BY fbuser UNION SELECT fbuser FROM connect_nokia", result => {
+    pool.query("SELECT fbuser FROM vragenlijsten GROUP BY fbuser UNION SELECT fbuser FROM connect_nokia").then(result => {
         let users = [];
         result.rows.forEach(row => {
             users.push(row.fbuser);
