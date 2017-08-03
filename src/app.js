@@ -596,7 +596,7 @@ app.use(bodyParser.json()); //toegevoegd: corrigeert de werking weer
 
 var debugtekst = "";
 
-app.use('/portal', require('./portal'));
+app.use('/portal', require('./portal/router'));
 
 // Server frontpage
 app.get('/', function (req, res) {
