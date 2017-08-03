@@ -46,7 +46,7 @@ router.get('/:user', (req, res) => {
 })
 
 router.get('/:user/data', (req, res) => {
-    let user = req.params.fbuser;
+    let user = req.params.user;
     let userData = {};
     pool.query('SELECT *, (SELECT SUM(waarde) FROM antwoorden WHERE antwoorden.vragenlijst = vragenlijsten.id) FROM vragenlijsten WHERE fbuser = $1', [user]).then(result => {
         console.log(result);
