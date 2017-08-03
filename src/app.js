@@ -600,8 +600,8 @@ app.use(bodyParser.json()); //toegevoegd: corrigeert de werking weer
 app.set('view engine', 'pug')
 
 var debugtekst = "";
-console.log(path.resolve(__dirname, 'public'));
-app.use('/static', express.static(path.resolve(__dirname, 'public')))
+console.log(path.resolve(__dirname, '../public'));
+app.use('/static', express.static(path.resolve(__dirname, '../public')))
 app.use('/portal', require('./portal'));
 
 // Server frontpage
