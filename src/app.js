@@ -378,7 +378,7 @@ function getNokiaMeasurements(user, callback) {
             let responseData = JSON.parse(response);
             let measureGroups = responseData.body.measuregrps;
             measureGroups.forEach(group => {
-                let date = group.date;
+                let date = new Date(group.date);
                 group.measures.forEach(measurement => {
                     let type = measurement.type;
                     let value = measurement.value * Math.pow(10, measurement.unit);
