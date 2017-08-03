@@ -11,6 +11,7 @@ const { Pool, Client } = require('pg');
 const util = require('util');
 const OAuth = require('oauth');
 const Q = require('q');
+const path = require('path');
 
 const REST_PORT = (process.env.PORT || 5000);
 const APIAI_ACCESS_TOKEN = process.env.APIAI_ACCESS_TOKEN;
@@ -600,7 +601,7 @@ app.set('view engine', 'pug')
 
 var debugtekst = "";
 
-app.use('/public', express.static(path.join(__dirname, 'public')))
+app.use(express.static(path.join(__dirname, 'public')))
 app.use('/portal', require('./portal'));
 
 // Server frontpage
