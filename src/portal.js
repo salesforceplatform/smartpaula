@@ -34,10 +34,15 @@ router.post('/', (req, res) => {
     }
 });
 
-router.get('/:user', (res, req) => {
+router.get('/:user', (req, res) => {
     try {
-        let user = req.params.fbuser
-        res.render('user', { user: user });
+        let user = req.params.fbuser;
+        let userData = {};
+        pool.query('SELECT *, (SELECT SUM(waarde) FROM antwoorden WHERE antwoorden.vragenlijst = vragenlijsten.id)').then(result => {
+            userData.lists = [];
+            result.rows.forEach((row) => { userData.lists.push(row) });
+            res.render('user', { user: user, userData: userData });
+        });
     } catch (err) {
         return res.status(400).json({
             status: "error",
