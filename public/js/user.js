@@ -1,1 +1,3 @@
-// JavaScript source code
+$(function () {
+    console.log(userData);
+});
