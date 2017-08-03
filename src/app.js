@@ -477,7 +477,9 @@ function getNokiaMeasurements(userid, callback) {
                     }
                     
                 }
-                callback();
+                if (isDefined(callback)) {
+                    callback();
+                }
 
             })
         }
@@ -596,7 +598,7 @@ app.use(bodyParser.json()); //toegevoegd: corrigeert de werking weer
 
 var debugtekst = "";
 
-app.use('/portal', require('./portal'));
+app.use('/portal', require('./portal')(portal));
 
 // Server frontpage
 app.get('/', function (req, res) {
