@@ -374,9 +374,9 @@ function getNokiaMeasurements(userid, callback) {
         if (isDefined(user)) {
             let url = 'https://api.health.nokia.com/measure' + '?action=getmeas' + '&userid=' + user.nokia_user + '&lastupdate=' + user.time;
             let signedUrl = nokiaAPI.signUrl(url, user.oauth_access_token, user.oauth_access_secret);
-            console.log(signedUrl);
             nokiaAPI.get(signedUrl, null, null, (error, response) => {
                 let responseData = JSON.parse(response);
+                console.log(responseData);
                 if (isDefined(responseData.body)){
                     let measureGroups = responseData.body.measuregrps;
                     measureGroups.forEach(group => {
