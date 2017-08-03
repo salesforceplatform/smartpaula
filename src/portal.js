@@ -20,7 +20,7 @@ router.post('/', (req, res) => {
     res.redirect('/' + user);
 });
 
-route.get('/:user', (res, req) => {
+router.get('/:user', (res, req) => {
     let user = req.params.fbuser                        
     res.render('user', { user: user });
 
