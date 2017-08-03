@@ -51,7 +51,7 @@ router.get('/:user/data', (req, res) => {
     pool.query('SELECT *, (SELECT SUM(waarde) FROM antwoorden WHERE antwoorden.vragenlijst = vragenlijsten.id) FROM vragenlijsten WHERE fbuser = $1', [user]).then(result => {
         console.log(result);
         userData.lists = [];
-        result.rows.forEach((row) => { userData.lists.push(row) });
+        result.rows.forEach((row) => { userData.lists.push({x: row.gestart, y: row.sum}) });
         res.status(200).json(userData);
     });
 });
