@@ -14,8 +14,10 @@ $(function () {
                 options: {
                     scales: {
                         yAxes: [{
-                            min: 0,
-                            max: 52
+                            ticks: {
+                                suggestedMin: 0,
+                                suggestedMax: 52
+                            }
                         }]
                     }
                 }
