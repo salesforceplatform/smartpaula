@@ -391,31 +391,59 @@ function getNokiaMeasurements(userid, callback) {
                 console.log(responseData);
                 if (isDefined(responseData.body)){
                     let measureGroups = responseData.body.measuregrps;
+                    let measureTypes = [];
                     measureGroups.forEach(group => {
                         let date = new Date(group.date * 1000).toISOString().slice(0, 19).replace('T', ' ');
                         group.measures.forEach(measurement => {
                             let type = measurement.type;
                             let value = measurement.value * Math.pow(10, measurement.unit);
+                            measureTypes.push(type);
                             if (type === 9) {
-                                pool.query("INSERT INTO measure_blood (fbuser, measure_date, diastolic) VALUES ($1, $2, $3) ON CONFLICT (fbuser, measure_date) DO UPDATE SET diastolic = excluded.diastolic", [user.fbuser, date, value])
+                                pool.query("INSERT INTO measure_blood (fbuser, measure_date, diastolic) VALUES ($1, $2, $3) ON CONFLICT (fbuser, measure_date) DO UPDATE SET diastolic = excluded.diastolic", [user.fbuser, date, value]);
                             }
                             if (type === 10) {
-                                pool.query("INSERT INTO measure_blood (fbuser, measure_date, systolic) VALUES ($1, $2, $3) ON CONFLICT (fbuser, measure_date) DO UPDATE SET systolic = excluded.systolic", [user.fbuser, date, value])
+                                pool.query("INSERT INTO measure_blood (fbuser, measure_date, systolic) VALUES ($1, $2, $3) ON CONFLICT (fbuser, measure_date) DO UPDATE SET systolic = excluded.systolic", [user.fbuser, date, value]);
                             }
                             if (type === 11) {
-                                pool.query("INSERT INTO measure_blood (fbuser, measure_date, pulse) VALUES ($1, $2, $3) ON CONFLICT (fbuser, measure_date) DO UPDATE SET pulse = excluded.pulse", [user.fbuser, date, value])
+                                pool.query("INSERT INTO measure_blood (fbuser, measure_date, pulse) VALUES ($1, $2, $3) ON CONFLICT (fbuser, measure_date) DO UPDATE SET pulse = excluded.pulse", [user.fbuser, date, value]);
                             }
                             if (type === 1) {
-                                pool.query("INSERT INTO measure_weight (fbuser, measure_date, weight) VALUES ($1, $2, $3) ON CONFLICT (fbuser, measure_date) DO UPDATE SET value = excluded.value", [user.fbuser, date, value])
+                                pool.query("INSERT INTO measure_weight (fbuser, measure_date, weight) VALUES ($1, $2, $3) ON CONFLICT (fbuser, measure_date) DO UPDATE SET value = excluded.value", [user.fbuser, date, value]);
                             }
                         });
                     })
                     pool.query('UPDATE connect_nokia SET last_update = (SELECT NOW()) WHERE fbuser = $1 OR nokia_user = $1', [userid]);
+                    if (measureTypes.length > 0) {
+                        sendMeasurementMessage(measureTypes, user.fbuser);
+                    }
                 }
 
             })
         }
     });
+}
+
+function sendMeasurementMessage(types, user) {
+    let event = 'new_measurement_';
+
+    if (types.length === 3 && types.includes(9) && types.includes(10) && types.includes(9)) {
+        event += 'blood';
+    } else if (types.length === 1 && types[0] === 1) {
+        event += 'weight';
+    } else {
+        event += 'multiple';
+    }
+
+    let request = apiAiService.eventRequest({
+        name: event
+    }, {
+            sessionId: sessionIds.get(fbUser)
+        });
+
+    request.on('response', (response) => { handleResponse(response, fbUser); });
+    request.on('error', (error) => console.error(error));
+
+    request.end
 }
 
 function nokiaSubscriptionUrl(user, appli){
