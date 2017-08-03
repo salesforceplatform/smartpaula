@@ -1,0 +1,67 @@
+doctype html
+html
+    head
+        title="Paula Portal"
+        link(href='/vendors/bootstrap/dist/css/bootstrap.min.css')
+        link(href='/vendors/font-awesome/css/font-awesome.min.css')
+        link(href='/vendors/iCheck/skins/flat/green.css')
+        link(href='/vendors/bootstrap-progressbar/css/bootstrap-progressbar-3.3.4.min.css')
+        link(href='/css/maps/jquery-jvectormap-2.0.3.css')
+        link(href='/vendors/bootstrap/dist/css/bootstrap.min.css')
+        link(href='/build/css/custom.min.css')
+    body.nav-md
+        div.container.body
+            div.main_container
+                div.col-md-3.left_col
+                    div.left_col.scroll-view
+                        div.navbar.nav_title(style="border: 0;")
+                            a.site_title(href='/portal')
+                                i.fa.fa-paw
+                                    span=message
+                        div.clearfix
+                        div#sidebar-menu.main_menu_side.hidden_print.main_menu
+                            div.menu_section
+                                h3=Menu
+                                ul.nav.side-menu
+                                    li
+                                        a(href='/portal')
+                                            i.fa.fa-home
+                div.top_nav
+                    div.nav_menu
+                        nav(role='navigation')
+                            div.nav.toggle
+                                a#menu_toggle
+                                    i.fa.fa-bars
+                        ul.nav.navbar-nav.navbar-right
+                            li
+                                a
+                                    span='bla'
+                
+                div.right_col(role='main')
+                   block content
+
+                footer
+                    div.pull-right
+                    dv.clearfix
+        script(src="/vendors/jquery/dist/jquery.min.js");
+        script(src="/vendors/bootstrap/dist/js/bootstrap.min.js");
+        script(src="/vendors/fastclick/lib/fastclick.js");
+        script(src="/vendors/nprogress/nprogress.js");
+        script(src="/vendors/Chart.js/dist/Chart.min.js");
+        script(src="/vendors/bernii/gauge.js/dist/gauge.min.js");
+        script(src="/vendors/bootstrap-progressbar/bootstrap-progressbar.min.js");
+        script(src="/vendors/iCheck/icheck.min.js");
+        script(src="/vendors/skycons/skycons.js");
+        script(src="/vendors/Flot/jquery.flot.js");
+        script(src="/vendors/Flot/jquery.flot.pie.js");
+        script(src="/vendors/Flot/jquery.flot.time.js");
+        script(src="/vendors/Flot/jquery.flot.stack.js");
+        script(src="/vendors/Flot/jquery.flot.resize.js");
+        script(src="/js/flot/jquery.flot.orderBars.js");
+        script(src="/js/flot/date.js");
+        script(src="/js/flot/jquery.flot.spline.js");
+        script(src="/js/flot/curvedLines.js");
+        script(src="/js/maps/jquery-jvectormap-2.0.3.min.js");
+        script(src="/js/moment/moment.min.js");
+        script(src="/build/js/custom.min.js");
+
