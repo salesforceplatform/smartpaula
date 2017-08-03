@@ -515,7 +515,7 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
                             return;
                         }
 
-                        pool.query('UPDATE connect_nokia SET oauth_access_token = $1, oauth_access_secret = $2, nokia_user = $3, last_update = 0 WHERE fbuser = $4', [oAuthToken, oAuthTokenSecret, userid, fbUser]).then(() => {
+                        pool.query('UPDATE connect_nokia SET oauth_access_token = $1, oauth_access_secret = $2, nokia_user = $3, last_update = \'epoch\' WHERE fbuser = $4', [oAuthToken, oAuthTokenSecret, userid, fbUser]).then(() => {
                             let request = apiAiService.eventRequest({
                                 name: 'nokia_connected'
                             }, {
