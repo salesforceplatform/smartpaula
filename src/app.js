@@ -20,13 +20,20 @@ const FB_PAGE_ACCESS_TOKEN = process.env.FB_PAGE_ACCESS_TOKEN;
 const NOKIA_API_KEY = process.env.NOKIA_API_KEY;
 const NOKIA_API_SECRET = process.env.NOKIA_API_SECRET;
 const HOSTNAME = process.env.HOSTNAME;
+const DEFAULT_INTENTS = ['57b82498-053c-4776-8be9-228c420e6c13', 'b429ecdc-21f4-4a07-8165-3620023185ba'];
+const DEFAULT_INTENT_REFER_TO = '1581441435202307';
+const VIEWS = __dirname + '/views/';
+
+/** @const {Pool} Postgres connection pool */
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
+/** @const {Apiai} API.AI connection pool */
 const apiAiService = apiai(APIAI_ACCESS_TOKEN, {
     language: APIAI_LANG,
     requestSource: "fb"
 });
 
+/** @const {OAuth} OAuth service to talk to the Nokia Health API*/
 const nokiaAPI = new OAuth.OAuth(
     'https://developer.health.nokia.com/account/request_token',
     'https://developer.health.nokia.com/account/access_token',
@@ -36,23 +43,32 @@ const nokiaAPI = new OAuth.OAuth(
     HOSTNAME + 'webhook/nokia',
     'HMAC-SHA1'
 );
+
+/** @const {Map} Map of existing API.AI session ID's */
 const sessionIds = new Map();
 
-const DEFAULT_INTENTS = ['57b82498-053c-4776-8be9-228c420e6c13', 'b429ecdc-21f4-4a07-8165-3620023185ba'];
-const DEFAULT_INTENT_REFER_TO = '1581441435202307';
-
+/**
+ * Handles an API.AI message, and responds accordingly to the Facebook user.
+ * Handling includes e.g. database operations that should occur as a result of a previous message.
+ * @param {object} response A valid API.AI response
+ * @param {number} sender A Facebook ID to respond to.
+ */
 function handleResponse(response, sender) {
     if (isDefined(response.result)) {
-        let responseText = response.result.fulfillment.speech;
-        let responseData = response.result.fulfillment.data;
-        let resolvedQuery = response.result.resolvedQuery
-        let action = response.result.action; //actie in intent
+        let /** string */ responseText = response.result.fulfillment.speech;
+        let /** object */responseData = response.result.fulfillment.data;
+        let /** string */resolvedQuery = response.result.resolvedQuery
+
+        /** The API.AI intent @type {string} */
         let intent = response.result.metadata.intentId;
+        /** The API.AI action within an intent @type {string} */
+        let action = response.result.action;
+        /** Additional parameters passed by the intent @type {object} */
         let parameters = response.result.parameters;
 
-        console.log(response.result);
-
         if (isDefined(responseData) && isDefined(responseData.facebook)) {
+            // If the response is specifically a facebook message, send it directly to the user.
+            // (Is this ever used?)
             if (!Array.isArray(responseData.facebook)) {
                 try {
                     console.log('Response as formatted message');
@@ -67,11 +83,10 @@ function handleResponse(response, sender) {
                     try {
                         if (facebookMessage.sender_action) {
                             console.log('Response as sender action');
-                            //sendFBMessage(sender, ' debug fb action: ' + sender_action);
                             sendFBSenderAction(sender, facebookMessage.sender_action);
                         } else {
                             console.log('Response as formatted message');
-                            sendFBMessage(sender, facebookMessage + ' geformatteerd bericht 2');
+                            sendFBMessage(sender, facebookMessage);
                         }
                     } catch (err) {
                         sendFBMessage(sender, {
@@ -80,12 +95,15 @@ function handleResponse(response, sender) {
                     }
                 });
             }
-            //hier komen de standaard tekst antwoorden van api.ai terecht
         } else if (isDefined(responseText)) {
             let beforeSending = [];
             let message = {
                 text: responseText
             };
+            /**
+             * These are the standard questionnare responses
+             * @type {Array}
+             */
             let quickReplies = [{
                 "content_type": "text",
                 "title": "😁",
@@ -114,22 +132,21 @@ function handleResponse(response, sender) {
             ];
             console.log('Response as text message');
 
-            // Controleer of het antwoord uit de default intents voortkomt. Zo ja, stuur de vraag dan door.
+            // If the intent is one of a set of predefined "default" intents, someone needs to do a manual followup with this user.
             if (DEFAULT_INTENTS.includes(intent)) {
                 getFBProfile(sender, (profile) => {
+                    // Forward the message to a predefined facebook user
+
                     // Disabled while in development
                     // sendFBMessage(DEFAULT_INTENT_REFER_TO, {text:'Hallo, ik heb een vraag gekregen van ' + profile.first_name + ' ' + profile.last_name + ' die ik niet kan beantwoorden:\n "' + resolvedQuery + '"'})
                     console.log('Default intent')
                 });
             }
 
-            //achterhaal of er intelligentie nodig is
-            var speech = "";
             switch (action) {
-                case "who_are_you": //check if user is known
-                    speech += action;
-                    break;
-                case "pam_sum": //calculate PAM score
+                // User has answered a new PAM question
+                // TODO: Create some way of updating questionnares and questions that works on all questionnares
+                case "pam_sum":
                     let payload = response.result.payload;
                     let score = parameters.pam_score;
 
@@ -161,42 +178,50 @@ function handleResponse(response, sender) {
                         message.quick_replies = quickReplies;
                     }
                     break;
+
+                // User wants to start a new questionnare
                 case "start_vragenlijst":
                     pool.query({ text: 'INSERT INTO vragenlijsten (fbuser, vragenlijst) VALUES($1, $2)', values: [sender, parameters.vragenlijst] })
                         .then(res => { console.log(res); })
                         .catch(e => console.error(e, e.stack));
                     break;
+
+                // User wants to connect to a service
                 case "connect_service":
                     let service = response.result.parameters.service;
                     if (isDefined(service)) {
                         switch (service) {
+                            // So far, only Nokia health (formerly Withings) is supported
                             case "Nokia":
+                                // Get a reqest token, and a login url to send to the user.
                                 getNokiaRequestToken(sender, (error, url) => { sendFBMessage(sender, { text: url }); });
                                 break;
                         }
                     }
                     break;
                 default:
-                    speech += 'Sorry, de actie is niet bekend.';
+                    console.log('Received an unknown action from API.ai: "' + action + '"');
             }
 
             // facebook API limit for text length is 640,
             // so we must split message if needed
             let splittedText = splitResponse(message.text);
-
+            // Send messages asynchronously, to ensure they arrive in the right order 
             async.eachSeries(splittedText, (textPart, callback) => {
-                //sendFBMessage(sender, {text: textPart + ' debug callback: ' + speech}, callback);
                 message.text = textPart;
                 sendFBMessage(sender, message, callback);
             });
         }
 
+        // Some messages Have a custom payload, we need to handle this payload;
         response.result.fulfillment.messages.forEach(function (message) {
             let payload = message.payload
-            console.log(message)
             if (isDefined(payload)) {
+                /** @type {string} */
                 let followUp = payload.followUp;
+                /** @type {boolean} */
                 let vragenlijst_end = payload.vragenlijst_end;
+
                 if (isDefined(followUp)) {
                     let request = apiAiService.eventRequest({
                         name: followUp
@@ -245,14 +270,24 @@ function processEvent(event) {
     }
 }
 
+/**
+ * Splits a string in 640 character long chunks
+ * @param {string} str String to split
+ */
 function splitResponse(str) {
     if (str.length <= 640) {
         return [str];
-    }
+    }      
 
     return chunkString(str, 640);
 }
 
+/**
+ * Splits a string into chunks
+ * @param {string} s String to chuck up
+ * @param {number} len Chunk length
+ * @return {array} Array of string chunks
+ */
 function chunkString(s, len) {
     var curr = len,
         prev = 0;
@@ -281,6 +316,11 @@ function chunkString(s, len) {
     return output;
 }
 
+/**
+ * Fetches basic facebook user data (name, gender, age)
+ * @param {number} facebookId Facebook Id to find user data for
+ * @param {function} callback Callback function, called with the user's profile
+ */
 function getFBProfile(facebookId, callback) {
     request({
         url: 'https://graph.facebook.com/v2.6/' + facebookId,
@@ -299,6 +339,12 @@ function getFBProfile(facebookId, callback) {
     });
 }
 
+/**
+ * Sends a chat message to a facebook user
+ * @param {number} sender Facebook user id to send the message to
+ * @param {object} messageData Message data to send
+ * @param {function} callback Callback function, called when the sending has completed (failed or succeeded)
+ */
 function sendFBMessage(sender, messageData, callback) {
     request({
         url: 'https://graph.facebook.com/v2.6/me/messages',
@@ -352,7 +398,14 @@ function sendFBSenderAction(sender, action, callback) {
     }, 1000);
 }
 
+/**
+ * Requests an OAuth 1.0 request token from the Nokia Health API, and stores it in the database. Also builds an authorization
+ * url that can be sent to a user in order to authorize Paula to access the user's data on the API
+ * @param {number} fbUser Facebook user id to associate this token with
+ * @param {function} callback Callback function called with (error, authentication URL)
+ */
 function getNokiaRequestToken(fbUser, callback) {
+    // We need a new OAuth object, because the callback url is specific to each user
     const nokiaAPI = new OAuth.OAuth(
         'https://developer.health.nokia.com/account/request_token',
         'https://developer.health.nokia.com/account/access_token',
@@ -377,6 +430,12 @@ function getNokiaRequestToken(fbUser, callback) {
     });
 }
 
+/**
+ * Fetches data from the Nokia Health API for a single user, and stores data in the database
+ * @param {number} userid Facebook id or nokia user id
+ * @param {any} callback Callback function, called when the request is completed
+ * @see https://developer.health.nokia.com/api/doc#api-Measure-get_measure
+ */
 function getNokiaMeasurements(userid, callback) {
     pool.query('SELECT *, extract(epoch from last_update) as time FROM connect_nokia WHERE fbuser = $1 OR nokia_user = $1', [userid]).then(res => {
         let user = res.rows[0];
@@ -389,7 +448,7 @@ function getNokiaMeasurements(userid, callback) {
             nokiaAPI.get(signedUrl, null, null, (error, response) => {
                 let responseData = JSON.parse(response);
                 console.log(responseData);
-                if (isDefined(responseData.body)){
+                if (isDefined(responseData.body)) {
                     let measureGroups = responseData.body.measuregrps;
                     let measureTypes = [];
                     measureGroups.forEach(group => {
@@ -412,18 +471,24 @@ function getNokiaMeasurements(userid, callback) {
                             }
                         });
                     })
-                    pool.query('UPDATE connect_nokia SET last_update = (SELECT NOW()) WHERE fbuser = $1 OR nokia_user = $1', [userid]);
-                    console.log(measureTypes);
+                    pool.query('UPDATE connect_nokia SET last_update = (SELECT NOW()) WHERE fbuser = $1 OR nokia_user = $1', [userid]); 
                     if (measureTypes.length > 0) {
                         sendMeasurementMessage(measureTypes, user.fbuser);
                     }
+                    
                 }
+                callback();
 
             })
         }
     });
 }
 
+/**
+ * Send facebook message to user, based on what new measurements have been received.
+ * @param {Array<number>} types measurement types, according to the Nokia Health API
+ * @param {number} user Facebook User Id
+ */
 function sendMeasurementMessage(types, user) {
     let event = 'new_measurement_';
 
@@ -443,7 +508,7 @@ function sendMeasurementMessage(types, user) {
         name: event
     }, {
             sessionId: sessionIds.get(user)
-        });                   
+        });
 
     request.on('response', (response) => { handleResponse(response, user); });
     request.on('error', (error) => console.error(error));
@@ -451,7 +516,13 @@ function sendMeasurementMessage(types, user) {
     request.end();
 }
 
-function nokiaSubscriptionUrl(user, appli){
+/**
+ * Builds a Nokia subscription url
+ * @param {number} user Nokia user id
+ * @param {number} appli Type of measurements to subscribe to.
+ * @see https://developer.health.nokia.com/api/doc#api-Notification-notify_subscribe
+ */
+function nokiaSubscriptionUrl(user, appli) {
     return 'https://api.health.nokia.com/notify'
         + '?action=subscribe'
         + '&userid=' + user
@@ -459,8 +530,12 @@ function nokiaSubscriptionUrl(user, appli){
         + '&appli=' + appli;
 }
 
+/**
+ * Subscribe to nokia notifications either for a specific user, or for all users at once
+ * @param {number|null} fbuser Facebook user id to subscribe to, or null to subscribe to all users
+ */
 function subscribeToNokia(fbuser) {
-    
+
     let query = { text: 'SELECT * FROM connect_nokia' };
     if (isDefined(fbuser)) {
         query.text += ' WHERE fbuser = $1';
@@ -473,12 +548,15 @@ function subscribeToNokia(fbuser) {
             signedUrl = nokiaAPI.signUrl(nokiaSubscriptionUrl(row.nokia_user, 1), row.oauth_access_token, row.oauth_access_secret);
             nokiaAPI.get(signedUrl, null, null, (error, responseData) => { if (error) console.log(error); });
 
+            // Get measurements, so that we have current data and don't have to wait for a new measurement to be made
             getNokiaMeasurements(row.fbuser);
-
         });
     })
 }
 
+/**
+ * Subscribe to the facebook message service
+ */
 function doSubscribeRequest() {
     request({
         method: 'POST',
@@ -517,6 +595,8 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json()); //toegevoegd: corrigeert de werking weer                    
 
 var debugtekst = "";
+
+app.user('/portal', './portal');
 
 // Server frontpage
 app.get('/', function (req, res) {
