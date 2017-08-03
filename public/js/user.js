@@ -4,8 +4,13 @@ $(function () {
         pam_chart = new Chart(ctx,
             {
                 type: 'line',
-                labes: data.lists.labels,
-                data: data.lists.data
+                data: {
+                    labels: data.lists.labels,
+                    datasets: [{
+                        data: data.lists.data,
+                        label: "PAM Score"
+                    }]
+                }
             })
     });
 });
