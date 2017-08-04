@@ -16,8 +16,8 @@ Wunderlist.prototype.getAuthUri = function () {
     return this._wunderlistAuth.code.getUri();
 }
 
-Wunderlist.prototype.getAccessToken = function (code, userId) {
-    request({
+Wunderlist.prototype.getAccessToken = function (code, userId, callback) {
+    return request({
         url: 'https://www.wunderlist.com/oauth/access_token',
         method: 'POST',
         json: true,
@@ -28,11 +28,14 @@ Wunderlist.prototype.getAccessToken = function (code, userId) {
         }
     }, (error, response, body) => {
         console.log(error, body);
+        if (callback) {
+            callback(body.access_token);
+        }
     });
 
-    return this._wunderlistAuth.code.getToken(reqUri).then((user) => {
-        return user.accessToken;
-    }, (err) => {console.log(err)});
+    // return this._wunderlistAuth.code.getToken(reqUri).then((user) => {
+    //     return user.accessToken;
+    // }, (err) => {console.log(err)});
 }
 
 Wunderlist.prototype.baa = function () {
