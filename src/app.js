@@ -202,7 +202,7 @@ function handleResponse(response, sender) {
                                 getNokiaRequestToken(sender, (error, url) => { sendFBMessage(sender, { text: url }); });
                                 break;
                             case "Wunderlist":
-                                message.text += '\n' + wunderlist.getAuthUri();
+                                message.text += '\n' + wunderlist.getAuthUri(sender);
                                 break;
                         }
                     }
