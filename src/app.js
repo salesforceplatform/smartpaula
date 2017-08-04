@@ -11,6 +11,7 @@ const { Pool, Client } = require('pg');
 const util = require('util');
 const OAuth = require('oauth');
 const path = require('path');
+const Wunderlist = require('./wunderlist');
 
 const REST_PORT = (process.env.PORT || 5000);
 const APIAI_ACCESS_TOKEN = process.env.APIAI_ACCESS_TOKEN;
@@ -43,6 +44,10 @@ const nokiaAPI = new OAuth.OAuth(
     HOSTNAME + 'webhook/nokia',
     'HMAC-SHA1'
 );
+
+const wunderlist = new Wunderlist();
+
+wunderlist.baa();
 
 /** @const {Map} Map of existing API.AI session ID's */
 const sessionIds = new Map();
