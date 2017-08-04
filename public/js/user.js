@@ -43,9 +43,10 @@ $(function () {
                 options: {
                     scales: {
                         yAxes: [{
+                            stacked: true,
                             ticks: {
                                 suggestedMin: 0,
-                                suggestedMax: 4
+                                suggestedMax: 52
                             }
                         }],
                         xAxes: [{
