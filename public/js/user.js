@@ -33,7 +33,7 @@ $(function () {
                 }
             });
 
-        ctx = $('#questionnare_per_question')[0].getContext(';2d')
+        ctx = $('#questionnare_per_question')[0].getContext('2d')
         question_chart = new Chart(ctx,
             {
                 type: 'line',
