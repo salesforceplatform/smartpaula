@@ -671,7 +671,7 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
 
 app.get('/connect/wunderlist/:fbUserId', (req, res) => {
     let user = req.params.fbUserId;
-    wunderlist.getAccessToken(req.originalUrl)
+    wunderlist.getAccessToken(req.originalUrl, user)
         .then(accessToken => {
             pool.query('INSERT INTO connect_wunderlist (fbuser, access_token) VALUES ($1, $2)', [user, accessToken])
                 .then(() => {
