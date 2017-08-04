@@ -28,6 +28,7 @@ $(function () {
                                 displayFormats: {
                                     hour: 'MMM D, h:mm A'
                                 }
+                            }
                         }]
                     }
                 }
