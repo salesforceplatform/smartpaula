@@ -58,9 +58,6 @@ router.get('/:user/data', (req, res) => {
         pool.query('SELECT *, extract(epoch from antwoorden.antwoord_op) as date FROM antwoorden LEFT JOIN vragenlijsten ON antwoorden.vragenlijst = vragenlijsten.id WHERE vragenlijsten.fbuser = $1 ORDER BY antwoorden.antwoord_op ASC', [user]).then(result => {
             userData.questions = { data: [] };
             result.rows.forEach((row) => {
-                if (!(userData.questions.labels.includes(row.antwoord_op))) {
-                    userData.questions.labels.push(row.antwoord_op);
-                }
                 if (!(row.vraag in userData.questions.data)) {
                     userData.questions.data[row.vraag] = {
                         data: [],
@@ -68,11 +65,11 @@ router.get('/:user/data', (req, res) => {
                     }
                 }
 
-                userData.questions.data = Object.keys(userData.questions.data).map(function (val) { return [val] })
-
                 userData.questions.data[row.vraag].data.push({ x:row.date, y: row.waarde })
                 
             });
+
+            userData.questions.data = Object.keys(userData.questions.data).map(function (val) { return [val] })
 
             res.status(200).json(userData);
         })
