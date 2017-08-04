@@ -11,12 +11,12 @@ let Wunderlist = function () {
     });
 };
 
-Wunderlist.prototype.getAuthUri = function (userId) {
-    return this._wunderlistAuth.code.getUri({ redirectUri: 'https://smart-paula.herokuapp.com/connect/wunderlist/' + userId });
+Wunderlist.prototype.getAuthUri = function () {
+    return this._wunderlistAuth.code.getUri();
 }
 
 Wunderlist.prototype.getAccessToken = function (reqUri, userId) {
-    return this._wunderlistAuth.code.getToken(reqUri, { redirectUri: 'https://smart-paula.herokuapp.com/connect/wunderlist/' + userId }).then((user) => {
+    return this._wunderlistAuth.code.getToken(reqUri).then((user) => {
         return user.accessToken;
     }, (err) => {console.log(err)});
 }

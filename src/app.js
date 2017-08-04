@@ -11,6 +11,7 @@ const { Pool, Client } = require('pg');
 const util = require('util');
 const OAuth = require('oauth');
 const path = require('path');
+const cookieParser = require('cookie-parser')
 const Wunderlist = require('./wunderlist');
 
 const REST_PORT = (process.env.PORT || 5000);
@@ -202,7 +203,7 @@ function handleResponse(response, sender) {
                                 getNokiaRequestToken(sender, (error, url) => { sendFBMessage(sender, { text: url }); });
                                 break;
                             case "Wunderlist":
-                                message.text += '\n' + wunderlist.getAuthUri(sender);
+                                message.text += '\n' + HOSTNAME + 'connect/wunderlist/' + sender;
                                 break;
                         }
                     }
@@ -603,11 +604,12 @@ app.use(bodyParser.urlencoded({
     extended: false
 })); //toegevoegd: heeft invloed verwerking event
 app.use(bodyParser.json()); //toegevoegd: corrigeert de werking weer
+app.use(cookieParser());
 
 app.set('view engine', 'pug')
 
 var debugtekst = "";
-console.log(path.resolve(__dirname, '../public'));
+
 app.use('/static', express.static(path.resolve(__dirname, '../public')))
 app.use('/portal', require('./portal'));
 
@@ -670,7 +672,15 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
 });
 
 app.get('/connect/wunderlist/:fbUserId', (req, res) => {
-    let user = req.params.fbUserId;
+    
+    res.cookie('fbuser', req.params.fbUserId, { maxAge: 1000 * 60 * 15, httpOnly: true })
+        .redirect(wunderlist.getAuthUri());
+
+});
+
+app.get('/connect/wunderlist/', (req, res) => {
+    console.log(req.cookies);
+    let user = req.cookies.fbuser;
     wunderlist.getAccessToken(req.originalUrl, user)
         .then(accessToken => {
             pool.query('INSERT INTO connect_wunderlist (fbuser, access_token) VALUES ($1, $2)', [user, accessToken])
