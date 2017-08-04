@@ -1,4 +1,5 @@
-const ClientOAuth2 = require('client-oauth2')
+const request = require('request');
+const ClientOAuth2 = require('client-oauth2');
 const wunderlistSDK = require('wunderlist');
 
 let Wunderlist = function () {
@@ -15,7 +16,20 @@ Wunderlist.prototype.getAuthUri = function () {
     return this._wunderlistAuth.code.getUri();
 }
 
-Wunderlist.prototype.getAccessToken = function (reqUri, userId) {
+Wunderlist.prototype.getAccessToken = function (code, userId) {
+    request({
+        url: 'https://www.wunderlist.com/oauth/access_token',
+        method: 'POST',
+        json: true,
+        body: {
+            client_id: '8931d36b605a3fe1900f',
+            client_secret: 'f0ea3e820e2337747b92407517144075cc2b171a1c5b566e56148ef4add8',
+            code: code
+        }
+    }, (error, response, body) => {
+        console.log(error, body);
+    });
+
     return this._wunderlistAuth.code.getToken(reqUri).then((user) => {
         return user.accessToken;
     }, (err) => {console.log(err)});

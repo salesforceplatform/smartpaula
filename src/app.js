@@ -681,7 +681,8 @@ app.get('/connect/wunderlist/:fbUserId', (req, res) => {
 app.get('/connect/wunderlist/', (req, res) => {
     console.log(req.cookies);
     let user = req.cookies.fbuser;
-    wunderlist.getAccessToken(req.originalUrl, user)
+    let code = req.query.code;
+    wunderlist.getAccessToken(code, user)
         .then(accessToken => {
             pool.query('INSERT INTO connect_wunderlist (fbuser, access_token) VALUES ($1, $2)', [user, accessToken])
                 .then(() => {
