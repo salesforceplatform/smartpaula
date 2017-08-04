@@ -55,7 +55,7 @@ router.get('/:user/data', (req, res) => {
             userData.lists.labels.push(Math.round(row.date));
             userData.lists.data.push(row.sum)
         });
-        pool.query('SELECT *, extract(epoch from antwoorden.andwoord_op) as date FROM antwoorden LEFT JOIN vragenlijsten ON antwoorden.vragenlijst = vragenlijsten.id WHERE vragenlijsten.fbuser = $1 ORDER BY antwoorden.antwoord_op ASC', [user]).then(result => {
+        pool.query('SELECT *, extract(epoch from antwoorden.antwoord_op) as date FROM antwoorden LEFT JOIN vragenlijsten ON antwoorden.vragenlijst = vragenlijsten.id WHERE vragenlijsten.fbuser = $1 ORDER BY antwoorden.antwoord_op ASC', [user]).then(result => {
             userData.questions = { labels: [], data: [] };
             result.rows.forEach((row) => {
                 if (!(userData.questions.labels.includes(row.antwoord_op))) {
