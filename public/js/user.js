@@ -5,7 +5,6 @@ $(function () {
             {
                 type: 'line',
                 data: {
-                    labels: data.lists.labels,
                     datasets: [{
                         data: data.lists.data,
                         label: "PAM Score"
