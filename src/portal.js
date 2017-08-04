@@ -69,7 +69,7 @@ router.get('/:user/data', (req, res) => {
                 
             });
 
-            userData.questions.data = Object.keys(userData.questions.data).map(function (val) { return [val] })
+            userData.questions.data = Object.keys(userData.questions.data).map(function (key) { return userData.questions.data[key] })
 
             res.status(200).json(userData);
         })
