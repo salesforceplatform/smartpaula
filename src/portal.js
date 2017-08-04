@@ -48,14 +48,14 @@ router.get('/:user', (req, res) => {
 router.get('/:user/data', (req, res) => {
     let user = req.params.user;
     let userData = {};
-    pool.query('SELECT *, extract(epoch from vragenlijsten.gestart) as date, (SELECT SUM(waarde) FROM antwoorden WHERE antwoorden.vragenlijst = vragenlijsten.id) FROM vragenlijsten WHERE fbuser = $1', [user]).then(result => {
+    pool.query('SELECT *, to_char(timezone(‘zulu’, to_timestamp(date_part(‘epoch’, gestart))),\'YYYY-MM-DDThh24:MI:SSZ\') as date as date, (SELECT SUM(waarde) FROM antwoorden WHERE antwoorden.vragenlijst = vragenlijsten.id) FROM vragenlijsten WHERE fbuser = $1', [user]).then(result => {
         console.log(result);
         userData.lists = { labels: [], data: [] };
         result.rows.forEach((row) => {
             userData.lists.labels.push(Math.round(row.date));
             userData.lists.data.push(row.sum)
         });
-        pool.query('SELECT *, to_char(timezone(‘zulu’, to_timestamp(date_part(‘epoch’, antwoorden.antwoord_op))),’YYYY-MM-DDThh24:MI:SSZ’) as date FROM antwoorden LEFT JOIN vragenlijsten ON antwoorden.vragenlijst = vragenlijsten.id WHERE vragenlijsten.fbuser = $1 ORDER BY antwoorden.antwoord_op ASC', [user]).then(result => {
+        pool.query('SELECT *, to_char(timezone(‘zulu’, to_timestamp(date_part(‘epoch’, antwoorden.antwoord_op))),\'YYYY-MM-DDThh24:MI:SSZ\') as date FROM antwoorden LEFT JOIN vragenlijsten ON antwoorden.vragenlijst = vragenlijsten.id WHERE vragenlijsten.fbuser = $1 ORDER BY antwoorden.antwoord_op ASC', [user]).then(result => {
             userData.questions = { data: [] };
             result.rows.forEach((row) => {
                 if (!(row.vraag in userData.questions.data)) {
