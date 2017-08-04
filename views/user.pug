@@ -2,7 +2,7 @@ extends portal.pug
 
 block content
     div.row
-        div.col-md-6.col-sm-6.col-xs-12
+        div.col-md-12.col-sm-12.col-xs-12
             div.x_panel
                div.x_title
                 h2="PAM Score"
@@ -23,6 +23,28 @@ block content
                 div.clearfix
                 div.x_content
                     canvas#questionnare_overall
+    div.row
+        div.col-md-12.col-sm-12.col-xs-12
+            div.x_panel
+               div.x_title
+                h2="PAM Score per vraag"
+                ul.nav.navbar-right.panel_toolbox
+                    li
+                        a.collapse-link
+                            i.fa.fa-chevron-up
+                    li.dropdown
+                        a.dropdown-toggle(data-toggle="dropdown" role="button" aria-expanded="false")
+                            i.fa.fa-wrech
+                        ul.dropdown-menu(role="menu")
+                            li
+                                a(href="#")="Settings 1"
+                            li
+                                a(href="#")="Settings 1"
+                    li.close-link
+                        i.fa.fa-close
+                div.clearfix
+                div.x_content
+                    canvas#questionnare_per_question
 
 block script
     script(src="/static/js/user.js")
