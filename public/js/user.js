@@ -21,7 +21,6 @@ $(function () {
                         xAxes: [{
                             type: 'time',
                             time: {
-                                round: 'day',
                                 unit: 'day',
                                 unitStepSize: 1,
                                 tooltipFormat: "h:mm:ss a",
