@@ -48,7 +48,7 @@ router.get('/:user', (req, res) => {
 router.get('/:user/data', (req, res) => {
     let user = req.params.user;
     let userData = {};
-    pool.query('SELECT *, extract(epoch from antwoorden.gestart) as date (SELECT SUM(waarde) FROM antwoorden WHERE antwoorden.vragenlijst = vragenlijsten.id) FROM vragenlijsten WHERE fbuser = $1', [user]).then(result => {
+    pool.query('SELECT *, extract(epoch from vragenlijsten.gestart) as date, (SELECT SUM(waarde) FROM antwoorden WHERE antwoorden.vragenlijst = vragenlijsten.id) FROM vragenlijsten WHERE fbuser = $1', [user]).then(result => {
         console.log(result);
         userData.lists = { labels: [], data: [] };
         result.rows.forEach((row) => {
