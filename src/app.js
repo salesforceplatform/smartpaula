@@ -201,6 +201,9 @@ function handleResponse(response, sender) {
                                 // Get a reqest token, and a login url to send to the user.
                                 getNokiaRequestToken(sender, (error, url) => { sendFBMessage(sender, { text: url }); });
                                 break;
+                            case "Wunderlist":
+                                message.text += '\n' + wunderlist.getAuthUri();
+                                break;
                         }
                     }
                     break;
@@ -665,6 +668,17 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
     }
 
 });
+
+app.get('/connect/wunderlist/:fbUserId', (req, res) => {
+    let user = req.params.fbUserId;
+    wunderlist.getAccessToken(req.originalUrl)
+        .then(accessToken => {
+            pool.query('INSERT INTO connect_wunderlist (fbuser, access_token) VALUES ($1, $2)', [user, accessToken])
+                .then(() => {
+                    res.status(200).send();
+                }, (err) => { res.status(400).json(err) });
+        });
+})
 
 app.get('/webhook/', (req, res) => {
     if (req.query['hub.verify_token'] == FB_VERIFY_TOKEN) {
