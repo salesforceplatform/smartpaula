@@ -72,8 +72,10 @@ router.get('/:user/data', (req, res) => {
                 userData.questions.data[row.vraag].data.push(row.waarde)
                 
             });
+
+            res.status(200).json(userData);
         })
-        res.status(200).json(userData);
+        
     });
 });
 
