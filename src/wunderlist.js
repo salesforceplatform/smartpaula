@@ -16,7 +16,7 @@ Wunderlist.prototype.getAuthUri = function (userId) {
 }
 
 Wunderlist.prototype.getAccessToken = function (reqUri) {
-    this._wunderlistAuth.code.getToken(reqUri).then((user) => {
+    return this._wunderlistAuth.code.getToken(reqUri).then((user) => {
         return user.accessToken;
     });
 }
