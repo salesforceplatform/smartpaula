@@ -51,8 +51,6 @@ $(function () {
                         xAxes: [{
                             type: 'time',
                             time: {
-                                unit: 'day',
-                                unitStepSize: 1,
                                 tooltipFormat: "h:mm:ss a",
                                 displayFormats: {
                                     hour: 'MMM D, h:mm A'
