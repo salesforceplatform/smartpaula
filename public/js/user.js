@@ -45,7 +45,7 @@ $(function () {
                         yAxes: [{
                             ticks: {
                                 suggestedMin: 0,
-                                suggestedMax: 52
+                                suggestedMax: 4
                             }
                         }],
                         xAxes: [{
