@@ -51,8 +51,10 @@ router.get('/:user/data', (req, res) => {
     pool.query('SELECT *, to_char(timezone(\'zulu\', to_timestamp(date_part(\'epoch\', vragenlijsten.gestart))),\'YYYY-MM-DDThh24:MI:SSZ\') as date, (SELECT SUM(waarde) FROM antwoorden WHERE antwoorden.vragenlijst = vragenlijsten.id) FROM vragenlijsten WHERE fbuser = $1', [user]).then(result => {
         console.log(result);
         userData.lists = { data: [] };
-        result.rows.forEach((row) => {                       
-            userData.lists.data.push({ x: row.date, y: row.sum })
+        result.rows.forEach((row) => {
+            if (row.date && row.sum) {
+                userData.lists.data.push({ x: row.date, y: row.sum })
+            }
         });
         pool.query('SELECT *, to_char(timezone(\'zulu\', to_timestamp(date_part(\'epoch\', antwoorden.antwoord_op))),\'YYYY-MM-DDThh24:MI:SSZ\') as date FROM antwoorden LEFT JOIN vragenlijsten ON antwoorden.vragenlijst = vragenlijsten.id WHERE vragenlijsten.fbuser = $1 ORDER BY antwoorden.antwoord_op ASC', [user]).then(result => {
             userData.questions = { data: [] };
