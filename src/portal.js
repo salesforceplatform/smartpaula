@@ -52,8 +52,27 @@ router.get('/:user/data', (req, res) => {
         console.log(result);
         userData.lists = { labels: [], data: [] };
         result.rows.forEach((row) => {
-            userData.lists.labels.push(row.gestart); userData.lists.data.push(row.sum)
+            userData.lists.labels.push(row.gestart);
+            userData.lists.data.push(row.sum)
         });
+        pool.query('SELECT * FROM antwoorden WHERE fbuser = $1 ORDER BY antwoord_op ASC', [user]).then(result => {
+            userData.questions = { labels: [], data: [] };
+            result.rows.forEach((row) => {
+                userData.questions.labels.push(row.gestart);
+                if (!(userData.questions.labels.includes(row.antwoord_op))) {
+                    userData.questions.labels.push(row.antwoord_op);
+                }
+                if (!(row.vraag in userData.questions.data)) {
+                    userData.questions.data[row.vraag] = {
+                        data: [],
+                        label: row.vraag
+                    }
+                }
+
+                userData.questions.data[row.vraag].data.push(row.waarde)
+                
+            });
+        })
         res.status(200).json(userData);
     });
 });

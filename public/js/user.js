@@ -18,6 +18,12 @@ $(function () {
                                 suggestedMin: 0,
                                 suggestedMax: 52
                             }
+                        }],
+                        xAxes: [{
+                            type: 'time',
+                            time: {
+                                round: 'day'
+                            }
                         }]
                     }
                 }
