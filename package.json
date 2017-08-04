@@ -26,7 +26,8 @@
     "pug": "^2.0.0-rc.3",
     "request": "^2.73.0",
     "util": "^0.10.3",
-    "withings-lib": "^0.2.2"
+    "withings-lib": "^0.2.2",
+    "wunderlist": "^0.1.3"
   },
   "repository": {
     "type": "git",
