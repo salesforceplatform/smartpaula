@@ -20,10 +20,7 @@ $(function () {
                             }
                         }],
                         xAxes: [{
-                            type: 'time',
-                            time: {
-                                round: 'day'
-                            }
+                            type: 'time'
                         }]
                     }
                 }
