@@ -10,7 +10,6 @@ const async = require('async');
 const { Pool, Client } = require('pg');
 const util = require('util');
 const OAuth = require('oauth');
-const Q = require('q');
 const path = require('path');
 
 const REST_PORT = (process.env.PORT || 5000);
