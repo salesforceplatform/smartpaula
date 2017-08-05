@@ -286,7 +286,7 @@ function processEvent(event) {
 function splitResponse(str) {
     if (str.length <= 640) {
         return [str];
-    }      
+    }
 
     return chunkString(str, 640);
 }
@@ -480,11 +480,11 @@ function getNokiaMeasurements(userid, callback) {
                             }
                         });
                     })
-                    pool.query('UPDATE connect_nokia SET last_update = (SELECT NOW()) WHERE fbuser = $1 OR nokia_user = $1', [userid]); 
+                    pool.query('UPDATE connect_nokia SET last_update = (SELECT NOW()) WHERE fbuser = $1 OR nokia_user = $1', [userid]);
                     if (measureTypes.length > 0) {
                         sendMeasurementMessage(measureTypes, user.fbuser);
                     }
-                    
+
                 }
                 if (isDefined(callback)) {
                     callback();
@@ -672,7 +672,7 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
 });
 
 app.get('/connect/wunderlist/:fbUserId', (req, res) => {
-    
+
     res.cookie('fbuser', req.params.fbUserId, { maxAge: 1000 * 60 * 15, httpOnly: true })
         .redirect(wunderlist.getAuthUri());
 
@@ -686,6 +686,17 @@ app.get('/connect/wunderlist/', (req, res) => {
         accessToken => {
             pool.query('INSERT INTO connect_wunderlist (fbuser, access_token) VALUES ($1, $2)', [user, accessToken])
                 .then(() => {
+                    let request = apiAiService.eventRequest({
+                        name: 'wunderlist_connected'
+                    }, {
+                            sessionId: sessionIds.get(user)
+                        });
+
+                    request.on('response', (response) => { handleResponse(response, user); });
+                    request.on('error', (error) => console.error(error));
+
+                    request.end();
+
                     res.status(200).send();
                 }, (err) => { res.status(400).json(err) });
         });
