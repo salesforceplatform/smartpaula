@@ -686,6 +686,9 @@ app.get('/connect/wunderlist/', (req, res) => {
         accessToken => {
             pool.query('INSERT INTO connect_wunderlist (fbuser, access_token) VALUES ($1, $2)', [user, accessToken])
                 .then(() => {
+                    if (!sessionIds.has(user)) {
+                        sessionIds.set(user, uuid.v1());
+                    }
                     let request = apiAiService.eventRequest({
                         name: 'wunderlist_connected'
                     }, {
