@@ -814,7 +814,7 @@ app.all('/webhook/wunderlist/:fbuser', (req, res) => {
                 if (completed) {
                     pool.query('UPDATE wunderlist_items SET item = $1, date_checked = $2 WHERE id = $3', [item, completed_at, id]);
                 } else {
-                    pool.query('UPDATE wunderlist_items SET item = $1, WHERE id = $3', [item, id]);
+                    pool.query('UPDATE wunderlist_items SET item = $1 WHERE id = $3', [item, id]);
                 }
                 break;
         }
