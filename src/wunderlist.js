@@ -96,7 +96,7 @@ Wunderlist.prototype.createWebhook = function (accessToken, list, callbackUri, c
     }, (error, response, body) => {
         console.log(error, body);
         if (callback) {
-            callback(body.access_token);
+            callback(body);
         }
     });
 }

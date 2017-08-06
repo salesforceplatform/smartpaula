@@ -207,7 +207,7 @@ function handleResponse(response, sender) {
                                             sessionId: sessionIds.get(sender)
                                         });
                                 });
-                            wunderlist.createWebhook(connection.access_token, list.id, HOSTNAME + 'webhook/wunderlist').then((someresult) => { console.log(someresult); });
+                            wunderlist.createWebhook(connection.access_token, list.id, HOSTNAME + 'webhook/wunderlist', (someresult) => { console.log(someresult); });
                         }
                         );
                     });
