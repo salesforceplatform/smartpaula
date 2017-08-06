@@ -791,18 +791,20 @@ app.all('/webhook/nokia/:userid/:type', (req, res) => {
 
 app.all('/webhook/wunderlist/:fbuser', (req, res) => {
     try {
-        let operation = req.body.operation;
+        
         let user = req.params.fbuser;
+        let body = JSON.parse(req.body);
 
         console.log(operation);
         console.log(req.body);
 
-        let list = req.body.subject.parents[0].id;
-        let id = req.body.subject.id;
-        let item = req.body.after.item;
-        let created_at = req.body.after.created_at;
-        let completed_at = req.body.after.completed_at;
-        let completed = req.body.after.completed;
+        let operation = body.operation;
+        let list = body.subject.parents[0].id;
+        let id = body.subject.id;
+        let item = body.after.item;
+        let created_at = body.after.created_at;
+        let completed_at = body.after.completed_at;
+        let completed = body.after.completed;
 
         console.log(req.body);
         switch (operation) {
