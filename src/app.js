@@ -207,7 +207,7 @@ function handleResponse(response, sender) {
                                             sessionId: sessionIds.get(sender)
                                         });
                                 });
-                            wunderlist.createWebhook(connection.access_token, list.id, HOSTNAME + 'webhook/wunderlist', (someresult) => { console.log(someresult); });
+                            wunderlist.createWebhook(connection.access_token, list.id, HOSTNAME + 'webhook/wunderlist/' + sender, (someresult) => { console.log(someresult); });
                         }
                         );
                     });
@@ -789,9 +789,33 @@ app.all('/webhook/nokia/:userid/:type', (req, res) => {
 
 });
 
-app.all('/webhook/wunderlist/', (req, res) => {
+app.all('/webhook/wunderlist/:fbuser', (req, res) => {
     try {
+        let operation = req.body.operation;
+        let user = req.params.fbuser;
+
         console.log(req.body);
+        switch (operation) {
+            case 'create':
+                let list = req.body.subject.parent.id;
+                let id = req.body.subject.id;
+                let item = req.body.after.item;
+                let created_at = req.body.after.created_at;
+                pool.query('INSERT INTO wunderlist_items (list, id, item, date_added) VALUES ($1, $2, $3, $4)', [list, id, item, created_at]);
+                break;
+            case 'update':
+                let completed = req.body.after.completed;
+                let item = req.body.after.item;
+                let completed_at = req.body.after.completed_at;
+                let id = req.body.subject.id;
+
+                if (completed) {
+                    pool.query('UPDATE wunderlist_items SET item = $1, date_checked = $2 WHERE id = $3', [item, completed_at, id]);
+                } else {
+                    pool.query('UPDATE wunderlist_items SET item = $1, WHERE id = $3', [item, id]);
+                }
+        }
+
 
     } catch (err) {
         return res.status(400).json({
