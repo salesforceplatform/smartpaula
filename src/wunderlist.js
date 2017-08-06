@@ -57,7 +57,7 @@ Wunderlist.prototype.createList = function (accessToken) {
 
     return wunderlistAPI.http.lists.create({ title: 'Paula\'s boodschappen' })
         .done(function (listData, statusCode) {
-            console.log(listData)
+            console.log(listData, statusCode);
             if (statusCode === 200) {
                 return listData;
             }
