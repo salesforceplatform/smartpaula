@@ -1,6 +1,6 @@
 const request = require('request');
 const ClientOAuth2 = require('client-oauth2');
-const wunderlistSDK = require('wunderlist');
+const WunderlistSDK = require('wunderlist');
 
 /**
  * Create a new Wunderlist API object
