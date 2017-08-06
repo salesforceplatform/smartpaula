@@ -817,6 +817,7 @@ app.all('/webhook/wunderlist/:fbuser', (req, res) => {
 
 
     } catch (err) {
+        console.log(err);
         return res.status(400).json({
             status: "error",
             error: err
