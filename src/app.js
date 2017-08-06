@@ -21,6 +21,8 @@ const FB_VERIFY_TOKEN = process.env.FB_VERIFY_TOKEN;
 const FB_PAGE_ACCESS_TOKEN = process.env.FB_PAGE_ACCESS_TOKEN;
 const NOKIA_API_KEY = process.env.NOKIA_API_KEY;
 const NOKIA_API_SECRET = process.env.NOKIA_API_SECRET;
+const WUNDERLIST_CLIENT_ID = process.env.WUNDERLIST_CLIENT_ID;
+const WUNDERLIST_CLIENT_SECRET = process.env.WUNDERLIST_CLIENT_SECRET;
 const HOSTNAME = process.env.HOSTNAME;
 const DEFAULT_INTENTS = ['57b82498-053c-4776-8be9-228c420e6c13', 'b429ecdc-21f4-4a07-8165-3620023185ba'];
 const DEFAULT_INTENT_REFER_TO = '1581441435202307';
@@ -46,9 +48,8 @@ const nokiaAPI = new OAuth.OAuth(
     'HMAC-SHA1'
 );
 
-const wunderlist = new Wunderlist();
-
-wunderlist.baa();
+/** @const {Wunderlist} Wunderlist API interface */
+const wunderlist = new Wunderlist(WUNDERLIST_CLIENT_ID, WUNDERLIST_CLIENT_SECRET, HOSTNAME + 'connect/wunderlist');
 
 /** @const {Map} Map of existing API.AI session ID's */
 const sessionIds = new Map();
@@ -62,8 +63,8 @@ const sessionIds = new Map();
 function handleResponse(response, sender) {
     if (isDefined(response.result)) {
         let /** string */ responseText = response.result.fulfillment.speech;
-        let /** object */responseData = response.result.fulfillment.data;
-        let /** string */resolvedQuery = response.result.resolvedQuery
+        let /** object */ responseData = response.result.fulfillment.data;
+        let /** string */ resolvedQuery = response.result.resolvedQuery
 
         /** The API.AI intent @type {string} */
         let intent = response.result.metadata.intentId;
@@ -134,8 +135,7 @@ function handleResponse(response, sender) {
                 "content_type": "text",
                 "title": "N.v.t",
                 "payload": "0"
-            }
-            ];
+            }];
             console.log('Response as text message');
 
             // If the intent is one of a set of predefined "default" intents, someone needs to do a manual followup with this user.
@@ -155,7 +155,6 @@ function handleResponse(response, sender) {
                 case "pam_sum":
                     let payload = response.result.payload;
                     let score = parameters.pam_score;
-
 
                     if (isDefined(score)) {
                         console.log(action, 'score is defined', score);
@@ -190,6 +189,27 @@ function handleResponse(response, sender) {
                     pool.query({ text: 'INSERT INTO vragenlijsten (fbuser, vragenlijst) VALUES($1, $2)', values: [sender, parameters.vragenlijst] })
                         .then(res => { console.log(res); })
                         .catch(e => console.error(e, e.stack));
+                    break;
+
+                // User wants to create a new wunderlist-list
+                case "create_wunderlist":
+                    pool.query("SELECT * FROM connect_wunderlist WHERE fbuser = $1", [sender]).then(result => {
+                        let connection = result.rows[0];
+                        wunderlist.createList(connection.access_token).done(list => {
+                            pool.query("INSERT INTO wunderlist_lists (fbuser, id, created_at) VALUES ($1, $2, $3)", [sender, list.id, list.created_at])
+                                .then(() => {
+                                    let request = apiAiService.eventRequest({
+                                        name: 'new_list',
+                                        data: {
+                                            name: list.title
+                                        }
+                                    }, {
+                                            sessionId: sessionIds.get(sender)
+                                        });
+                                })
+                        }
+                        );
+                    });
                     break;
 
                 // User wants to connect to a service
@@ -684,7 +704,7 @@ app.get('/connect/wunderlist/', (req, res) => {
     let code = req.query.code;
     wunderlist.getAccessToken(code, user,
         accessToken => {
-            pool.query('INSERT INTO connect_wunderlist (fbuser, access_token) VALUES ($1, $2)', [user, accessToken])
+            pool.query('INSERT INTO connect_wunderlist (fbuser, access_token) VALUES ($1, $2) ON CONFLICT (fbuser) DO UPDATE SET access_token = excluded.access_token', [user, accessToken])
                 .then(() => {
                     if (!sessionIds.has(user)) {
                         sessionIds.set(user, uuid.v1());
