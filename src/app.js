@@ -794,26 +794,25 @@ app.all('/webhook/wunderlist/:fbuser', (req, res) => {
         let operation = req.body.operation;
         let user = req.params.fbuser;
 
+        let list = req.body.subject.parent.id;
+        let id = req.body.subject.id;
+        let item = req.body.after.item;
+        let created_at = req.body.after.created_at;
+        let completed_at = req.body.after.completed_at;
+        let completed = req.body.after.completed;
+
         console.log(req.body);
         switch (operation) {
             case 'create':
-                let list = req.body.subject.parent.id;
-                let id = req.body.subject.id;
-                let item = req.body.after.item;
-                let created_at = req.body.after.created_at;
                 pool.query('INSERT INTO wunderlist_items (list, id, item, date_added) VALUES ($1, $2, $3, $4)', [list, id, item, created_at]);
                 break;
             case 'update':
-                let completed = req.body.after.completed;
-                let item = req.body.after.item;
-                let completed_at = req.body.after.completed_at;
-                let id = req.body.subject.id;
-
                 if (completed) {
                     pool.query('UPDATE wunderlist_items SET item = $1, date_checked = $2 WHERE id = $3', [item, completed_at, id]);
                 } else {
                     pool.query('UPDATE wunderlist_items SET item = $1, WHERE id = $3', [item, id]);
                 }
+                break;
         }
 
 
