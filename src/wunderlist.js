@@ -67,4 +67,33 @@ Wunderlist.prototype.createList = function (accessToken) {
         });
 };
 
+/**
+ * Subsribes a new webhook for a specific list. (Wunderlist only allows for webhooks on list level.)
+ * @param {string} accessToken Access Token for the user this list belongs to.
+ * @param {integer} list List to subscribe to.
+ * @param {string} callbackUri URI to callback to.
+ */
+Wunderlist.prototype.createWebhook = function (accessToken, list, callbackUri) {
+    let wunderlistAPI = new WunderlistSDK({
+        'accessToken': accessToken,
+        'clientID': this._clientId
+    });
+
+    return request({
+        url: 'http://a.wunderlist.com/api/v1/webhooks',
+        method: 'POST',
+        json: true,
+        headers: {
+            'X-CLIENT-ID': this._clientId,
+            'X-ACCESS-TOKEN': accessToken
+        },
+        body: {
+            list_id: list,
+            url: callbackUri,
+            processor_type: 'generic',
+            configuration: ''
+        }
+    })
+}
+
 module.exports = Wunderlist;
