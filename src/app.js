@@ -795,7 +795,6 @@ app.all('/webhook/wunderlist/:fbuser', (req, res) => {
         let user = req.params.fbuser;
         let body = JSON.parse(req.body);
 
-        console.log(operation);
         console.log(req.body);
 
         let operation = body.operation;
