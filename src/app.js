@@ -789,6 +789,18 @@ app.all('/webhook/nokia/:userid/:type', (req, res) => {
 
 });
 
+app.all('/webhook/wunderlist/', (req, res) => {
+    try {
+        console.log(req.body);
+
+    } catch (err) {
+        return res.status(400).json({
+            status: "error",
+            error: err
+        });
+    }
+});
+
 
 //bewerking van api.ai vanuit webhook alvorens terug te sturen
 //app.post('/herokuai', function (req1, res1) {
