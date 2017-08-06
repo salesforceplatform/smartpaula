@@ -73,7 +73,7 @@ Wunderlist.prototype.createList = function (accessToken) {
  * @param {integer} list List to subscribe to.
  * @param {string} callbackUri URI to callback to.
  */
-Wunderlist.prototype.createWebhook = function (accessToken, list, callbackUri) {
+Wunderlist.prototype.createWebhook = function (accessToken, list, callbackUri, callback) {
     let wunderlistAPI = new WunderlistSDK({
         'accessToken': accessToken,
         'clientID': this._clientId
@@ -93,7 +93,12 @@ Wunderlist.prototype.createWebhook = function (accessToken, list, callbackUri) {
             processor_type: 'generic',
             configuration: ''
         }
-    })
+    }, (error, response, body) => {
+        console.log(error, body);
+        if (callback) {
+            callback(body.access_token);
+        }
+    });
 }
 
 module.exports = Wunderlist;
