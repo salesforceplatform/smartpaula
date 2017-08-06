@@ -21,8 +21,6 @@ let Wunderlist = function (clientId, clientSecret, redirectUri) {
         authorizationUri: 'https://www.wunderlist.com/oauth/authorize',
         redirectUri: redirectUri
     });
-
-    return this;
 };
 
 Wunderlist.prototype.getAuthUri = function () {
