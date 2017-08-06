@@ -55,7 +55,7 @@ Wunderlist.prototype.createList = function (accessToken) {
         'clientID': this._clientId
     });
 
-    return wunderlistAPI.http.lists.create()
+    return wunderlistAPI.http.lists.create({ title: 'Paula\'s boodschappen' })
         .done(function (listData, statusCode) {
             console.log(listData)
             if (statusCode === 200) {
@@ -63,7 +63,7 @@ Wunderlist.prototype.createList = function (accessToken) {
             }
         })
         .fail(function (resp, code) {
-            // ...
+            console.log(resp);
         });
 };
 
