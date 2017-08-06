@@ -794,7 +794,7 @@ app.all('/webhook/wunderlist/:fbuser', (req, res) => {
         let operation = req.body.operation;
         let user = req.params.fbuser;
 
-        let list = req.body.subject.parent.id;
+        let list = req.body.subject.parents[0].id;
         let id = req.body.subject.id;
         let item = req.body.after.item;
         let created_at = req.body.after.created_at;
