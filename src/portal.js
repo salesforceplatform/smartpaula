@@ -102,7 +102,23 @@ router.get('/:user/data', (req, res) => {
 
             userData.questions.data = Object.keys(userData.questions.data).map(function (key) { return userData.questions.data[key] })
 
-            res.status(200).json(userData);
+            pool.query('SELECT *, to_char(timezone(\'zulu\', to_timestamp(date_part(\'epoch\', measure_blood.measure_date))),\'YYYY-MM-DDThh24:MI:SSZ\') as date FROM measure_blood WHERE fbuser = $1', [user]).then((result) => {
+                userData.systolic = [];
+                userdata.diastolic = [];
+                userData.pulse = [];
+                result.rows.forEach(row => {
+                    if (row.systolic) {
+                        userData.systolic.push({ x: row.date, y: row.systolic });
+                    }
+                    if (row.diastolic) {
+                        userData.diastolic.push({ x: row.date, y: row.diastolic });
+                    }
+                    if (row.pulse) {
+                        userData.pulse.push({ x: row.date, y: row.pulde });
+                    }
+                });
+                res.status(200).json(userData);
+            });
         })
 
     });

@@ -43,7 +43,7 @@ $(function () {
                     data: {
                         datasets: [{
                             data: dataSet.data,
-                            labe: 'Vraag ' + dataSet.label
+                            label: 'Vraag ' + dataSet.label
                         }]
                     },
                     options: {
