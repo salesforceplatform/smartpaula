@@ -106,7 +106,7 @@ $(function () {
                             id: 'Pulse',
                             type: 'linear',
                             ticks: {
-                                suggestedMin: 40,
+                                suggestedMin: 0,
                                 suggestedMax: 125
                             }
                         }],
