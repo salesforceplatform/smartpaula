@@ -29,7 +29,7 @@ function getAllUsers(callback) {
             let users = [];
             getUser(result.rows,
                 (profile) => {
-                    users.push({ id: row.fbuser, name: profile.first_name + ' ' + profile.last_name });
+                    users.push({ id: profile.id, name: profile.first_name + ' ' + profile.last_name });
                 },
                 () => {
                     callback(users)
