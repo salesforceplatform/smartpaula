@@ -102,7 +102,7 @@ router.get('/:user/data', (req, res) => {
 
             userData.questions.data = Object.keys(userData.questions.data).map(function (key) { return userData.questions.data[key] })
 
-            pool.query('SELECT *, to_char(timezone(\'zulu\', to_timestamp(date_part(\'epoch\', measure_blood.measure_date))),\'YYYY-MM-DDThh24:MI:SSZ\') as date FROM measure_blood WHERE fbuser = $1', [user]).then((result) => {
+            pool.query('SELECT *, to_char(timezone(\'zulu\', to_timestamp(date_part(\'epoch\', measure_blood.measure_date))),\'YYYY-MM-DDThh24:MI:SSZ\') as date FROM measure_blood WHERE fbuser = $1 ORDER BY measure_date ASC', [user]).then((result) => {
                 userData.blood = {};
                 userData.blood.systolic = [];
                 userData.blood.diastolic = [];
@@ -118,7 +118,7 @@ router.get('/:user/data', (req, res) => {
                         userData.blood.pulse.push({ x: row.date, y: row.pulse });
                     }
                 });
-                pool.query('SELECT *, to_char(timezone(\'zulu\', to_timestamp(date_part(\'epoch\', measure_weight.measure_date))),\'YYYY-MM-DDThh24:MI:SSZ\') as date FROM measure_weight WHERE fbuser = $1', [user]).then(result => {
+                pool.query('SELECT *, to_char(timezone(\'zulu\', to_timestamp(date_part(\'epoch\', measure_weight.measure_date))),\'YYYY-MM-DDThh24:MI:SSZ\') as date FROM measure_weight WHERE fbuser = $1 ORDER BY measure_date ASC', [user]).then(result => {
                     userData.weight = { data: [] };
                     result.rows.forEach(row => {
                         if (row.weight) {
