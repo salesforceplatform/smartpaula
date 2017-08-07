@@ -27,7 +27,7 @@ function getAllUsers(callback) {
     pool.query("SELECT fbuser FROM vragenlijsten GROUP BY fbuser UNION SELECT fbuser FROM connect_nokia UNION SELECT fbuser FROM connect_wunderlist")
         .then(result => {
             let users = [];
-            getUser(result.rows, users,
+            getUser(result.rows,
                 (profile) => {
                     users.push({ id: row.fbuser, name: profile.first_name + ' ' + profile.last_name });
                 },
