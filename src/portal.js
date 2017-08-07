@@ -17,8 +17,7 @@ const facebook = new Facebook(FB_VERIFY_TOKEN, FB_PAGE_ACCESS_TOKEN);
 function getUser(users, callback, onComplete) {
     if (users.length) {
         let user = users.shift();
-        console.log(users, user);
-        facebook.getProfile(users.fbuser, callback);
+        facebook.getProfile(user.fbuser, callback);
     } else {
         onComplete()
     }
