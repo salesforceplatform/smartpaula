@@ -29,6 +29,7 @@ function getAllUsers(callback) {
             let users = [];
             getUser(result.rows,
                 (profile) => {
+                    console.log(profile)
                     users.push({ id: profile.id, name: profile.first_name + ' ' + profile.last_name });
                 },
                 () => {
