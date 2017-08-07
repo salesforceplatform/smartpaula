@@ -103,7 +103,7 @@ router.get('/:user/data', (req, res) => {
             userData.questions.data = Object.keys(userData.questions.data).map(function (key) { return userData.questions.data[key] })
 
             pool.query('SELECT *, to_char(timezone(\'zulu\', to_timestamp(date_part(\'epoch\', measure_blood.measure_date))),\'YYYY-MM-DDThh24:MI:SSZ\') as date FROM measure_blood WHERE fbuser = $1', [user]).then((result) => {
-                userData.blooad = {};
+                userData.blood = {};
                 userData.blood.systolic = [];
                 userdata.blood.diastolic = [];
                 userData.blood.pulse = [];
