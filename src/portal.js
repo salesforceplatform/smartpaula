@@ -109,13 +109,13 @@ router.get('/:user/data', (req, res) => {
                 userData.blood.pulse = [];
                 result.rows.forEach(row => {
                     if (row.systolic) {
-                        userData.systolic.push({ x: row.date, y: row.systolic });
+                        userData.blood.systolic.push({ x: row.date, y: row.systolic });
                     }
                     if (row.diastolic) {
-                        userData.diastolic.push({ x: row.date, y: row.diastolic });
+                        userData.blood.diastolic.push({ x: row.date, y: row.diastolic });
                     }
                     if (row.pulse) {
-                        userData.pulse.push({ x: row.date, y: row.pulse });
+                        userData.blood.pulse.push({ x: row.date, y: row.pulse });
                     }
                 });
                 pool.query('SELECT *, to_char(timezone(\'zulu\', to_timestamp(date_part(\'epoch\', measure_blood.measure_date))),\'YYYY-MM-DDThh24:MI:SSZ\') as date FROM measure_weight WHERE fbuser = $1', [user]).then(result => {

@@ -33,7 +33,6 @@ $(function () {
                 }
             });
 
-        console.log(data.questions);
         data.questions.data.forEach(function (dataSet) {
             console.log(dataSet);
             ctx = $('#questionnare_per_question_' + dataSet.label)[0].getContext('2d')
@@ -67,5 +66,42 @@ $(function () {
                     }
                 })
         });
+        ctx = $('blood')[0].getContext('2d')
+        question_chart = new Chart(ctx,
+            {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        yAxisID: 'Pressure',
+                        data: data.blood.systolic,
+                        label: 'Systolisch'
+                    },
+                    {
+                        yAxisID: 'Pressure',
+                        data: data.blood.diastolic,
+                        label: 'Diastolisch'
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            id: 'Pressure',
+                            type: 'linear'
+                        }, {
+                                id: 'Pulse',
+                                type: 'linear'
+                        }],
+                        xAxes: [{
+                            type: 'time',
+                            time: {
+                                tooltipFormat: "h:mm:ss a",
+                                displayFormats: {
+                                    hour: 'MMM D, h:mm A'
+                                }
+                            }
+                        }]
+                    }
+                }
+            })
     });
 });
