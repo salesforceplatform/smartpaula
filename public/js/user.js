@@ -74,16 +74,19 @@ $(function () {
                     datasets: [{
                         yAxisID: 'Pressure',
                         data: data.blood.systolic,
+                        borderColor: 'rgba(255, 0, 0, 0)',
                         label: 'Systolisch'
                     },
                     {
                         yAxisID: 'Pressure',
                         data: data.blood.diastolic,
+                        borderColor: 'rgba(0, 255, 0, 0)',
                         label: 'Diastolisch'
                     },
                     {
                         yAxisID: 'Pulse',
                         data: data.blood.pulse,
+                        borderColor: 'rgba(0, 0, 255, 0)',
                         label: 'Hartslag'
                     }]
                 },
@@ -92,6 +95,10 @@ $(function () {
                         yAxes: [{
                             id: 'Pressure',
                             type: 'linear'
+                            ticks: [{
+                                min: 40,
+                                max: 250
+                            }]
                         }, {
                             id: 'Pulse',
                             type: 'linear'
