@@ -99,12 +99,16 @@ $(function () {
                             id: 'Pressure',
                             type: 'linear',
                             ticks: [{
-                                min: 40,
-                                max: 250
+                                suggestedMin: 40,
+                                suggestedMax: 250
                             }]
                         }, {
                             id: 'Pulse',
-                            type: 'linear'
+                            type: 'linear',
+                            ticks: [{
+                                suggestedMin: 40,
+                                suggestedMax: 250
+                            }]
                         }],
                         xAxes: [{
                             type: 'time',
