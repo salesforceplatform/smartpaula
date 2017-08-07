@@ -107,7 +107,6 @@ function handleResponse(response, sender) {
                 });
             }
         } else if (isDefined(responseText)) {
-            let beforeSending = [];
             let message = {
                 text: responseText
             };
@@ -174,18 +173,15 @@ function handleResponse(response, sender) {
                                         pool.query('INSERT INTO antwoorden (vragenlijst, waarde, antwoord_op, vraag) VALUES ($1, $2, (SELECT NOW()), $3)', [vragenlijst, score, answer_no]);
                                     });
                             });
+                    }
+                    message.quick_replies = quickReplies;
 
-                        if (isDefined(payload)) {
-                            console.log(payload);
-                            if (isDefined(payload.vragenlijst_end)) {
-                                console.log(payload.vragenlijst_end);
-                            }
+                    response.result.fulfillment.messages.forEach(function (message) {
+                        let payload = message.payload;
+                        if (isDefined(payload) && isDefined(payload.vragenlijst_end) && payload.vragenlijst_end) {
+                            delete message.quick_replies;
                         }
-                    }
-
-                    if (!(isDefined(payload) && isDefined(payload.vragenlijst_end) && payload.vragenlijst_end)) {
-                        message.quick_replies = quickReplies;
-                    }
+                    });
                     break;
 
                 // User wants to start a new questionnare
@@ -751,3 +747,9 @@ app.listen(REST_PORT, () => {
 
 facebook.doSubscribeRequest();
 subscribeToNokia();
+
+pool.query("SELECT connect_wunderlist.fbuser, connect_wunderlist.access_token, wunderlist_lists.id FROM wunderlist_lists LEFT JOIN connect_wunderlist ON wunderlist_lists.fbuser = connect_wunderlist.fbuser").then(result => {
+    result.rows.forEach(row => {
+        wunderlist.createWebhook(row.access_token, row.id, HOSTNAME + 'webhook/wunderlist/' + row.fbuser);
+    })
+})

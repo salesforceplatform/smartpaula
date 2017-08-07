@@ -74,11 +74,6 @@ Wunderlist.prototype.createList = function (accessToken) {
  * @param {string} callbackUri URI to callback to.
  */
 Wunderlist.prototype.createWebhook = function (accessToken, list, callbackUri, callback) {
-    let wunderlistAPI = new WunderlistSDK({
-        'accessToken': accessToken,
-        'clientID': this._clientId
-    });
-
     return request({
         url: 'http://a.wunderlist.com/api/v1/webhooks',
         method: 'POST',
