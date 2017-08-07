@@ -98,17 +98,17 @@ $(function () {
                         yAxes: [{
                             id: 'Pressure',
                             type: 'linear',
-                            ticks: [{
+                            ticks: {
                                 suggestedMin: 40,
                                 suggestedMax: 250
-                            }]
+                            }
                         }, {
                             id: 'Pulse',
                             type: 'linear',
-                            ticks: [{
+                            ticks: {
                                 suggestedMin: 40,
                                 suggestedMax: 250
-                            }]
+                            }
                         }],
                         xAxes: [{
                             type: 'time',
