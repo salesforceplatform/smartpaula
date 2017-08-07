@@ -118,9 +118,17 @@ router.get('/:user/data', (req, res) => {
                         userData.pulse.push({ x: row.date, y: row.pulse });
                     }
                 });
-                res.status(200).json(userData);
+                pool.query('SELECT *, to_char(timezone(\'zulu\', to_timestamp(date_part(\'epoch\', measure_blood.measure_date))),\'YYYY-MM-DDThh24:MI:SSZ\') as date FROM measure_weight WHERE fbuser = $1', [user]).then(result => {
+                    userData.weight = { data: [] };
+                    result.rows.forEach(row => {
+                        if (row.weight) {
+                            userData.weight.data.push({ x: row.date, y: row.weight });
+                        }
+                    })
+                    res.status(200).json(userData);
+                });
             });
-        })
+        });
 
     });
 });
