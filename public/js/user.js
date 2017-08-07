@@ -94,7 +94,7 @@ $(function () {
                     scales: {
                         yAxes: [{
                             id: 'Pressure',
-                            type: 'linear'
+                            type: 'linear',
                             ticks: [{
                                 min: 40,
                                 max: 250
