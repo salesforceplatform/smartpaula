@@ -417,7 +417,7 @@ function getNokiaMeasurements(userid, callback) {
                                 pool.query("INSERT INTO measure_blood (fbuser, measure_date, pulse) VALUES ($1, $2, $3) ON CONFLICT (fbuser, measure_date) DO UPDATE SET pulse = excluded.pulse", [user.fbuser, date, value]);
                             }
                             if (type === 1) {
-                                pool.query("INSERT INTO measure_weight (fbuser, measure_date, weight) VALUES ($1, $2, $3) ON CONFLICT (fbuser, measure_date) DO UPDATE SET value = excluded.value", [user.fbuser, date, value]);
+                                pool.query("INSERT INTO measure_weight (fbuser, measure_date, weight) VALUES ($1, $2, $3) ON CONFLICT (fbuser, measure_date) DO UPDATE SET weight = excluded.weight", [user.fbuser, date, value]);
                             }
                         });
                     })
