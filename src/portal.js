@@ -14,11 +14,11 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 /** @const {Facebook} Facebook API interface */
 const facebook = new Facebook(FB_VERIFY_TOKEN, FB_PAGE_ACCESS_TOKEN);
 
-function getUser(users, callback, onComplete) {
-    console.log(users, users.length);
-    if (users.length) {
-        let user = users.shift();
-        facebook.getProfile(user.fbuser, callback);
+function getUser(rows, callback, onComplete) {
+    console.log(rows, rows.length);
+    if (rows.length) {
+        let user = rows.shift();
+        facebook.getProfile(rows.fbuser, callback);
     } else {
         onComplete()
     }
@@ -30,7 +30,6 @@ function getAllUsers(callback) {
             let users = [];
             getUser(result.rows,
                 (profile) => {
-                    console.log(profile)
                     users.push({ id: profile.id, name: profile.first_name + ' ' + profile.last_name });
                 },
                 () => {
