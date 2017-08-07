@@ -33,33 +33,36 @@ $(function () {
                 }
             });
 
-        ctx = $('#questionnare_per_question')[0].getContext('2d')
-        question_chart = new Chart(ctx,
-            {
-                type: 'line',
-                data: {
-                    datasets: data.questions.data
-                },
-                options: {
-                    scales: {
-                        yAxes: [{
-                            stacked: true,
-                            ticks: {
-                                suggestedMin: 0,
-                                suggestedMax: 52
-                            }
-                        }],
-                        xAxes: [{
-                            type: 'time',
-                            time: {
-                                tooltipFormat: "h:mm:ss a",
-                                displayFormats: {
-                                    hour: 'MMM D, h:mm A'
+        data.questions.data.forEach(function (dataSet) {
+            console.log(dataSet);
+            ctx = $('#questionnare_per_question_' + dataset.label)[0].getContext('2d')
+            question_chart = new Chart(ctx,
+                {
+                    type: 'line',
+                    data: {
+                        datasets: data.questions[label];
+                    },
+                    options: {
+                        scales: {
+                            yAxes: [{
+                                stacked: true,
+                                ticks: {
+                                    suggestedMin: 0,
+                                    suggestedMax: 52
                                 }
-                            }
-                        }]
+                            }],
+                            xAxes: [{
+                                type: 'time',
+                                time: {
+                                    tooltipFormat: "h:mm:ss a",
+                                    displayFormats: {
+                                        hour: 'MMM D, h:mm A'
+                                    }
+                                }
+                            }]
+                        }
                     }
-                }
-            })
+                })
+        });
     });
 });
