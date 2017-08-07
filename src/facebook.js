@@ -55,7 +55,7 @@ Facebook.prototype.doSubscribeRequest = function () {
  * @param {object} messageData Message data to send
  * @param {function} callback Callback function, called when the sending has completed (failed or succeeded)
  */
-Facebook.prototype.sendFBMessage = function (sender, messageData, callback) {
+Facebook.prototype.sendMessage = function (sender, messageData, callback) {
     request({
         url: 'https://graph.facebook.com/v2.6/me/messages',
         qs: {
