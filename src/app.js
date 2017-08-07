@@ -152,6 +152,8 @@ function handleResponse(response, sender) {
                 });
             }
 
+            console.log(response.result);
+
             switch (action) {
                 // User has answered a new PAM question
                 // TODO: Create some way of updating questionnares and questions that works on all questionnares
