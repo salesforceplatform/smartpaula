@@ -36,7 +36,7 @@ $(function () {
         console.log(data.questions);
         data.questions.data.forEach(function (dataSet) {
             console.log(dataSet);
-            ctx = $('#questionnare_per_question_' + dataset.label)[0].getContext('2d')
+            ctx = $('#questionnare_per_question_' + dataSet.label)[0].getContext('2d')
             question_chart = new Chart(ctx,
                 {
                     type: 'line',
