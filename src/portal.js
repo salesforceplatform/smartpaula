@@ -15,11 +15,11 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const facebook = new Facebook(FB_VERIFY_TOKEN, FB_PAGE_ACCESS_TOKEN);
 
 function getAllUsers(callback) {
-    pool.query("SELECT fbuser FROM vragenlijsten GROUP BY fbuser UNION SELECT fbuser FROM connect_nokia")
+    pool.query("SELECT fbuser FROM vragenlijsten GROUP BY fbuser UNION SELECT fbuser FROM connect_nokia UNION SELECT fbuser FROM connect_wunderlist")
         .then(result => {
             let users = [];
             result.rows.forEach(row => {
-                facebook.getProfile(sender, (profile) => {
+                facebook.getProfile(row.fbuser, (profile) => {
                     users.push({ id: row.fbuser, name: profile.first_name + ' ' + profile.last_name });
                 });
             });
