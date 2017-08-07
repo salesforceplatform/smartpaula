@@ -14,16 +14,26 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 /** @const {Facebook} Facebook API interface */
 const facebook = new Facebook(FB_VERIFY_TOKEN, FB_PAGE_ACCESS_TOKEN);
 
+function getUser(users, callback, onComplete) {
+    if (lenuser.length) {
+        let user = users.shift()
+        facebook.getProfile(users.fbuser, callback);
+    } else {
+        onComplete()
+    }
+}
+
 function getAllUsers(callback) {
     pool.query("SELECT fbuser FROM vragenlijsten GROUP BY fbuser UNION SELECT fbuser FROM connect_nokia UNION SELECT fbuser FROM connect_wunderlist")
         .then(result => {
             let users = [];
-            result.rows.forEach(row => {
-                facebook.getProfile(row.fbuser, (profile) => {
+            getUsers(result.rows, users,
+                (profile) => {
                     users.push({ id: row.fbuser, name: profile.first_name + ' ' + profile.last_name });
+                },
+                () => {
+                    callback(users)
                 });
-            });
-            callback(users);
         });
 }
 
