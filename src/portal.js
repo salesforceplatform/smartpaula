@@ -114,7 +114,7 @@ router.get('/:user/data', (req, res) => {
                         userData.diastolic.push({ x: row.date, y: row.diastolic });
                     }
                     if (row.pulse) {
-                        userData.pulse.push({ x: row.date, y: row.pulde });
+                        userData.pulse.push({ x: row.date, y: row.pulse });
                     }
                 });
                 res.status(200).json(userData);
