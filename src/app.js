@@ -13,6 +13,7 @@ const OAuth = require('oauth');
 const path = require('path');
 const cookieParser = require('cookie-parser')
 const Wunderlist = require('./wunderlist');
+const Facebook = require('./facebook');
 
 const REST_PORT = (process.env.PORT || 5000);
 const APIAI_ACCESS_TOKEN = process.env.APIAI_ACCESS_TOKEN;
@@ -51,6 +52,9 @@ const nokiaAPI = new OAuth.OAuth(
 /** @const {Wunderlist} Wunderlist API interface */
 const wunderlist = new Wunderlist(WUNDERLIST_CLIENT_ID, WUNDERLIST_CLIENT_SECRET, HOSTNAME + 'connect/wunderlist');
 
+/** @const {Facebook} Facebook API interface */
+const facebook = new Facebook(FB_VERIFY_TOKEN, FB_PAGE_ACCESS_TOKEN);
+
 /** @const {Map} Map of existing API.AI session ID's */
 const sessionIds = new Map();
 
@@ -79,9 +83,9 @@ function handleResponse(response, sender) {
             if (!Array.isArray(responseData.facebook)) {
                 try {
                     console.log('Response as formatted message');
-                    sendFBMessage(sender, responseData.facebook + ' geformatteerd bericht');
+                    facebook.sendMessage(sender, responseData.facebook + ' geformatteerd bericht');
                 } catch (err) {
-                    sendFBMessage(sender, {
+                    facebook.sendMessage(sender, {
                         text: err.message
                     });
                 }
@@ -90,13 +94,13 @@ function handleResponse(response, sender) {
                     try {
                         if (facebookMessage.sender_action) {
                             console.log('Response as sender action');
-                            sendFBSenderAction(sender, facebookMessage.sender_action);
+                            facebook.sendSenderAction(sender, facebookMessage.sender_action);
                         } else {
                             console.log('Response as formatted message');
-                            sendFBMessage(sender, facebookMessage);
+                            facebook.sendMessage(sender, facebookMessage);
                         }
                     } catch (err) {
-                        sendFBMessage(sender, {
+                        facebook.sendMessage(sender, {
                             text: err.message
                         });
                     }
@@ -140,11 +144,11 @@ function handleResponse(response, sender) {
 
             // If the intent is one of a set of predefined "default" intents, someone needs to do a manual followup with this user.
             if (DEFAULT_INTENTS.includes(intent)) {
-                getFBProfile(sender, (profile) => {
+                facebook.getProfile(sender, (profile) => {
                     // Forward the message to a predefined facebook user
 
                     // Disabled while in development
-                    // sendFBMessage(DEFAULT_INTENT_REFER_TO, {text:'Hallo, ik heb een vraag gekregen van ' + profile.first_name + ' ' + profile.last_name + ' die ik niet kan beantwoorden:\n "' + resolvedQuery + '"'})
+                    // facebook.sendMessage(DEFAULT_INTENT_REFER_TO, {text:'Hallo, ik heb een vraag gekregen van ' + profile.first_name + ' ' + profile.last_name + ' die ik niet kan beantwoorden:\n "' + resolvedQuery + '"'})
                     console.log('Default intent')
                 });
             }
@@ -221,7 +225,7 @@ function handleResponse(response, sender) {
                             // So far, only Nokia health (formerly Withings) is supported
                             case "Nokia":
                                 // Get a reqest token, and a login url to send to the user.
-                                getNokiaRequestToken(sender, (error, url) => { sendFBMessage(sender, { text: url }); });
+                                getNokiaRequestToken(sender, (error, url) => { facebook.sendMessage(sender, { text: url }); });
                                 break;
                             case "Wunderlist":
                                 message.text += '\n' + HOSTNAME + 'connect/wunderlist/' + sender;
@@ -239,7 +243,7 @@ function handleResponse(response, sender) {
             // Send messages asynchronously, to ensure they arrive in the right order 
             async.eachSeries(splittedText, (textPart, callback) => {
                 message.text = textPart;
-                sendFBMessage(sender, message, callback);
+                facebook.sendMessage(sender, message, callback);
             });
         }
 
@@ -344,88 +348,6 @@ function chunkString(s, len) {
     }
     output.push(s.substr(prev));
     return output;
-}
-
-/**
- * Fetches basic facebook user data (name, gender, age)
- * @param {number} facebookId Facebook Id to find user data for
- * @param {function} callback Callback function, called with the user's profile
- */
-function getFBProfile(facebookId, callback) {
-    request({
-        url: 'https://graph.facebook.com/v2.6/' + facebookId,
-        qs: {
-            access_token: FB_PAGE_ACCESS_TOKEN
-        },
-        method: 'GET'
-    }, (error, response, body) => {
-        if (error) {
-            console.log('Error sending message: ', error);
-        } else if (response.body.error) {
-            console.log('Error: ', response.body.error);
-        } else if (callback) {
-            callback(JSON.parse(body));
-        }
-    });
-}
-
-/**
- * Sends a chat message to a facebook user
- * @param {number} sender Facebook user id to send the message to
- * @param {object} messageData Message data to send
- * @param {function} callback Callback function, called when the sending has completed (failed or succeeded)
- */
-function sendFBMessage(sender, messageData, callback) {
-    request({
-        url: 'https://graph.facebook.com/v2.6/me/messages',
-        qs: {
-            access_token: FB_PAGE_ACCESS_TOKEN
-        },
-        method: 'POST',
-        json: {
-            recipient: {
-                id: sender
-            },
-            message: messageData
-        }
-    }, (error, response, body) => {
-        if (error) {
-            console.log('Error sending message: ', error);
-        } else if (response.body.error) {
-            console.log('Error: ', response.body.error);
-        }
-
-        if (callback) {
-            callback();
-        }
-    });
-}
-
-function sendFBSenderAction(sender, action, callback) {
-    setTimeout(() => {
-        request({
-            url: 'https://graph.facebook.com/v2.6/me/messages',
-            qs: {
-                access_token: FB_PAGE_ACCESS_TOKEN
-            },
-            method: 'POST',
-            json: {
-                recipient: {
-                    id: sender
-                },
-                sender_action: action
-            }
-        }, (error, response, body) => {
-            if (error) {
-                console.log('Error sending action: ', error);
-            } else if (response.body.error) {
-                console.log('Error: ', response.body.error);
-            }
-            if (callback) {
-                callback();
-            }
-        });
-    }, 1000);
 }
 
 /**
@@ -584,23 +506,6 @@ function subscribeToNokia(fbuser) {
             getNokiaMeasurements(row.fbuser);
         });
     })
-}
-
-/**
- * Subscribe to the facebook message service
- */
-function doSubscribeRequest() {
-    request({
-        method: 'POST',
-        uri: "https://graph.facebook.com/v2.6/me/subscribed_apps?access_token=" + FB_PAGE_ACCESS_TOKEN
-    },
-        (error, response, body) => {
-            if (error) {
-                console.error('Error while subscription: ', error);
-            } else {
-                console.log('Subscription result: ', response.body);
-            }
-        });
 }
 
 function isDefined(obj) {
@@ -844,5 +749,5 @@ app.listen(REST_PORT, () => {
     console.log('Rest service ready on port ' + REST_PORT);
 });
 
-doSubscribeRequest();
+facebook.doSubscribeRequest();
 subscribeToNokia();
