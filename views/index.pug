@@ -12,5 +12,5 @@ block content
                     select#user.form-control(name="user" required)
                         option(value="")="Kies..."
                         each user in users
-                            option(value=user)=user
+                            option(value=user.id)=user.name
                     button.btn.btn-default(type=submit)="Submit"
