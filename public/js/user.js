@@ -100,14 +100,14 @@ $(function () {
                             type: 'linear',
                             ticks: {
                                 suggestedMin: 40,
-                                suggestedMax: 250
+                                suggestedMax: 200
                             }
                         }, {
                             id: 'Pulse',
                             type: 'linear',
                             ticks: {
                                 suggestedMin: 40,
-                                suggestedMax: 250
+                                suggestedMax: 200
                             }
                         }],
                         xAxes: [{
