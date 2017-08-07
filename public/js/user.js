@@ -1,6 +1,6 @@
 $(function () {
     $.get(window.location.href + '/data', function (data) {
-        var ctx = $('#questionnare_overall')[0].getContext('2d');        
+        var ctx = $('#questionnare_overall')[0].getContext('2d');
         pam_chart = new Chart(ctx,
             {
                 type: 'line',
@@ -80,6 +80,11 @@ $(function () {
                         yAxisID: 'Pressure',
                         data: data.blood.diastolic,
                         label: 'Diastolisch'
+                    },
+                    {
+                        yAxisID: 'Pulse',
+                        data: data.blood.pulse,
+                        label: 'Hartslag'
                     }]
                 },
                 options: {
@@ -88,8 +93,8 @@ $(function () {
                             id: 'Pressure',
                             type: 'linear'
                         }, {
-                                id: 'Pulse',
-                                type: 'linear'
+                            id: 'Pulse',
+                            type: 'linear'
                         }],
                         xAxes: [{
                             type: 'time',
