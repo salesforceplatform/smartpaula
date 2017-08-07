@@ -107,7 +107,7 @@ $(function () {
                             type: 'linear',
                             ticks: {
                                 suggestedMin: 40,
-                                suggestedMax: 200
+                                suggestedMax: 125
                             }
                         }],
                         xAxes: [{
