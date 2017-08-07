@@ -40,7 +40,10 @@ $(function () {
             question_chart = new Chart(ctx,
                 {
                     type: 'line',
-                    data: data.questions[dataSet.label],
+                    datasets: [{
+                        data: dataSet.data,
+                        labe: 'Vraag ' + dataSet.label
+                    }],
                     options: {
                         scales: {
                             yAxes: [{
