@@ -1,17 +1,35 @@
-﻿const express = require('express')
+﻿
+const express = require('express')
 const router = express.Router()
 const { Pool, Client } = require('pg');
+
+const Facebook = require('./facebook');
+
+const FB_VERIFY_TOKEN = process.env.FB_VERIFY_TOKEN;
+const FB_PAGE_ACCESS_TOKEN = process.env.FB_PAGE_ACCESS_TOKEN;
 
 /** @const {Pool} Postgres connection pool */
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
-router.get('/', function (req, res) {
-    try {
-        pool.query("SELECT fbuser FROM vragenlijsten GROUP BY fbuser UNION SELECT fbuser FROM connect_nokia").then(result => {
+/** @const {Facebook} Facebook API interface */
+const facebook = new Facebook(FB_VERIFY_TOKEN, FB_PAGE_ACCESS_TOKEN);
+
+function getAllUsers(callback) {
+    pool.query("SELECT fbuser FROM vragenlijsten GROUP BY fbuser UNION SELECT fbuser FROM connect_nokia")
+        .then(result => {
             let users = [];
             result.rows.forEach(row => {
-                users.push(row.fbuser);
-            })
+                facebook.getProfile(sender, (profile) => {
+                    users.push({ id: row.fbuser, name: profile.first_name + ' ' + profile.last_name });
+                });
+            });
+            callback(users);
+        });
+}
+
+router.get('/', function (req, res) {
+    try {
+        getAllUsers((users) => {
             res.render('index', { title: 'Hey', message: 'Hello there!', users: users });
         });
     } catch (err) {
@@ -66,15 +84,15 @@ router.get('/:user/data', (req, res) => {
                     }
                 }
 
-                userData.questions.data[row.vraag].data.push({ x:row.date, y: row.waarde })
-                
+                userData.questions.data[row.vraag].data.push({ x: row.date, y: row.waarde })
+
             });
 
             userData.questions.data = Object.keys(userData.questions.data).map(function (key) { return userData.questions.data[key] })
 
             res.status(200).json(userData);
         })
-        
+
     });
 });
 
