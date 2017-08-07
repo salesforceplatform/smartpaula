@@ -90,7 +90,7 @@ Facebook.prototype.getProfile = function (facebookId, callback) {
     request({
         url: 'https://graph.facebook.com/v2.6/' + facebookId,
         qs: {
-            access_token: FB_PAGE_ACCESS_TOKEN
+            access_token: this._pageAccessToken
         },
         method: 'GET'
     }, (error, response, body) => {
