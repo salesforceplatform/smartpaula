@@ -33,22 +33,20 @@ $(function () {
                 }
             });
 
+        console.log(data.questions);
         data.questions.data.forEach(function (dataSet) {
             console.log(dataSet);
             ctx = $('#questionnare_per_question_' + dataset.label)[0].getContext('2d')
             question_chart = new Chart(ctx,
                 {
                     type: 'line',
-                    data: {
-                        datasets: data.questions[label];
-                    },
+                    data: data.questions[dataset.label],
                     options: {
                         scales: {
                             yAxes: [{
-                                stacked: true,
                                 ticks: {
                                     suggestedMin: 0,
-                                    suggestedMax: 52
+                                    suggestedMax: 5
                                 }
                             }],
                             xAxes: [{
