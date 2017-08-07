@@ -1,3 +1,5 @@
+const request = require('request');
+
 let Facebook = function (verifyToken, pageAccessToken) {
     this._verifyToken = verifyToken;
     this._pageAccessToken = pageAccessToken;
