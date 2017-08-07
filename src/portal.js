@@ -18,7 +18,7 @@ function getUser(rows, callback, onComplete) {
     console.log(rows, rows.length);
     if (rows.length) {
         let user = rows.shift();
-        facebook.getProfile(user.fbuser, (profile) => { callback(profile); getUser(rows, callback, onComplete) });
+        facebook.getProfile(user.fbuser, (profile) => { profile.id = user.fbuser; callback(profile); getUser(rows, callback, onComplete) });
     } else {
         onComplete()
     }
