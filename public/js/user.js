@@ -66,7 +66,7 @@ $(function () {
                     }
                 })
         });
-        ctx = $('blood')[0].getContext('2d')
+        ctx = $('#blood')[0].getContext('2d')
         question_chart = new Chart(ctx,
             {
                 type: 'line',
@@ -94,6 +94,34 @@ $(function () {
                             type: 'linear'
                         }, {
                             id: 'Pulse',
+                            type: 'linear'
+                        }],
+                        xAxes: [{
+                            type: 'time',
+                            time: {
+                                tooltipFormat: "h:mm:ss a",
+                                displayFormats: {
+                                    hour: 'MMM D, h:mm A'
+                                }
+                            }
+                        }]
+                    }
+                }
+            })
+
+        ctx = $('#weight')[0].getContext('2d')
+        question_chart = new Chart(ctx,
+            {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        data: data.weight.data,
+                        label: 'Gewicht'
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
                             type: 'linear'
                         }],
                         xAxes: [{
