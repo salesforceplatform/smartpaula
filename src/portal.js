@@ -15,6 +15,7 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const facebook = new Facebook(FB_VERIFY_TOKEN, FB_PAGE_ACCESS_TOKEN);
 
 function getUser(users, callback, onComplete) {
+    console.log(users, users.length);
     if (users.length) {
         let user = users.shift();
         facebook.getProfile(user.fbuser, callback);
