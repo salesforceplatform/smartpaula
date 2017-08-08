@@ -243,6 +243,18 @@ app.post('/signup', passport.authenticate('local-signup', {
     failureFlash: true
 }));
 
+app.get('/login', (req, res) => {
+    try {
+        res.render('login');
+
+    } catch (err) {
+        return res.status(400).json({
+            status: "error",
+            error: err
+        });
+    }
+})
+
 app.post('/login', passport.authenticate('local-login', {
     successRedirect: '/portal', // redirect to the secure profile section
     failureRedirect: '/portal/login', // redirect back to the signup page if there is an error
