@@ -54,7 +54,7 @@ const User = sequelize.define('user', {
         underscored: true,
         instanceMethods: {
 
-            
+
         }
     });
 
@@ -69,7 +69,6 @@ User.prototype.validPassword = function (password) {
 User.sync();
 
 function getUser(rows, callback, onComplete) {
-    console.log(rows, rows.length);
     if (rows.length) {
         let user = rows.shift();
         facebook.getProfile(user.fbuser, (profile) => { profile.id = user.fbuser; callback(profile); getUser(rows, callback, onComplete) });
@@ -95,8 +94,7 @@ function getAllUsers(callback) {
 
 passport.use(new LocalStrategy(
     function (username, password, done) {
-        User.findOne({ username: username }, function (err, user) {
-            if (err) { return done(err); }
+        User.findOne({ where: { email: username } }).then(user => {
             if (!user) {
                 return done(null, false, { message: 'Incorrect username.' });
             }
@@ -109,12 +107,15 @@ passport.use(new LocalStrategy(
 ));
 
 passport.serializeUser(function (user, done) {
+    console.log(user);
     done(null, user.id);
 });
 
 passport.deserializeUser(function (id, done) {
-    User.findById(id, function (err, user) {
-        done(err, user);
+    console.log(id)
+    User.findById(id).then(user => {
+        console.log('deserialized:', user);
+        done(user);
     });
 });
 
@@ -126,20 +127,20 @@ passport.use('local-signup', new LocalStrategy({
     function (req, email, password, done) {
         User.findOne({ where: { 'email': email } })
             .then(user => {
-            // check to see if theres already a user with that email
-            if (user) {
-                return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
-            } else {
+                // check to see if theres already a user with that email
+                if (user) {
+                    return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
+                } else {
 
-                // if there is no user with that email
-                // create the user
-                var newUser = User.create({ email: email, password: User.generateHash(password) })
-                    .then(user => {
-                        return done(null, newUser);
-                    })
-            }
+                    // if there is no user with that email
+                    // create the user
+                    var newUser = User.create({ email: email, password: User.generateHash(password) })
+                        .then(user => {
+                            return done(null, newUser);
+                        })
+                }
 
-        });
+            });
 
     }));
 
