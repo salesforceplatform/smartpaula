@@ -52,7 +52,8 @@ const User = sequelize.define('user', {
     },
     admin: {
         type: Sequelize.BOOLEAN
-    },
+    }
+},{
     instanceMethods: {
         generateHash: function (password) {
             return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
