@@ -168,7 +168,7 @@ passport.use('local-login', new LocalStrategy({
 
         // find a user whose email is the same as the forms email
         // we are checking to see if the user trying to login already exists
-        User.findOne({ where: { 'email': email } }).then( user => {
+        User.findOne({ where: { 'email': email } }).then(user => {
 
             // if no user is found, return the message
             if (!user)
@@ -273,7 +273,14 @@ app.get('/admin/:user', isLoggedIn, isAdmin, (req, res) => {
     try {
         let id = req.params.user;
         if (id === 'new') {
-            res.render('profile', { user: req.user, profile: user });
+            res.render('profile', {
+                user: req.user, profile: {
+                    first_name: '',
+                    last_name: '',
+                    email: '',
+                    admin: false;
+                }
+            });
         } else {
             User.findById(id).then(user => {
                 res.render('profile', { user: req.user, profile: user });
@@ -290,11 +297,41 @@ app.get('/admin/:user', isLoggedIn, isAdmin, (req, res) => {
 app.post('/admin/:user', isLoggedIn, isAdmin, (req, res) => {
     try {
         let id = req.params.user;
-        User.findById(id).then(user => {
+        let password = req.body.password;
+        let userData = {
+            first_name: req.body.firstname,
+            last_name: req.body.lastname,
+            email: req.body.email,
+            admin: req.body.admin
+        }
 
-            res.render('profile', { user: req.user, profile: user });
-        });
-        res.redirect('/portal/admin');
+        if (password) {
+            userData.password = User.generateHash(password);
+        }
+
+        if (id === 'new') {
+            User.findOne({ where: { email: email } }).then(user => {
+                if (user) {
+                    req.flash('signupMessage', 'That email is already taken.');
+                    res.redirect('/portal/admin/new');
+                } else {
+                    User.create(userData).then(() => {
+                        res.redirect('/portal/admin');
+                    })
+                }
+            });
+        } else {
+            User.findById(id).then(user => {
+                user.update({
+                    first_name: first_name,
+                    last_name: last_name,
+                    email: email,
+                    password: password
+                }).then(() => {
+                    res.redirect('/portal/admin');
+                });
+            });
+        }
     } catch (err) {
         return res.status(400).json({
             status: "error",

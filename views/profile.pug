@@ -7,7 +7,7 @@ block content
                 .x_title
                     h2="Gebruiker"
                 .x_content
-                    form.form-horizontal.form-label-left
+                    form.form-horizontal.form-label-left(method='post')
                         .form-group
                             label.control-label.col-md-3.col-sm-3.col-xs-12(for='firstname')="First Name"
                             .col-md-6.col-sm-6.col-xs-12
@@ -23,4 +23,11 @@ block content
                         .form-group
                             label.control-label.col-md-3.col-sm-3.col-xs-12(for='password')="Password"
                             .col-md-6.col-sm-6.col-xs-12
-                                input#password.form-control.col-md-7.col-xs-12(type='password' name='password' value=user.password)
+                                input#password.form-control.col-md-7.col-xs-12(type='password' name='password')
+                        .form-group
+                            label.control-label.col-md-3.col-sm-3.col-xs-12(for='admin')="Is Admin"
+                            .col-md-6.col-sm-6.col-xs-12
+                                input#admin.form-control.col-md-7.col-xs-12(type='checkbox' name='admin')
+                        .form-group
+                            .col-md-6.col-sm-6.col-xs-12.col-md-offset-3
+                                button.btn.btn-default.submit(type='submit')='Login'
