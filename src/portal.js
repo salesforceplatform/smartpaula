@@ -120,11 +120,8 @@ passport.use('local-signup', new LocalStrategy({
     passReqToCallback: true
 },
     function (req, email, password, done) {
-        User.findOne({ where: { 'email': email } }, function (err, user) {
-            // if there are any errors, return the error
-            if (err)
-                return done(err);
-
+        User.findOne({ where: { 'email': email } })
+            .then(user => {
             // check to see if theres already a user with that email
             if (user) {
                 return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
