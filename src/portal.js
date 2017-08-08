@@ -8,6 +8,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const Sequelize = require('sequelize');
 const bcrypt = require('bcrypt-nodejs');
+const flash = require('connect-flash');
 
 const Facebook = require('./facebook');
 
