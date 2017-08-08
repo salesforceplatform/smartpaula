@@ -278,7 +278,7 @@ app.get('/admin/:user', isLoggedIn, isAdmin, (req, res) => {
                     first_name: '',
                     last_name: '',
                     email: '',
-                    admin: false;
+                    admin: false
                 }
             });
         } else {
