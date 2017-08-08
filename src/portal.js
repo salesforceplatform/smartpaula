@@ -298,7 +298,7 @@ app.get('/:user', isLoggedIn, (req, res) => {
     }
 })
 
-app.get('/:user/data', isLoggedIn, (req, res) => {
+app.get('/:user/data', (req, res) => {
     let user = req.params.user;
     let userData = {};
     pool.query('SELECT *, to_char(timezone(\'zulu\', to_timestamp(date_part(\'epoch\', vragenlijsten.gestart))),\'YYYY-MM-DDThh24:MI:SSZ\') as date, (SELECT SUM(waarde) FROM antwoorden WHERE antwoorden.vragenlijst = vragenlijsten.id) FROM vragenlijsten WHERE fbuser = $1', [user]).then(result => {
