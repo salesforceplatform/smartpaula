@@ -275,6 +275,7 @@ app.get('/admin/:user', isLoggedIn, isAdmin, (req, res) => {
         if (id === 'new') {
             res.render('profile', {
                 user: req.user, profile: {
+                    id: 'new',
                     first_name: '',
                     last_name: '',
                     email: '',
