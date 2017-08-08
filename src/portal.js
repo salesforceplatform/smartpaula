@@ -290,7 +290,7 @@ app.get('/admin/:user', isLoggedIn, isAdmin, (req, res) => {
 app.post('/admin/:user', isLoggedIn, isAdmin, (req, res) => {
     try {
         let id = req.params.user;
-        User.findById(id).then(users => {
+        User.findById(id).then(user => {
             res.render('profile', { user: req.user, profile: user });
         });
         res.redirect('/portal/admin');
