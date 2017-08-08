@@ -272,9 +272,13 @@ app.get('/admin', isLoggedIn, isAdmin, (req, res) => {
 app.get('/admin/:user', isLoggedIn, isAdmin, (req, res) => {
     try {
         let id = req.params.user;
-        User.findById(id).then(users => {
+        if (id === 'new') {
             res.render('profile', { user: req.user, profile: user });
-        });
+        } else {
+            User.findById(id).then(users => {
+                res.render('profile', { user: req.user, profile: user });
+            });
+        }
     } catch (err) {
         return res.status(400).json({
             status: "error",
@@ -282,6 +286,21 @@ app.get('/admin/:user', isLoggedIn, isAdmin, (req, res) => {
         });
     }
 });
+
+app.post('/admin/:user', isLoggedIn, isAdmin, (res, res) => {
+    try {
+        let id = req.params.user;
+        User.findById(id).then(users => {
+            res.render('profile', { user: req.user, profile: user });
+        });
+        res.redirect)
+    } catch (err) {
+        return res.status(400).json({
+            status: "error",
+            error: err
+        });
+    }
+})
 
 app.get('/:user', isLoggedIn, (req, res) => {
     try {
