@@ -322,12 +322,7 @@ app.post('/admin/:user', isLoggedIn, isAdmin, (req, res) => {
             });
         } else {
             User.findById(id).then(user => {
-                user.update({
-                    first_name: first_name,
-                    last_name: last_name,
-                    email: email,
-                    password: password
-                }).then(() => {
+                user.update(userData).then(() => {
                     res.redirect('/portal/admin');
                 });
             });
