@@ -6,7 +6,7 @@ const { Pool, Client } = require('pg');
 const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const Sequeslize = require('sequelize');
+const Sequelize = require('sequelize');
 const bcrypt = require('bcrypt-nodejs');
 
 const Facebook = require('./facebook');
