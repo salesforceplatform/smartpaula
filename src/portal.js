@@ -308,7 +308,9 @@ app.post('/admin/:user', isLoggedIn, isAdmin, (req, res) => {
         }
         if (typeof admin !== 'undefined' && admin) {
             userData.admin = true;
-        } 
+        } else {
+            userData.admin = false;
+        }
         if (password) {
             userData.password = User.generateHash(password);
         }
