@@ -168,7 +168,7 @@ passport.use('local-login', new LocalStrategy({
 
         // find a user whose email is the same as the forms email
         // we are checking to see if the user trying to login already exists
-        User.findOne({ where: { 'email': email } }.then( user => {
+        User.findOne({ where: { 'email': email } }).then( user => {
 
             // if no user is found, return the message
             if (!user)
@@ -180,8 +180,7 @@ passport.use('local-login', new LocalStrategy({
 
             // all is well, return successful user
             return done(null, user);
-        });
-
+        })
     })
 );
 
