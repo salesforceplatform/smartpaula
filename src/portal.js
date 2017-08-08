@@ -134,7 +134,7 @@ passport.use('local-signup', new LocalStrategy({
 
                     // if there is no user with that email
                     // create the user
-                        User.create({ email: email, password: User.generateHash(password) })
+                        User.create({ first_name: req.body.firstname, last_name: req.body.lastname, email: email, password: User.generateHash(password) })
                         .then(user => {
                             return done(null, user);
                         })
