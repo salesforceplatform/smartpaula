@@ -30,11 +30,11 @@ html
                                         a(href='/portal')
                                             i.fa.fa-home
                                             span="Home"
-                                    if user.admin
-                                        li
-                                            a(href='/portal/admin')
-                                            i.fa.fa-user
-                                            span="users"
+                                        if user.admin
+                                            li
+                                                a(href='/portal/admin')
+                                                    i.fa.fa-user
+                                                    span="users"
                 div.top_nav
                     div.nav_menu
                         nav(role='navigation')
