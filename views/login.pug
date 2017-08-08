@@ -1,1 +1,23 @@
 extends start.pug
+
+block content
+    div
+        a#signup.hiddenanchor
+        a#signin.hiddenanchor
+
+        .login_wrapper
+            .animate.form.login_form
+                section.login_content
+                    form(method='POST')
+                        h1='Login'
+                        div
+                            input.form_control(type='text' name='username' placeholder='Username' required)
+                        div
+                            input.form_control(type='password' name='username' placeholder='Password' required)
+                        div
+                            button.btn.btn-default.submit
+                                ='Login'
+                        .clearfix
+                        .separator
+                            .change-link
+                                a.to_register(href='#signup')='Create Account'
