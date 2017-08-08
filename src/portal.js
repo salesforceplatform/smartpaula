@@ -310,9 +310,9 @@ app.post('/admin/:user', isLoggedIn, isAdmin, (req, res) => {
         }
 
         if (id === 'new') {
-            User.findOne({ where: { email: email } }).then(user => {
+            User.findOne({ where: { email: userData.email } }).then(user => {
                 if (user) {
-                    req.flash('signupMessage', 'That email is already taken.');
+                    //req.flash('signupMessage', 'That email is already taken.');
                     res.redirect('/portal/admin/new');
                 } else {
                     User.create(userData).then(() => {
