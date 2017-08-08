@@ -1,0 +1,33 @@
+extends portal.pug
+
+block content
+    .row
+        .col-md-12.col-sm-12.col-xs-12
+            .x_panel
+                .x_title
+                    h2="Gebruikers"
+                    .clearfix
+                .x_content
+                    .table.table_hover
+                    thead
+                        tr
+                            th="Voornaam"
+                            th="Achternaam"
+                            th="Email"
+                            th="Admin"
+                            th
+                    tbody
+                        each user in users
+                            tr
+                                td=user.first_name
+                                td=user.last_name
+                                td=user.email
+                                td
+                                    if user.admin
+                                        i.fa.fa-check
+                                    else
+                                        i.fa.fa-cross
+                                td
+                                    a(href=user.id)
+                                        i.fa.fa-edit
+                                
