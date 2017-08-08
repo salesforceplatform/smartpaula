@@ -92,6 +92,20 @@ function getAllUsers(callback) {
         });
 }
 
+function isLoggedIn(req, res, next) {
+    if (req.isAuthenticated())
+        return next();
+
+    res.redirect('/portal/login');
+}
+
+function isAdmin(req, res, next) {
+    if (req.user.admin)
+        return next();
+
+    res.redirect('/portal/');
+}
+
 passport.use(new LocalStrategy(
     function (username, password, done) {
         User.findOne({ where: { email: username } }).then(user => {
@@ -134,7 +148,7 @@ passport.use('local-signup', new LocalStrategy({
 
                     // if there is no user with that email
                     // create the user
-                        User.create({ first_name: req.body.firstname, last_name: req.body.lastname, email: email, password: User.generateHash(password) })
+                    User.create({ first_name: req.body.firstname, last_name: req.body.lastname, email: email, password: User.generateHash(password) })
                         .then(user => {
                             return done(null, user);
                         })
@@ -142,7 +156,38 @@ passport.use('local-signup', new LocalStrategy({
 
             });
 
-    }));
+    })
+);
+
+passport.use('local-login', new LocalStrategy({
+    // by default, local strategy uses username and password, we will override with email
+    usernameField: 'email',
+    passwordField: 'password',
+    passReqToCallback: true // allows us to pass back the entire request to the callback
+},
+    function (req, email, password, done) { // callback with email and password from our form
+
+        // find a user whose email is the same as the forms email
+        // we are checking to see if the user trying to login already exists
+        User.findOne({ 'email': email }, function (err, user) {
+            // if there are any errors, return the error before anything else
+            if (err)
+                return done(err);
+
+            // if no user is found, return the message
+            if (!user)
+                return done(null, false, req.flash('loginMessage', 'No user found.')); // req.flash is the way to set flashdata using connect-flash
+
+            // if the user is found but the password is wrong
+            if (!user.validPassword(password))
+                return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.')); // create the loginMessage and save it to session as flashdata
+
+            // all is well, return successful user
+            return done(null, user);
+        });
+
+    })
+);
 
 const app = express();
 
@@ -156,7 +201,7 @@ app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session
 
-app.get('/', function (req, res) {
+app.get('/', isLoggedIn, (req, res) => {
     try {
         getAllUsers((users) => {
             res.render('index', { title: 'Hey', message: 'Hello there!', users: users });
@@ -169,7 +214,7 @@ app.get('/', function (req, res) {
     }
 });
 
-app.post('/', (req, res) => {
+app.post('/', isLoggedIn, (req, res) => {
     try {
         let user = req.body.user;
         res.redirect('/portal/' + user);
@@ -191,13 +236,47 @@ app.get('/signup', (req, res) => {
         });
     }
 });
+
 app.post('/signup', passport.authenticate('local-signup', {
     successRedirect: '/portal/profile',
     failureRedirect: '/portal/signup',
     failureFlash: true
 }));
 
-app.get('/:user', (req, res) => {
+app.post('/login', passport.authenticate('local-login', {
+    successRedirect: '/portal', // redirect to the secure profile section
+    failureRedirect: '/portal/login', // redirect back to the signup page if there is an error
+    failureFlash: true // allow flash messages
+}));
+
+app.get('/admin', isLoggedIn, isAdmin, (req, res) => {
+    try {
+        User.findAll().then(users => {
+            res.render('admin', { users: users });
+        });
+    } catch (err) {
+        return res.status(400).json({
+            status: "error",
+            error: err
+        });
+    }
+});
+
+app.get('/admin/:user', isLoggedIn, isAdmin, (req, res) => {
+    try {
+        let id = req.params.user;
+        User.findById(id).then(users => {
+            res.render('profile', { user: user });
+        });
+    } catch (err) {
+        return res.status(400).json({
+            status: "error",
+            error: err
+        });
+    }
+});
+
+app.get('/:user', isLoggedIn, (req, res) => {
     try {
         res.render('user');
     } catch (err) {
@@ -208,7 +287,7 @@ app.get('/:user', (req, res) => {
     }
 })
 
-app.get('/:user/data', (req, res) => {
+app.get('/:user/data', isLoggedIn, (req, res) => {
     let user = req.params.user;
     let userData = {};
     pool.query('SELECT *, to_char(timezone(\'zulu\', to_timestamp(date_part(\'epoch\', vragenlijsten.gestart))),\'YYYY-MM-DDThh24:MI:SSZ\') as date, (SELECT SUM(waarde) FROM antwoorden WHERE antwoorden.vragenlijst = vragenlijsten.id) FROM vragenlijsten WHERE fbuser = $1', [user]).then(result => {
