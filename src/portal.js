@@ -35,7 +35,6 @@ sequelize
     });
 
 const User = sequelize.define('user', {
-    underscored: true,
     firstName: {
         type: Sequelize.STRING
     },
@@ -51,16 +50,17 @@ const User = sequelize.define('user', {
     admin: {
         type: Sequelize.BOOLEAN
     }
-},{
-    instanceMethods: {
-        generateHash: function (password) {
-            return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
-        },
-        validPassword: function (password) {
-            return bcrypt.compareSync(password, this.local.password);
+}, {
+        underscored: true,
+        instanceMethods: {
+            generateHash: function (password) {
+                return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+            },
+            validPassword: function (password) {
+                return bcrypt.compareSync(password, this.local.password);
+            }
         }
-    }
-})
+    })
 
 User.sync();
 
@@ -188,9 +188,9 @@ app.get('/signup', (req, res) => {
     }
 });
 app.post('/signup', passport.authenticate('local-signup', {
-    successRedirect: '/profile', 
-    failureRedirect: '/signup', 
-    failureFlash: true 
+    successRedirect: '/profile',
+    failureRedirect: '/signup',
+    failureFlash: true
 }));
 
 app.get('/:user', (req, res) => {
