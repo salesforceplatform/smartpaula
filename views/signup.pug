@@ -11,11 +11,11 @@ block content
                     form(method='POST')
                         h1='Login'
                         div
-                            input.form_control(type=text placeholder='Username' required)
+                            input.form_control(type='text' placeholder='Username' required)
                         div
                             input.form_control(type='password' placeholder='Password' required)
                         div
-                            a.btn.btn-default.submit
+                            button.btn.btn-default.submit
                                 ='Login'
                         .clearfix
                         .separator
@@ -35,9 +35,13 @@ block content
                         div
                             input.form_control(type='password' placeholder='Password' required)    
                         div
-                            a.btn.btn-default submit
+                            button.btn.btn-default.submit
                                 ="Submit"
                         .clearfix
                         .separator
                             .change-link
                                 a.to_register(href='#signin')='Login'
+                            .clearfix
+                            div
+                                h1="Smart Paula"
+                                p="©2017 Radboudumc REshape Center for Innovation"
