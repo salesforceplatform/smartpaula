@@ -126,7 +126,6 @@ passport.serializeUser(function (user, done) {
 });
 
 passport.deserializeUser(function (id, done) {
-    console.log(id)
     User.findById(id).then(user => {
         console.log('deserialized:', user);
         done(user);
@@ -238,7 +237,7 @@ app.get('/signup', (req, res) => {
 });
 
 app.post('/signup', passport.authenticate('local-signup', {
-    successRedirect: '/portal/profile',
+    successRedirect: '/portal/',
     failureRedirect: '/portal/signup',
     failureFlash: true
 }));
