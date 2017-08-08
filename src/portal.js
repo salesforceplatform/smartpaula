@@ -203,7 +203,7 @@ app.use(flash()); // use connect-flash for flash messages stored in session
 app.get('/', isLoggedIn, (req, res) => {
     try {
         getAllUsers((users) => {
-            res.render('index', { user: req.user });
+            res.render('index', { user: req.user, users: users });
         });
     } catch (err) {
         return res.status(400).json({
