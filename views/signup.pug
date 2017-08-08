@@ -10,7 +10,16 @@ block content
                 section.login_content
                     form()
                         div
-                            input.form_control(placeholder='Username')
+                            input.form_control(type=text placeholder='Username' required)
+                        div
+                            input.form_control(type='password' placeholder='Password' required)
+                        div
+                            a.btn.btn-default.submit
+                                ='Login'
+                        .clearfix
+                        .separator
+                            .change-link
+                                a.to_register(href='#signup')='Create Account'
                 
             .animate.form.registration_form
                 section.login_content
@@ -28,3 +37,6 @@ block content
                             a.btn.btn-default submit
                                 ="Submit"
                         .clearfix
+                        .separator
+                            .change-link
+                                a.to_register(href='#signin')='Login'
