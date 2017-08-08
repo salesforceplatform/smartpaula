@@ -35,10 +35,10 @@ sequelize
     });
 
 const User = sequelize.define('user', {
-    firstName: {
+    first_name: {
         type: Sequelize.STRING
     },
-    lastName: {
+    last_name: {
         type: Sequelize.STRING
     },
     email: {
@@ -130,7 +130,7 @@ passport.use('local-signup', new LocalStrategy({
 
                 // if there is no user with that email
                 // create the user
-                var newUser = User.create({ firstName: firstname, lastName: lastname, email: email, password: User.generateHash(password) })
+                var newUser = User.create({ first_name: firstname, last_name: lastname, email: email, password: User.generateHash(password) })
                     .then(user => {
                         return done(null, newUser);
                     })
