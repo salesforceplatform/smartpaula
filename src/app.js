@@ -11,7 +11,7 @@ const { Pool, Client } = require('pg');
 const util = require('util');
 const OAuth = require('oauth');
 const path = require('path');
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
 const Wunderlist = require('./wunderlist');
 const Facebook = require('./facebook');
 
@@ -529,8 +529,6 @@ app.use(bodyParser.urlencoded({
 })); //toegevoegd: heeft invloed verwerking event
 app.use(bodyParser.json()); //toegevoegd: corrigeert de werking weer
 app.use(cookieParser());
-
-app.set('view engine', 'pug')
 
 var debugtekst = "";
 

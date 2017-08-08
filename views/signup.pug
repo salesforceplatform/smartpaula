@@ -1,0 +1,23 @@
+extends start.pug
+
+block content
+    div
+        .login-wrapper
+            .animate.form.login_form
+                section.login_content
+                    form
+                        h1="Signup"
+                        div
+                            input.form_control(type='text' placeholder='First name' required)
+                        div
+                            input.form_control(type='text' placeholder='Last name' required)
+                        div
+                            input.form_control(type='email' placeholder='Email' required)
+                        div
+                            input.form_control(type='text' placeholder='Username' required)
+                        div
+                            input.form_control(type='password' placeholder='Password' required)    
+                        div
+                            a.btn.btn-default submit
+                                ="Submit"
+                        .clearfix
