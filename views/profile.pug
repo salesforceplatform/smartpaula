@@ -24,9 +24,9 @@ block content
                             label.control-label.col-md-3.col-sm-3.col-xs-12(for='password')="Password"
                             .col-md-6.col-sm-6.col-xs-12
                                 if profile.id === 'new'
-                                    input#password.form-control.col-md-7.col-xs-12(type='password' name='password')
-                                else
                                     input#password.form-control.col-md-7.col-xs-12(type='password' name='password' required)
+                                else
+                                    input#password.form-control.col-md-7.col-xs-12(type='password' name='password' )
                         .form-group
                             label.control-label.col-md-3.col-sm-3.col-xs-12(for='admin')="Is Admin"
                             .col-md-6.col-sm-6.col-xs-12
