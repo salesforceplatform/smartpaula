@@ -299,13 +299,16 @@ app.post('/admin/:user', isLoggedIn, isAdmin, (req, res) => {
     //try {
         let id = req.params.user;
         let password = req.body.password;
+        let admin = req.body.admin;
+        console.log(req.body);
         let userData = {
             first_name: req.body.firstname,
             last_name: req.body.lastname,
             email: req.body.email,
-            admin: req.body.admin
         }
-
+        if (admin) {
+            userData.admin = admin;
+        } 
         if (password) {
             userData.password = User.generateHash(password);
         }
