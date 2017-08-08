@@ -107,8 +107,9 @@ passport.use(new LocalStrategy(
 ));
 
 passport.serializeUser(function (user, done) {
-    console.log(user);
-    done(null, user.id);
+    user.then(user => {
+        done(null, user.id);
+    });
 });
 
 passport.deserializeUser(function (id, done) {
