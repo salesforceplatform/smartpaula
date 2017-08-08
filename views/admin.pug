@@ -8,7 +8,7 @@ block content
                     h2="Gebruikers"
                     .clearfix
                 .x_content
-                    .table.table_hover
+                    table.table.table-hover
                         thead
                             tr
                                 th="Voornaam"
@@ -28,6 +28,6 @@ block content
                                         else
                                             i.fa.fa-cross
                                     td
-                                        a(href=user.id)
+                                        a(href='admin/' + user.id)
                                             i.fa.fa-edit
                                 
