@@ -168,10 +168,7 @@ passport.use('local-login', new LocalStrategy({
 
         // find a user whose email is the same as the forms email
         // we are checking to see if the user trying to login already exists
-        User.findOne({ where: { 'email': email } }, function (err, user) {
-            // if there are any errors, return the error before anything else
-            if (err)
-                return done(err);
+        User.findOne({ where: { 'email': email } }.then( user => {
 
             // if no user is found, return the message
             if (!user)
