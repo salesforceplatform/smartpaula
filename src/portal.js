@@ -115,9 +115,11 @@ passport.deserializeUser(function (id, done) {
 });
 
 passport.use('local-signup', new LocalStrategy({
+    usernameField: 'email',
+    passwordField: 'password'
     passReqToCallback: true
 },
-    function (req, firstname, lastname, email, password, done) {
+    function (req, email, password, done) {
         User.findOne({ where: { 'email': email } }, function (err, user) {
             // if there are any errors, return the error
             if (err)
@@ -125,12 +127,12 @@ passport.use('local-signup', new LocalStrategy({
 
             // check to see if theres already a user with that email
             if (user) {
-                return done(null, false, req.flash('signupMessage', 'Thatemail is already taken.'));
+                return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
             } else {
 
                 // if there is no user with that email
                 // create the user
-                var newUser = User.create({ first_name: firstname, last_name: lastname, email: email, password: User.generateHash(password) })
+                var newUser = User.create({ email: email, password: User.generateHash(password) })
                     .then(user => {
                         return done(null, newUser);
                     })
@@ -179,7 +181,7 @@ app.post('/', (req, res) => {
 
 app.get('/signup', (req, res) => {
     try {
-        res.render('signup');
+        res.render('signup', { message: req.flash('signupMessage') });
     } catch (err) {
         return res.status(400).json({
             status: "error",
@@ -188,8 +190,8 @@ app.get('/signup', (req, res) => {
     }
 });
 app.post('/signup', passport.authenticate('local-signup', {
-    successRedirect: '/profile',
-    failureRedirect: '/signup',
+    successRedirect: '/portal/profile',
+    failureRedirect: '/portal/signup',
     failureFlash: true
 }));
 
