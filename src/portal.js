@@ -52,10 +52,13 @@ const User = sequelize.define('user', {
     }
 }, {
         underscored: true,
-        instanceMethods: {
+        classMethods: {
             generateHash: function (password) {
                 return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
-            },
+            }
+        },
+        instanceMethods: {
+            
             validPassword: function (password) {
                 return bcrypt.compareSync(password, this.local.password);
             }
