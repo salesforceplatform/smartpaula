@@ -640,7 +640,7 @@ app.get('/webhook/', (req, res) => {
 });
 
 //ontvangen van FB bericht
-
+app.post('/webhook/', (req, res) => {
     try {
         var data = JSONbig.parse(req.body);
 
@@ -674,7 +674,7 @@ app.get('/webhook/', (req, res) => {
 });
 
 app.post('/webhook/scheduler', (req, res) => {
-    res.status(200).send();
+    res.status(200).send()
 });
 
 app.all('/webhook/nokia/:userid/:type', (req, res) => {
