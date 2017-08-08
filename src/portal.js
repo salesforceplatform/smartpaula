@@ -293,7 +293,7 @@ app.post('/admin/:user', isLoggedIn, isAdmin, (res, res) => {
         User.findById(id).then(users => {
             res.render('profile', { user: req.user, profile: user });
         });
-        res.redirect)
+        res.redirect('portal/admin');
     } catch (err) {
         return res.status(400).json({
             status: "error",
