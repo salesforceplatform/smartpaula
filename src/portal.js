@@ -45,9 +45,6 @@ const User = sequelize.define('user', {
     email: {
         type: Sequelize.STRING
     },
-    userName: {
-        type: Sequelize.STRING
-    },
     password: {
         type: Sequelize.STRING
     },
@@ -120,20 +117,20 @@ passport.deserializeUser(function (id, done) {
 passport.use('local-signup', new LocalStrategy({
     passReqToCallback: true
 },
-    function (req, email, password, done) {
+    function (req, firstname, lastname, email, password, done) {
         User.findOne({ where: { 'email': email } }, function (err, user) {
             // if there are any errors, return the error
             if (err)
                 return done(err);
 
-            // check to see if theres already a user with that username
+            // check to see if theres already a user with that email
             if (user) {
-                return done(null, false, req.flash('signupMessage', 'That username is already taken.'));
+                return done(null, false, req.flash('signupMessage', 'Thatemail is already taken.'));
             } else {
 
-                // if there is no user with that username
+                // if there is no user with that email
                 // create the user
-                var newUser = User.create({ email: email, password: User.generateHash(password) })
+                var newUser = User.create({ firstName: firstname, lastName: lastname, email: email, password: User.generateHash(password) })
                     .then(user => {
                         return done(null, newUser);
                     })

@@ -2,7 +2,16 @@ extends start.pug
 
 block content
     div
+        a#signup.hiddenanchor
+        a#signin.hiddenanchor
+
         .login-wrapper
+            .animate.form.login-form
+                section.login_content
+                    form()
+                        div
+                            input.form_control(placeholder='Username')
+                
             .animate.form.registration_form
                 section.login_content
                     form(method='POST')
@@ -13,8 +22,6 @@ block content
                             input.form_control(type='text' placeholder='Last name' required)
                         div
                             input.form_control(type='email' placeholder='Email' required)
-                        div
-                            input.form_control(type='text' placeholder='Username' required)
                         div
                             input.form_control(type='password' placeholder='Password' required)    
                         div
