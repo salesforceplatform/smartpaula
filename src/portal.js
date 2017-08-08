@@ -107,9 +107,8 @@ passport.use(new LocalStrategy(
 ));
 
 passport.serializeUser(function (user, done) {
-    user.then(user => {
-        done(null, user.id);
-    });
+    console.log('serializing:', user);
+    done(null, user.id);
 });
 
 passport.deserializeUser(function (id, done) {
@@ -135,9 +134,9 @@ passport.use('local-signup', new LocalStrategy({
 
                     // if there is no user with that email
                     // create the user
-                    var newUser = User.create({ email: email, password: User.generateHash(password) })
+                        User.create({ email: email, password: User.generateHash(password) })
                         .then(user => {
-                            return done(null, newUser);
+                            return done(null, user);
                         })
                 }
 
