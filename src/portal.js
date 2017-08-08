@@ -203,7 +203,7 @@ app.use(flash()); // use connect-flash for flash messages stored in session
 app.get('/', isLoggedIn, (req, res) => {
     try {
         getAllUsers((users) => {
-            res.render('index', { title: 'Hey', message: 'Hello there!', users: users });
+            res.render('index', { user: req.user });
         });
     } catch (err) {
         return res.status(400).json({
@@ -263,7 +263,7 @@ app.post('/login', passport.authenticate('local-login', {
 app.get('/admin', isLoggedIn, isAdmin, (req, res) => {
     try {
         User.findAll().then(users => {
-            res.render('admin', { users: users });
+            res.render('admin', { users: users, user: req.user });
         });
     } catch (err) {
         return res.status(400).json({
@@ -277,7 +277,7 @@ app.get('/admin/:user', isLoggedIn, isAdmin, (req, res) => {
     try {
         let id = req.params.user;
         User.findById(id).then(users => {
-            res.render('profile', { user: user });
+            res.render('profile', { user: req.user, profile: user });
         });
     } catch (err) {
         return res.status(400).json({
@@ -289,7 +289,7 @@ app.get('/admin/:user', isLoggedIn, isAdmin, (req, res) => {
 
 app.get('/:user', isLoggedIn, (req, res) => {
     try {
-        res.render('user');
+        res.render('user', { user: req.user });
     } catch (err) {
         return res.status(400).json({
             status: "error",
