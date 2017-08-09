@@ -34,7 +34,6 @@ $(function () {
             });
 
         data.questions.data.forEach(function (dataSet) {
-            console.log(dataSet);
             ctx = $('#questionnare_per_question_' + dataSet.label)[0].getContext('2d')
             question_chart = new Chart(ctx,
                 {
@@ -57,7 +56,6 @@ $(function () {
                                 type: 'time',
                                 time: {
                                     unit: 'second',
-                                    round: 'second',
                                     stepSize: 1,
                                     tooltipFormat: "h:mm:ss a",
                                     displayFormats: {
@@ -69,7 +67,7 @@ $(function () {
                     }
                 })
         });
-        ctx = $('#blood')[0].getContext('2d')
+        ctx = $('#blood_pressure')[0].getContext('2d')
         question_chart = new Chart(ctx,
             {
                 type: 'line',
@@ -87,14 +85,8 @@ $(function () {
                         borderColor: "#8e5ea2",
                         label: 'Diastolisch',
                         fill: false
-                    },
-                    {
-                        yAxisID: 'Pulse',
-                        data: data.blood.pulse,
-                        borderColor: "#c45850",
-                        label: 'Hartslag',
-                        fill: false
-                    }]
+                    }
+                    ]
                 },
                 options: {
                     scales: {
@@ -104,13 +96,6 @@ $(function () {
                             ticks: {
                                 suggestedMin: 40,
                                 suggestedMax: 200
-                            }
-                        }, {
-                            id: 'Pulse',
-                            type: 'linear',
-                            ticks: {
-                                suggestedMin: 0,
-                                suggestedMax: 125
                             }
                         }],
                         xAxes: [{
@@ -139,7 +124,11 @@ $(function () {
                 options: {
                     scales: {
                         yAxes: [{
-                            type: 'linear'
+                            type: 'linear',
+                            ticks: {
+                                beginAtZero: true,
+                                stepSize: 1,
+                            }
                         }],
                         xAxes: [{
                             type: 'time',
@@ -153,5 +142,38 @@ $(function () {
                     }
                 }
             })
+
+        ctx = $('#pulse')[0].getContext('2d')
+        question_chart = new Chart(ctx,
+            {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        data: data.blood.pulse,
+                        borderColor: "#c45850",
+                        label: 'Hartslag',
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            type: 'linear',
+                            ticks: {
+                                suggestedMin: 0,
+                                suggestedMax: 125
+                            }],
+                        xAxes: [{
+                            type: 'time',
+                            time: {
+                                tooltipFormat: "h:mm:ss a",
+                                displayFormats: {
+                                    hour: 'MMM D, h:mm A'
+                                }
+                            }
+                        }]
+                    }
+                }
+            });
     });
 });
