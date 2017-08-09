@@ -24,14 +24,13 @@ let Nokia = function (apiKey, apiSecret, callbackUrl) {
  * @param {number} appli Type of measurements to subscribe to.
  * @see https://developer.health.nokia.com/api/doc#api-Notification-notify_subscribe
  */
-Nokia.prototype._subscriptionUrl(user, appli) {
+Nokia.prototype._subscriptionUrl = function (user, appli) {
     return 'https://api.health.nokia.com/notify'
         + '?action=subscribe'
         + '&userid=' + user
         + '&callbackurl=' + HOSTNAME + 'webhook/nokia/' + user + '/' + appli
         + '&appli=' + appli;
 }
-
 /**
  * Requests an OAuth 1.0 request token from the Nokia Health API, and stores it in the database. Also builds an authorization
  * url that can be sent to a user in order to authorize Paula to access the user's data on the API
