@@ -612,6 +612,7 @@ app.post('/webhook/', (req, res) => {
 
 app.post('/webhook/scheduler', (req, res) => {
     pool.query('SELECT fbuser FROM connect_nokia WHERE last_update > (CURRENT_DATE - INTERVAL \'1 week\') AND sent_message = NULL').then(result => {
+        console.log(result);
         result.rows.forEach(row => {
             let user = row.fbuser;
             if (!sessionIds.has(user)) {
