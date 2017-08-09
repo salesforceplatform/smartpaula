@@ -162,7 +162,8 @@ $(function () {
                             ticks: {
                                 suggestedMin: 0,
                                 suggestedMax: 125
-                            }],
+                            }
+                        }],
                         xAxes: [{
                             type: 'time',
                             time: {
