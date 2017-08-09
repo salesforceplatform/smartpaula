@@ -125,7 +125,8 @@ $(function () {
                         yAxes: [{
                             type: 'linear',
                             ticks: {
-                                suggestedMin: 50
+                                suggestedMin: 50,
+                                suggestedMax: 120
                             }
                         }],
                         xAxes: [{
