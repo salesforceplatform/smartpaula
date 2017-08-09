@@ -41,7 +41,6 @@ const apiAiService = apiai(APIAI_ACCESS_TOKEN, {
 
 /** @const {Nokia} Nokia API interface */
 const nokia = new Nokia(NOKIA_API_KEY, NOKIA_API_SECRET, HOSTNAME + 'connect/nokia/');
-);
 
 /** @const {Wunderlist} Wunderlist API interface */
 const wunderlist = new Wunderlist(WUNDERLIST_CLIENT_ID, WUNDERLIST_CLIENT_SECRET, HOSTNAME + 'connect/wunderlist');
