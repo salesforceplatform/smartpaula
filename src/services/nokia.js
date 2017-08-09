@@ -2,6 +2,18 @@ const OAuth = require('oauth');
 
 const HOSTNAME = process.env.HOSTNAME;
 
+function isDefined(obj) {
+    if (typeof obj == 'undefined') {
+        return false;
+    }
+
+    if (!obj) {
+        return false;
+    }
+
+    return obj != null;
+}
+
 let Nokia = function (apiKey, apiSecret, callbackUrl) {
     this._apiKey = apiKey;
     this._apiSecret = apiSecret;
