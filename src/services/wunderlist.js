@@ -55,7 +55,7 @@ Wunderlist.prototype.createList = function (accessToken) {
         'clientID': this._clientId
     });
 
-    return wunderlistAPI.http.lists.create({ title: 'Paula\'s boodschappen' })
+    return wunderlistAPI.http.lists.create({ title: 'Mijn boodschappen' })
         .done(function (listData, statusCode) {
             console.log(listData, statusCode);
             if (statusCode === 200) {
