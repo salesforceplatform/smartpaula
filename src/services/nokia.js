@@ -50,7 +50,7 @@ Nokia.prototype.getRequestUrl = function (fbUser, callback) {
     );
     nokiaAPI.getOAuthRequestToken((error, oAuthToken, oAuthTokenSecret, results) => {
         let authUrl = 'https://developer.health.nokia.com/account/authorize?'
-            + 'oauth_consumer_key=' + NOKIA_API_KEY
+            + 'oauth_consumer_key=' + this._apiKey
             + '&oauth_token=' + oAuthToken;
         if (error) {
             callback(error);
