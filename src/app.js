@@ -651,10 +651,9 @@ app.post('/webhook/scheduler', (req, res) => {
                     send[user] = []
                 }
                 
-                if (sent.includes(type)) {
+                if (!sent.includes(type)) {
                     send[user].push(type);
                 }
-                console.log(send, sent, user);
             });
             for (let user in send) {
                 if (!send.hasOwnProperty(user)) continue;
