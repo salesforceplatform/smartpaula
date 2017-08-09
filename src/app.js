@@ -160,7 +160,6 @@ function handleResponse(response, sender) {
                         pool.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', [sender])
                             .then(res => {
                                 let vragenlijst = res.rows[0].id;
-                                console.log('vragenlijst', vragenlijst);
                                 pool.query('SELECT * FROM antwoorden WHERE vragenlijst = $1', [vragenlijst])
                                     .then(res => {
                                         let answer_no = res.rowCount + 1;

@@ -81,7 +81,7 @@ Nokia.prototype.getMeasurements = function (nokiaUser, accessToken, accessSecret
 }
 
 Nokia.prototype.subscribe = function (nokiaUser, accessToken, accessSecret, type, callback) {
-    let signedUrl = this._oAuth.signUrl(this._subscriptionUrl(nokiaUser, type), row.oauth_access_token, row.oauth_access_secret);
+    let signedUrl = this._oAuth.signUrl(this._subscriptionUrl(nokiaUser, type), accessToken, accessSecret);
     this._oAuth.get(signedUrl, null, null, callback);
 }
 
