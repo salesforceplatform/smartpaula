@@ -239,6 +239,14 @@ function handleResponse(response, sender) {
                     console.log('Received an unknown action from API.ai: "' + action + '"');
             }
 
+            if (intent = "Connected Wunderlist") {
+                message.quick_replies = [{
+                    "content_type": "text",
+                    "title": "Nieuwe boodschappenlijst",
+                    "payload": "Nieuwe boodschappenlijst"
+                }]
+            }
+
             // facebook API limit for text length is 640,
             // so we must split message if needed
             let splittedText = splitResponse(message.text);
