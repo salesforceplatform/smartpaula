@@ -146,8 +146,6 @@ function handleResponse(response, sender) {
                 });
             }
 
-            console.log(response.result);
-
             switch (action) {
                 // User has answered a new PAM question
                 // TODO: Create some way of updating questionnares and questions that works on all questionnares
@@ -156,15 +154,12 @@ function handleResponse(response, sender) {
                     let score = parameters.pam_score;
 
                     if (isDefined(score)) {
-                        console.log(action, 'score is defined', score);
-
                         pool.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', [sender])
                             .then(res => {
                                 let vragenlijst = res.rows[0].id;
                                 pool.query('SELECT * FROM antwoorden WHERE vragenlijst = $1', [vragenlijst])
                                     .then(res => {
-                                        let answer_no = res.rowCount + 1;
-                                        console.log('answer_no', answer_no);
+                                        let answer_no = res.rowCount + 1;;
                                         pool.query('INSERT INTO antwoorden (vragenlijst, waarde, antwoord_op, vraag) VALUES ($1, $2, (SELECT NOW()), $3)', [vragenlijst, score, answer_no]);
                                     });
                             });
@@ -182,7 +177,6 @@ function handleResponse(response, sender) {
                 // User wants to start a new questionnare
                 case "start_vragenlijst":
                     pool.query({ text: 'INSERT INTO vragenlijsten (fbuser, vragenlijst) VALUES($1, $2)', values: [sender, parameters.vragenlijst] })
-                        .then(res => { console.log(res); })
                         .catch(e => console.error(e, e.stack));
                     break;
 
@@ -205,10 +199,9 @@ function handleResponse(response, sender) {
                                     request.on('error', (error) => console.error(error));
 
                                     request.end();
-                                });
-                            wunderlist.createWebhook(connection.access_token, list.id, HOSTNAME + 'webhook/wunderlist/' + sender, (someresult) => { console.log(someresult); });
-                        }
-                        );
+                                }).catch(e => console.error(e, e.stack));;
+                            wunderlist.createWebhook(connection.access_token, list.id, HOSTNAME + 'webhook/wunderlist/' + sender);
+                        });
                     });
                     break;
 
@@ -224,8 +217,9 @@ function handleResponse(response, sender) {
                                     if (!error) {
                                         facebook.sendMessage(sender, { text: url });
                                         pool.query('DELETE FROM connect_nokia WHERE fbuser = $1', [sender]).then(() => {
-                                            pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret) VALUES ($1, $2, $3)', [sender, oAuthToken, oAuthTokenSecret]);
-                                        });
+                                            pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret) VALUES ($1, $2, $3)', [sender, oAuthToken, oAuthTokenSecret])
+                                                .catch(e => console.error(e, e.stack));;
+                                        }).catch(e => console.error(e, e.stack));;
                                     }
                                 });
                                 break;
@@ -282,7 +276,6 @@ function handleResponse(response, sender) {
 
                     request.on('response', (response) => { handleResponse(response, sender); });
                     request.on('error', (error) => console.error(error));
-
                     request.end();
                 }
 
@@ -375,7 +368,7 @@ function chunkString(s, len) {
 function sendMeasurementMessage(types, user) {
     let event = 'new_measurement_';
 
-    if (types.length === 3 && types.includes(9) && types.includes(10) && types.includes(9)) {
+    if (types.length === 3 && types.includes(9) && types.includes(10) && types.includes(11)) {
         event += 'blood';
     } else if (types.length === 1 && types[0] === 1) {
         event += 'weight';
@@ -427,9 +420,7 @@ function getNokiaMeasurements(userid) {
             if (measureTypes.length > 0) {
                 sendMeasurementMessage(measureTypes, user.fbuser);
             }
-            pool.query('UPDATE connect_nokia SET last_update = (SELECT NOW()), sent_message = NULL WHERE fbuser = $1 OR nokia_user = $1', [userid]);
-
-
+            pool.query('UPDATE connect_nokia SET last_update = (SELECT NOW()), sent_message = NULL WHERE fbuser = $1 OR nokia_user = $1', [userid
         });
     });
 }
@@ -455,6 +446,11 @@ function subscribeToNokia(fbuser) {
     })
 }
 
+/**
+ * Checks if an object is either undefined or falsy
+ * @param {any} obj Object to check
+ * @returns {boolean} True if defined an thruthy, false if not defined or falsy
+ */
 function isDefined(obj) {
     if (typeof obj == 'undefined') {
         return false;
@@ -626,6 +622,15 @@ app.post('/webhook/', (req, res) => {
 });
 
 app.post('/webhook/scheduler', (req, res) => {
+    pool.query('SELECT * FROM (' +
+            '(SELECT distinct on (fbuser) measure_blood.fbuser, \'blood\' as measurement_type, sent_message FROM measure_blood LEFT JOIN connect_nokia ON measure_blood.fbuser = connect_nokia.fbuser ORDER BY fbuser, measure_date DESC)' +
+            'UNION ALL ' +
+            '(SELECT distinct on (fbuser) measure_weight.fbuser, weight \'blood\' as measurement_type, sent_message FROM measure_weight LEFT JOIN connect_nokia ON measure_weight.fbuser = connect_nokia.fbuser ORDER BY fbuser, measure_date DESC)' +
+        ') as latest_records  WHERE latest_records.measure_date < (CURRENT_DATE - INTERVAL \'1 week\')').then(result => {
+            console.log(result);
+        });
+
+    /**
     pool.query('SELECT fbuser FROM connect_nokia WHERE last_update < (CURRENT_DATE - INTERVAL \'1 week\') AND sent_message IS NULL').then(result => {
         console.log(result);
         result.rows.forEach(row => {
@@ -646,6 +651,7 @@ app.post('/webhook/scheduler', (req, res) => {
             pool.query('UPDATE connect_nokia SET sent_message = true WHERE fbuser = $1', [user]);
         })
     })
+    */
     res.status(200).send()
 });
 
