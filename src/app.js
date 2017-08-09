@@ -643,12 +643,15 @@ app.post('/webhook/scheduler', (req, res) => {
         ') as latest_records  WHERE measure_date < (CURRENT_DATE - INTERVAL \'1 week\')').then(result => {
             let send = {}
             result.rows.forEach(row => {
+                console.log(row);
                 let user = row.fbuser;
                 let sent = row.sent_message.split(',');
                 let type = row.measurement_type;
+                console.log(send, user);
                 if (!(user in send)) {
                     send[user] = []
                 }
+                console.log(send, user);
                 if (sent.includes(type)) {
                     send.user.push(type);
                 }
