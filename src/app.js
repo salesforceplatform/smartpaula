@@ -626,7 +626,7 @@ app.post('/webhook/scheduler', (req, res) => {
             '(SELECT distinct on (fbuser) measure_blood.fbuser, \'blood\' as measurement_type, sent_message FROM measure_blood LEFT JOIN connect_nokia ON measure_blood.fbuser = connect_nokia.fbuser ORDER BY fbuser, measure_date DESC)' +
             'UNION ALL ' +
             '(SELECT distinct on (fbuser) measure_weight.fbuser, \'weight\' as measurement_type, sent_message FROM measure_weight LEFT JOIN connect_nokia ON measure_weight.fbuser = connect_nokia.fbuser ORDER BY fbuser, measure_date DESC)' +
-        ') as latest_records  WHERE latest_records.measure_date < (CURRENT_DATE - INTERVAL \'1 week\')').then(result => {
+        ') as latest_records  WHERE measure_date < (CURRENT_DATE - INTERVAL \'1 week\')').then(result => {
             console.log(result);
         });
 
