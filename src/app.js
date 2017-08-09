@@ -653,7 +653,7 @@ app.post('/webhook/scheduler', (req, res) => {
                 }
                 console.log(send, user);
                 if (sent.includes(type)) {
-                    send.user.push(type);
+                    send[user].push(type);
                 }
             });
             console.log(send);
