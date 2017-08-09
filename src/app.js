@@ -650,7 +650,7 @@ app.post('/webhook/scheduler', (req, res) => {
                 if (!(user in send)) {
                     send[user] = []
                 }
-                console.log(send, user);
+                console.log(send, sent, user);
                 if (sent.includes(type)) {
                     send[user].push(type);
                 }
