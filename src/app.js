@@ -405,7 +405,7 @@ function getNokiaMeasurements(userid) {
             if (measureTypes.length > 0) {
                 sendMeasurementMessage(measureTypes, user.fbuser);
             }
-            pool.query('UPDATE connect_nokia SET last_update = (SELECT NOW()) WHERE fbuser = $1 OR nokia_user = $1', [userid]);
+            pool.query('UPDATE connect_nokia SET last_update = (SELECT NOW()), sent_message = NULL WHERE fbuser = $1 OR nokia_user = $1', [userid]);
 
 
         });
@@ -604,8 +604,9 @@ app.post('/webhook/', (req, res) => {
 });
 
 app.post('/webhook/scheduler', (req, res) => {
-    pool.query('SELECT fbuser FROM connect_nokia WHERE last_update > (CURRENT_DATE - INTERVAL \'1 week\')').then(result => {
+    pool.query('SELECT fbuser FROM connect_nokia WHERE last_update > (CURRENT_DATE - INTERVAL \'1 week\') AND sent_message = NULL').then(result => {
         result.rows.forEach(row => {
+            let user = row.fbuser;
             if (!sessionIds.has(user)) {
                 sessionIds.set(user, uuid.v1());
             }
@@ -613,12 +614,13 @@ app.post('/webhook/scheduler', (req, res) => {
             let request = apiAiService.eventRequest({
                 name: 'old_measurement'
             }, {
-                    sessionId: sessionIds.get(row.fbuser)
+                    sessionId: sessionIds.get(user)
                 });
-            request.on('response', (response) => { handleResponse(response, sender); });
+            request.on('response', (response) => { handleResponse(response, user); });
             request.on('error', (error) => console.error(error));
 
             request.end();
+            pool.query('UPDATE connect_nokia SET sent_message = true WHERE fbuser = $1', [user]);
         })
     })
     res.status(200).send()
