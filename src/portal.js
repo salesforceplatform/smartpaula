@@ -83,7 +83,6 @@ function getAllUsers(callback) {
             let users = [];
             getUser(result.rows,
                 (profile) => {
-                    console.log(profile);
                     users.push({ id: profile.id, name: profile.first_name + ' ' + profile.last_name });
                 },
                 () => {
@@ -121,13 +120,11 @@ passport.use(new LocalStrategy(
 ));
 
 passport.serializeUser(function (user, done) {
-    console.log('serializing:', user);
     done(null, user.id);
 });
 
 passport.deserializeUser(function (id, done) {
-    User.findById(id).then(user => {
-        console.log('deserialized:', user);
+    User.findById(id).then(user => {          
         done(null, user);
     });
 });
@@ -221,23 +218,6 @@ app.post('/', isLoggedIn, (req, res) => {
     }
 });
 
-app.get('/signup', (req, res) => {
-    try {
-        res.render('signup', { message: req.flash('signupMessage') });
-    } catch (err) {
-        return res.status(400).json({
-            status: "error",
-            error: err
-        });
-    }
-});
-
-app.post('/signup', passport.authenticate('local-signup', {
-    successRedirect: '/portal/',
-    failureRedirect: '/portal/signup',
-    failureFlash: true
-}));
-
 app.get('/login', (req, res) => {
     try {
         res.render('login');
@@ -300,7 +280,6 @@ app.post('/admin/:user', isLoggedIn, isAdmin, (req, res) => {
         let id = req.params.user;
         let password = req.body.password;
         let admin = req.body.admin;
-        console.log(req.body);
         let userData = {
             first_name: req.body.firstname,
             last_name: req.body.lastname,
@@ -356,7 +335,6 @@ app.get('/:user/data', (req, res) => {
     let user = req.params.user;
     let userData = {};
     pool.query('SELECT *, to_char(timezone(\'zulu\', to_timestamp(date_part(\'epoch\', vragenlijsten.gestart))),\'YYYY-MM-DDThh24:MI:SSZ\') as date, (SELECT SUM(waarde) FROM antwoorden WHERE antwoorden.vragenlijst = vragenlijsten.id) FROM vragenlijsten WHERE fbuser = $1', [user]).then(result => {
-        console.log(result);
         userData.lists = { data: [] };
         result.rows.forEach((row) => {
             if (row.date && row.sum) {
