@@ -647,7 +647,6 @@ app.post('/webhook/scheduler', (req, res) => {
                 let user = row.fbuser;
                 let sent = row.sent_message.split(',');
                 let type = row.measurement_type;
-                console.log(send, user);
                 if (!(user in send)) {
                     send[user] = []
                 }
@@ -656,7 +655,33 @@ app.post('/webhook/scheduler', (req, res) => {
                     send[user].push(type);
                 }
             });
-            console.log(send);
+            for (let user in send) {
+                if (!send.hasOwnProperty(user)) continue;
+
+                if (!sessionIds.has(user)) {
+                    sessionIds.set(user, uuid.v1());
+                }
+
+                send[user].forEach(type => {
+                    let request = apiAiService.eventRequest({
+                        name: 'old_measurement_' + type
+                    }, {
+                            sessionId: sessionIds.get(user)
+                        });
+                    request.on('response', (response) => { handleResponse(response, user); });
+                    request.on('error', (error) => console.error(error));
+                    request.end();
+
+                    pool.query('SELECT sent_message FROM connect_nokia WHERE fbuser = $1', [user]).then(result => {
+                        let userRecord = result.rows[0];
+                        let sentTypes = userRecord.sent_message.split(',');
+                        if (!sentTypes.includes(type)) {
+                            sentTypes.push(type);
+                        }
+                        pool.query('UPDATE connect_nokia SET sent_message = $1 WHERE fbuser = $2', [sentTypes.join(), user]);
+                    })
+                })
+            }
         });
 
     /**
