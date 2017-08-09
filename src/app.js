@@ -239,17 +239,19 @@ function handleResponse(response, sender) {
                     console.log('Received an unknown action from API.ai: "' + action + '"');
             }
 
-            if (intent = "Connected Wunderlist") {
+            if (intent === "Connected Wunderlist") {
                 message.quick_replies = [{
                     "content_type": "text",
-                    "title": "Nieuwe boodschappenlijst",
+                    "title": "Nieuwe lijst aanmaken",
                     "payload": "Nieuwe boodschappenlijst"
                 },
-                    {
-                        "content_type": "text",
-                        "title": "Niet nu",
-                        "payload": "Niet nu"
-                    }]
+                {
+                    "content_type": "text",
+                    "title": "Niet nu",
+                    "payload": "Niet nu"
+                }]
+            } else if (intent === 'PAM_vragenlijst_einde') {
+                delete message.quick_replies
             }
 
             // facebook API limit for text length is 640,
