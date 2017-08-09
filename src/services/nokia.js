@@ -72,9 +72,9 @@ Nokia.prototype.getRequestUrl = function (fbUser, callback) {
  */
 Nokia.prototype.getMeasurements = function (nokiaUser, accessToken, accessSecret, lastUpdate, callback) {
     let url = 'https://api.health.nokia.com/measure' + '?action=getmeas' + '&userid=' + nokiaUser + '&lastupdate=' + Math.round(lastUpdate);
-    let signedUrl = nokiaAPI.signUrl(url, accessToken, accessSecret);
+    let signedUrl = this._oAuth.signUrl(url, accessToken, accessSecret);
 
-    nokiaAPI.get(signedUrl, null, null, (error, response) => {
+    this._oAuth.get(signedUrl, null, null, (error, response) => {
         let responseData = JSON.parse(response);
         if (isDefined(responseData.body)) {
             let measureGroups = responseData.body.measuregrps;
@@ -84,8 +84,8 @@ Nokia.prototype.getMeasurements = function (nokiaUser, accessToken, accessSecret
 }
 
 Nokia.prototype.subscribe = function (nokiaUser, accessToken, accessSecret, type, callback) {
-    let signedUrl = nokiaAPI.signUrl(nokiaSubscriptionUrl(nokiaUser, type), row.oauth_access_token, row.oauth_access_secret);
-    nokiaAPI.get(signedUrl, null, null, callback);
+    let signedUrl = this._oAuth.signUrl(nokiaSubscriptionUrl(nokiaUser, type), row.oauth_access_token, row.oauth_access_secret);
+    this._oAuth.get(signedUrl, null, null, callback);
 }
 
 Nokia.prototype.getAccessToken = function (requestToken, requestSecret, verifier, callback) {
