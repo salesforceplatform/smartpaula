@@ -397,7 +397,7 @@ function getNokiaMeasurements(userid) {
         let user = res.rows[0];
         nokia.getMeasurements(user.nokia_user, user.oauth_access_token, user.oauth_access_secret, user.time, measureGroups => {
             let measureTypes = [];
-            let sentTypes = user.sent_message.split(',');
+            let sentTypes = isDefined(user.sent_message) ? user.sent_message.split(',') : [];
             measureGroups.forEach(group => {
                 let date = new Date(group.date * 1000).toISOString().slice(0, 19).replace('T', ' ');
                 group.measures.forEach(measurement => {
