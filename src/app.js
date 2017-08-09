@@ -65,7 +65,7 @@ function handleResponse(response, sender) {
 
         /** The API.AI intent @type {string} */
         let intent = response.result.metadata.intentId;
-        let intentName = response.rsult.metadata.intentName;
+        let intentName = response.result.metadata.intentName;
         /** The API.AI action within an intent @type {string} */
         let action = response.result.action;
         /** Additional parameters passed by the intent @type {object} */
