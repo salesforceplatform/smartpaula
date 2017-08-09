@@ -397,6 +397,7 @@ function getNokiaMeasurements(userid) {
         let user = res.rows[0];
         nokia.getMeasurements(user.nokia_user, user.oauth_access_token, user.oauth_access_secret, user.time, measureGroups => {
             let measureTypes = [];
+            let sentTypes = user.sent_message.split(',');
             measureGroups.forEach(group => {
                 let date = new Date(group.date * 1000).toISOString().slice(0, 19).replace('T', ' ');
                 group.measures.forEach(measurement => {
@@ -419,8 +420,21 @@ function getNokiaMeasurements(userid) {
             })
             if (measureTypes.length > 0) {
                 sendMeasurementMessage(measureTypes, user.fbuser);
+                measureTypes.forEach(type => {
+                    let namedType = '';
+                    if (type === 9 || type === 10 || type === 11) {
+                        namedType = 'blood'
+                    } else if (type === 1) {
+                        namedType = 'weight'
+                    }
+                    let index = sentTypes.indexOf(namedType);
+                    if (index > -1) {
+                        sentTypes.splice(index, 1);
+                    }
+                })
             }
-            pool.query('UPDATE connect_nokia SET last_update = (SELECT NOW()), sent_message = NULL WHERE fbuser = $1 OR nokia_user = $1', [userid]);
+
+            pool.query('UPDATE connect_nokia SET last_update = (SELECT NOW()), sent_message = $1 WHERE fbuser = $2 OR nokia_user = $2', [sentTypes.join(), userid]);
         });
     });
 }
@@ -627,7 +641,19 @@ app.post('/webhook/scheduler', (req, res) => {
             'UNION ALL ' +
             '(SELECT distinct on (fbuser) measure_weight.fbuser, \'weight\' as measurement_type, measure_date, sent_message FROM measure_weight LEFT JOIN connect_nokia ON measure_weight.fbuser = connect_nokia.fbuser ORDER BY fbuser, measure_date DESC)' +
         ') as latest_records  WHERE measure_date < (CURRENT_DATE - INTERVAL \'1 week\')').then(result => {
-            console.log(result);
+            let send = {}
+            result.rows.forEach(row => {
+                let user = row.fbuser;
+                let sent = row.sent_message.split(',');
+                let type = row.measurement_type;
+                if (!isDefined(send[user])) {
+                    send[user] = []
+                }
+                if (sent.includes(type)) {
+                    send.user.push(type);
+                }
+            });
+            console.log(send);
         });
 
     /**
