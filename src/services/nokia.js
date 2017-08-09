@@ -56,10 +56,7 @@ Nokia.prototype.getRequestUrl = function (fbUser, callback) {
             callback(error);
             return;
         }
-        pool.query('DELETE FROM connect_nokia WHERE fbuser = $1', [fbUser]).then(() => {
-            pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret) VALUES ($1, $2, $3)', [fbUser, oAuthToken, oAuthTokenSecret]);
-        });
-        callback(null, authUrl);
+        callback(null, authUrl, oAuthToken, oAuthTokenSecret);
     });
 }
 
@@ -84,7 +81,7 @@ Nokia.prototype.getMeasurements = function (nokiaUser, accessToken, accessSecret
 }
 
 Nokia.prototype.subscribe = function (nokiaUser, accessToken, accessSecret, type, callback) {
-    let signedUrl = this._oAuth.signUrl(nokiaSubscriptionUrl(nokiaUser, type), row.oauth_access_token, row.oauth_access_secret);
+    let signedUrl = this._oAuth.signUrl(this._subscriptionUrl(nokiaUser, type), row.oauth_access_token, row.oauth_access_secret);
     this._oAuth.get(signedUrl, null, null, callback);
 }
 

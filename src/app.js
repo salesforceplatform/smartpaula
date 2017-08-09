@@ -220,7 +220,14 @@ function handleResponse(response, sender) {
                             // So far, only Nokia health (formerly Withings) is supported
                             case "Nokia":
                                 // Get a reqest token, and a login url to send to the user.
-                                nokia.getRequestUrl(sender, (error, url) => { facebook.sendMessage(sender, { text: url }); });
+                                nokia.getRequestUrl(sender, (error, url, oAuthToken, oAuthTokenSecret) => {
+                                    if (!error) {
+                                        facebook.sendMessage(sender, { text: url });
+                                        pool.query('DELETE FROM connect_nokia WHERE fbuser = $1', [fbUser]).then(() => {
+                                            pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret) VALUES ($1, $2, $3)', [fbUser, oAuthToken, oAuthTokenSecret]);
+                                        });
+                                    }
+                                });
                                 break;
                             case "Wunderlist":
                                 message.text += '\n' + HOSTNAME + 'connect/wunderlist/' + sender;
