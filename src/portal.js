@@ -10,7 +10,7 @@ const Sequelize = require('sequelize');
 const bcrypt = require('bcrypt-nodejs');
 const flash = require('connect-flash');
 
-const Facebook = require('./facebook');
+const Facebook = require('./services/facebook');
 
 const FB_VERIFY_TOKEN = process.env.FB_VERIFY_TOKEN;
 const FB_PAGE_ACCESS_TOKEN = process.env.FB_PAGE_ACCESS_TOKEN;
