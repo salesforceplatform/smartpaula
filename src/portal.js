@@ -296,7 +296,7 @@ app.get('/admin/:user', isLoggedIn, isAdmin, (req, res) => {
 });
 
 app.post('/admin/:user', isLoggedIn, isAdmin, (req, res) => {
-    //try {
+    try {
         let id = req.params.user;
         let password = req.body.password;
         let admin = req.body.admin;
@@ -333,12 +333,12 @@ app.post('/admin/:user', isLoggedIn, isAdmin, (req, res) => {
                 });
             });
         }
-    //} catch (err) {
-        //return res.status(400).json({
-         //   status: "error",
-       //     error: err
-     //   });
-    //}
+    } catch (err) {
+        return res.status(400).json({
+            status: "error",
+            error: err
+        });
+    }
 })
 
 app.get('/:user', isLoggedIn, (req, res) => {

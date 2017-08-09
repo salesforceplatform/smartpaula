@@ -9,11 +9,12 @@ const JSONbig = require('json-bigint');
 const async = require('async');
 const { Pool, Client } = require('pg');
 const util = require('util');
-const OAuth = require('oauth');
 const path = require('path');
 const cookieParser = require('cookie-parser');
-const Wunderlist = require('./wunderlist');
-const Facebook = require('./facebook');
+
+const Wunderlist = require('./services/wunderlist');
+const Facebook = require('./services/facebook');
+const Nokia = require('./services/nokia');
 
 const REST_PORT = (process.env.PORT || 5000);
 const APIAI_ACCESS_TOKEN = process.env.APIAI_ACCESS_TOKEN;
@@ -25,28 +26,21 @@ const NOKIA_API_SECRET = process.env.NOKIA_API_SECRET;
 const WUNDERLIST_CLIENT_ID = process.env.WUNDERLIST_CLIENT_ID;
 const WUNDERLIST_CLIENT_SECRET = process.env.WUNDERLIST_CLIENT_SECRET;
 const HOSTNAME = process.env.HOSTNAME;
+const DEFAULT_INTENT_REFER_TO = process.env.DEFAULT_INTENT_REFER_TO;
 const DEFAULT_INTENTS = ['57b82498-053c-4776-8be9-228c420e6c13', 'b429ecdc-21f4-4a07-8165-3620023185ba'];
-const DEFAULT_INTENT_REFER_TO = '1581441435202307';
 const VIEWS = __dirname + '/views/';
 
 /** @const {Pool} Postgres connection pool */
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
-/** @const {Apiai} API.AI connection pool */
+/** @const {Apiai} API.AI interface */
 const apiAiService = apiai(APIAI_ACCESS_TOKEN, {
     language: APIAI_LANG,
     requestSource: "fb"
 });
 
-/** @const {OAuth} OAuth service to talk to the Nokia Health API*/
-const nokiaAPI = new OAuth.OAuth(
-    'https://developer.health.nokia.com/account/request_token',
-    'https://developer.health.nokia.com/account/access_token',
-    NOKIA_API_KEY,
-    NOKIA_API_SECRET,
-    '1.0',
-    HOSTNAME + 'webhook/nokia',
-    'HMAC-SHA1'
+/** @const {Nokia} Nokia API interface */
+const nokia = new Nokia(NOKIA_API_KEY, NOKIA_API_SECRET, HOSTNAME + 'connect/nokia/');
 );
 
 /** @const {Wunderlist} Wunderlist API interface */
@@ -223,7 +217,7 @@ function handleResponse(response, sender) {
                             // So far, only Nokia health (formerly Withings) is supported
                             case "Nokia":
                                 // Get a reqest token, and a login url to send to the user.
-                                getNokiaRequestToken(sender, (error, url) => { facebook.sendMessage(sender, { text: url }); });
+                                nokia.getRequestUrl(sender, (error, url) => { facebook.sendMessage(sender, { text: url }); });
                                 break;
                             case "Wunderlist":
                                 message.text += '\n' + HOSTNAME + 'connect/wunderlist/' + sender;
@@ -349,94 +343,6 @@ function chunkString(s, len) {
 }
 
 /**
- * Requests an OAuth 1.0 request token from the Nokia Health API, and stores it in the database. Also builds an authorization
- * url that can be sent to a user in order to authorize Paula to access the user's data on the API
- * @param {number} fbUser Facebook user id to associate this token with
- * @param {function} callback Callback function called with (error, authentication URL)
- */
-function getNokiaRequestToken(fbUser, callback) {
-    // We need a new OAuth object, because the callback url is specific to each user
-    const nokiaAPI = new OAuth.OAuth(
-        'https://developer.health.nokia.com/account/request_token',
-        'https://developer.health.nokia.com/account/access_token',
-        NOKIA_API_KEY,
-        NOKIA_API_SECRET,
-        '1.0',
-        HOSTNAME + 'connect/nokia/' + fbUser,
-        'HMAC-SHA1'
-    );
-    nokiaAPI.getOAuthRequestToken((error, oAuthToken, oAuthTokenSecret, results) => {
-        let authUrl = 'https://developer.health.nokia.com/account/authorize?'
-            + 'oauth_consumer_key=' + NOKIA_API_KEY
-            + '&oauth_token=' + oAuthToken;
-        if (error) {
-            callback(error);
-            return;
-        }
-        pool.query('DELETE FROM connect_nokia WHERE fbuser = $1', [fbUser]).then(() => {
-            pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret) VALUES ($1, $2, $3)', [fbUser, oAuthToken, oAuthTokenSecret]);
-        });
-        callback(null, authUrl);
-    });
-}
-
-/**
- * Fetches data from the Nokia Health API for a single user, and stores data in the database
- * @param {number} userid Facebook id or nokia user id
- * @param {any} callback Callback function, called when the request is completed
- * @see https://developer.health.nokia.com/api/doc#api-Measure-get_measure
- */
-function getNokiaMeasurements(userid, callback) {
-    pool.query('SELECT *, extract(epoch from last_update) as time FROM connect_nokia WHERE fbuser = $1 OR nokia_user = $1', [userid]).then(res => {
-        let user = res.rows[0];
-        if (isDefined(user)) {
-            let url = 'https://api.health.nokia.com/measure' + '?action=getmeas' + '&userid=' + user.nokia_user + '&lastupdate=' + Math.round(user.time);
-            let signedUrl = nokiaAPI.signUrl(url, user.oauth_access_token, user.oauth_access_secret);
-            console.log(signedUrl);
-            console.log(user);
-
-            nokiaAPI.get(signedUrl, null, null, (error, response) => {
-                let responseData = JSON.parse(response);
-                console.log(responseData);
-                if (isDefined(responseData.body)) {
-                    let measureGroups = responseData.body.measuregrps;
-                    let measureTypes = [];
-                    measureGroups.forEach(group => {
-                        let date = new Date(group.date * 1000).toISOString().slice(0, 19).replace('T', ' ');
-                        group.measures.forEach(measurement => {
-                            let type = measurement.type;
-                            let value = measurement.value * Math.pow(10, measurement.unit);
-                            measureTypes.push(type);
-                            if (type === 9) {
-                                pool.query("INSERT INTO measure_blood (fbuser, measure_date, diastolic) VALUES ($1, $2, $3) ON CONFLICT (fbuser, measure_date) DO UPDATE SET diastolic = excluded.diastolic", [user.fbuser, date, value]);
-                            }
-                            if (type === 10) {
-                                pool.query("INSERT INTO measure_blood (fbuser, measure_date, systolic) VALUES ($1, $2, $3) ON CONFLICT (fbuser, measure_date) DO UPDATE SET systolic = excluded.systolic", [user.fbuser, date, value]);
-                            }
-                            if (type === 11) {
-                                pool.query("INSERT INTO measure_blood (fbuser, measure_date, pulse) VALUES ($1, $2, $3) ON CONFLICT (fbuser, measure_date) DO UPDATE SET pulse = excluded.pulse", [user.fbuser, date, value]);
-                            }
-                            if (type === 1) {
-                                pool.query("INSERT INTO measure_weight (fbuser, measure_date, weight) VALUES ($1, $2, $3) ON CONFLICT (fbuser, measure_date) DO UPDATE SET weight = excluded.weight", [user.fbuser, date, value]);
-                            }
-                        });
-                    })
-                    pool.query('UPDATE connect_nokia SET last_update = (SELECT NOW()) WHERE fbuser = $1 OR nokia_user = $1', [userid]);
-                    if (measureTypes.length > 0) {
-                        sendMeasurementMessage(measureTypes, user.fbuser);
-                    }
-
-                }
-                if (isDefined(callback)) {
-                    callback();
-                }
-
-            })
-        }
-    });
-}
-
-/**
  * Send facebook message to user, based on what new measurements have been received.
  * @param {Array<number>} types measurement types, according to the Nokia Health API
  * @param {number} user Facebook User Id
@@ -468,18 +374,39 @@ function sendMeasurementMessage(types, user) {
     request.end();
 }
 
-/**
- * Builds a Nokia subscription url
- * @param {number} user Nokia user id
- * @param {number} appli Type of measurements to subscribe to.
- * @see https://developer.health.nokia.com/api/doc#api-Notification-notify_subscribe
- */
-function nokiaSubscriptionUrl(user, appli) {
-    return 'https://api.health.nokia.com/notify'
-        + '?action=subscribe'
-        + '&userid=' + user
-        + '&callbackurl=' + HOSTNAME + 'webhook/nokia/' + user + '/' + appli
-        + '&appli=' + appli;
+function getNokiaMeasurements(userid) {
+    pool.query('SELECT *, extract(epoch from last_update) as time FROM connect_nokia WHERE fbuser = $1 OR nokia_user = $1', [userid]).then(res => {
+        let user = res.rows[0];
+        nokia.getMeasurements(user.nokia_user, user.oauth_access_token, user.oauth_access_secret, user.time, measureGroups => {
+            let measureTypes = [];
+            measureGroups.forEach(group => {
+                let date = new Date(group.date * 1000).toISOString().slice(0, 19).replace('T', ' ');
+                group.measures.forEach(measurement => {
+                    let type = measurement.type;
+                    let value = measurement.value * Math.pow(10, measurement.unit);
+                    measureTypes.push(type);
+                    if (type === 9) {
+                        pool.query("INSERT INTO measure_blood (fbuser, measure_date, diastolic) VALUES ($1, $2, $3) ON CONFLICT (fbuser, measure_date) DO UPDATE SET diastolic = excluded.diastolic", [user.fbuser, date, value]);
+                    }
+                    if (type === 10) {
+                        pool.query("INSERT INTO measure_blood (fbuser, measure_date, systolic) VALUES ($1, $2, $3) ON CONFLICT (fbuser, measure_date) DO UPDATE SET systolic = excluded.systolic", [user.fbuser, date, value]);
+                    }
+                    if (type === 11) {
+                        pool.query("INSERT INTO measure_blood (fbuser, measure_date, pulse) VALUES ($1, $2, $3) ON CONFLICT (fbuser, measure_date) DO UPDATE SET pulse = excluded.pulse", [user.fbuser, date, value]);
+                    }
+                    if (type === 1) {
+                        pool.query("INSERT INTO measure_weight (fbuser, measure_date, weight) VALUES ($1, $2, $3) ON CONFLICT (fbuser, measure_date) DO UPDATE SET weight = excluded.weight", [user.fbuser, date, value]);
+                    }
+                });
+            })
+            if (measureTypes.length > 0) {
+                sendMeasurementMessage(measureTypes, user.fbuser);
+            }
+            pool.query('UPDATE connect_nokia SET last_update = (SELECT NOW()) WHERE fbuser = $1 OR nokia_user = $1', [userid]);
+
+
+        });
+    });
 }
 
 /**
@@ -487,7 +414,6 @@ function nokiaSubscriptionUrl(user, appli) {
  * @param {number|null} fbuser Facebook user id to subscribe to, or null to subscribe to all users
  */
 function subscribeToNokia(fbuser) {
-
     let query = { text: 'SELECT * FROM connect_nokia' };
     if (isDefined(fbuser)) {
         query.text += ' WHERE fbuser = $1';
@@ -495,12 +421,10 @@ function subscribeToNokia(fbuser) {
     }
     pool.query(query).then(res => {
         res.rows.forEach(row => {
-            let signedUrl = nokiaAPI.signUrl(nokiaSubscriptionUrl(row.nokia_user, 4), row.oauth_access_token, row.oauth_access_secret);
-            nokiaAPI.get(signedUrl, null, null, (error, responseData) => { if (error) console.log(error); });
-            signedUrl = nokiaAPI.signUrl(nokiaSubscriptionUrl(row.nokia_user, 1), row.oauth_access_token, row.oauth_access_secret);
-            nokiaAPI.get(signedUrl, null, null, (error, responseData) => { if (error) console.log(error); });
+            nokia.subscribe(row.nokia, row.oauth_access_token, row.oauth_access_secret, 1, (error, responseData) => { if (error) console.log(error); });
+            nokia.subscribe(row.nokia, row.oauth_access_token, row.oauth_access_secret, 4, (error, responseData) => { if (error) console.log(error); });
 
-            // Get measurements, so that we have current data and don't have to wait for a new measurement to be made
+            // Get measurements, so that we have current data and don't have to wait for a new measurement to be made to be up to date
             getNokiaMeasurements(row.fbuser);
         });
     })
@@ -550,8 +474,7 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
         pool.query("SELECT * FROM connect_nokia WHERE fbuser = $1", [fbUser])
             .then(result => {
                 let userOAuth = result.rows[0];
-                console.log(userOAuth);
-                nokiaAPI.getOAuthAccessToken(
+                nokia.getAccessToken(
                     userOAuth.oauth_request_token,
                     userOAuth.oauth_request_secret,
                     oAuthVerifier,
@@ -594,37 +517,41 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
 });
 
 app.get('/connect/wunderlist/:fbUserId', (req, res) => {
-
     res.cookie('fbuser', req.params.fbUserId, { maxAge: 1000 * 60 * 15, httpOnly: true })
         .redirect(wunderlist.getAuthUri());
-
 });
 
 app.get('/connect/wunderlist/', (req, res) => {
-    console.log(req.cookies);
-    let user = req.cookies.fbuser;
-    let code = req.query.code;
-    wunderlist.getAccessToken(code, user,
-        accessToken => {
-            pool.query('INSERT INTO connect_wunderlist (fbuser, access_token) VALUES ($1, $2) ON CONFLICT (fbuser) DO UPDATE SET access_token = excluded.access_token', [user, accessToken])
-                .then(() => {
-                    if (!sessionIds.has(user)) {
-                        sessionIds.set(user, uuid.v1());
-                    }
-                    let request = apiAiService.eventRequest({
-                        name: 'wunderlist_connected'
-                    }, {
-                            sessionId: sessionIds.get(user)
-                        });
+    try {
+        let user = req.cookies.fbuser;
+        let code = req.query.code;
+        wunderlist.getAccessToken(code, user,
+            accessToken => {
+                pool.query('INSERT INTO connect_wunderlist (fbuser, access_token) VALUES ($1, $2) ON CONFLICT (fbuser) DO UPDATE SET access_token = excluded.access_token', [user, accessToken])
+                    .then(() => {
+                        if (!sessionIds.has(user)) {
+                            sessionIds.set(user, uuid.v1());
+                        }
+                        let request = apiAiService.eventRequest({
+                            name: 'wunderlist_connected'
+                        }, {
+                                sessionId: sessionIds.get(user)
+                            });
 
-                    request.on('response', (response) => { handleResponse(response, user); });
-                    request.on('error', (error) => console.error(error));
+                        request.on('response', (response) => { handleResponse(response, user); });
+                        request.on('error', (error) => console.error(error));
 
-                    request.end();
+                        request.end();
 
-                    res.status(200).send();
-                }, (err) => { res.status(400).json(err) });
+                        res.status(200).send();
+                    }, (err) => { res.status(400).json(err) });
+            });
+    } catch (err) {
+        return res.status(400).json({
+            status: "error",
+            error: err
         });
+    }
 })
 
 app.get('/webhook/', (req, res) => {
@@ -682,7 +609,7 @@ app.all('/webhook/nokia/:userid/:type', (req, res) => {
         let startDate = req.body.startdate;
         let enddate = req.body.enddate;
 
-        getNokiaMeasurements(req.params.userid);
+        getNokiaMeasurements(req.params.userid)
 
         return res.status(200).end();
     } catch (err) {
@@ -696,7 +623,7 @@ app.all('/webhook/nokia/:userid/:type', (req, res) => {
 
 app.all('/webhook/wunderlist/:fbuser', (req, res) => {
     try {
-        
+
         let user = req.params.fbuser;
         let body = JSON.parse(req.body);
 

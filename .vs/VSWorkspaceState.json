@@ -1,11 +1,12 @@
 {
   "ExpandedNodes": [
     "",
+    "\\bin",
     "\\public",
     "\\public\\js",
     "\\src",
     "\\views"
   ],
-  "SelectedNode": "\\src\\portal.js",
+  "SelectedNode": "\\src\\app.js",
   "PreviewInSolutionExplorer": false
 }
