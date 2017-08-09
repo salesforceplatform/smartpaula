@@ -202,6 +202,10 @@ function handleResponse(response, sender) {
                                     }, {
                                             sessionId: sessionIds.get(sender)
                                         });
+                                    request.on('response', (response) => { handleResponse(response, sender); });
+                                    request.on('error', (error) => console.error(error));
+
+                                    request.end();
                                 });
                             wunderlist.createWebhook(connection.access_token, list.id, HOSTNAME + 'webhook/wunderlist/' + sender, (someresult) => { console.log(someresult); });
                         }
@@ -601,6 +605,23 @@ app.post('/webhook/', (req, res) => {
 });
 
 app.post('/webhook/scheduler', (req, res) => {
+    pool.query('SELECT fbuser FROM connect_nokia WHERE last_update > (CURRENT_DATE - INTERVAL \'1 week\')').then(result => {
+        result.rows.forEach(row => {
+            if (!sessionIds.has(user)) {
+                sessionIds.set(user, uuid.v1());
+            }
+
+            let request = apiAiService.eventRequest({
+                name: 'old_measurement'
+            }, {
+                    sessionId: sessionIds.get(row.fbuser)
+                });
+            request.on('response', (response) => { handleResponse(response, sender); });
+            request.on('error', (error) => console.error(error));
+
+            request.end();
+        })
+    })
     res.status(200).send()
 });
 
