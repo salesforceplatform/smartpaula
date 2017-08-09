@@ -244,7 +244,12 @@ function handleResponse(response, sender) {
                     "content_type": "text",
                     "title": "Nieuwe boodschappenlijst",
                     "payload": "Nieuwe boodschappenlijst"
-                }]
+                },
+                    {
+                        "content_type": "text",
+                        "title": "Niet nu",
+                        "payload": "Niet nu"
+                    }]
             }
 
             // facebook API limit for text length is 640,
