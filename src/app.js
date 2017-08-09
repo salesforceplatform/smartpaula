@@ -420,7 +420,7 @@ function getNokiaMeasurements(userid) {
             if (measureTypes.length > 0) {
                 sendMeasurementMessage(measureTypes, user.fbuser);
             }
-            pool.query('UPDATE connect_nokia SET last_update = (SELECT NOW()), sent_message = NULL WHERE fbuser = $1 OR nokia_user = $1', [userid
+            pool.query('UPDATE connect_nokia SET last_update = (SELECT NOW()), sent_message = NULL WHERE fbuser = $1 OR nokia_user = $1', [userid]);
         });
     });
 }
