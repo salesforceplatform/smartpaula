@@ -646,7 +646,7 @@ app.post('/webhook/scheduler', (req, res) => {
                 let user = row.fbuser;
                 let sent = row.sent_message.split(',');
                 let type = row.measurement_type;
-                if (!isDefined(send[user])) {
+                if (!(user in send)) {
                     send[user] = []
                 }
                 if (sent.includes(type)) {
