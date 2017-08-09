@@ -223,8 +223,8 @@ function handleResponse(response, sender) {
                                 nokia.getRequestUrl(sender, (error, url, oAuthToken, oAuthTokenSecret) => {
                                     if (!error) {
                                         facebook.sendMessage(sender, { text: url });
-                                        pool.query('DELETE FROM connect_nokia WHERE fbuser = $1', [fbUser]).then(() => {
-                                            pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret) VALUES ($1, $2, $3)', [fbUser, oAuthToken, oAuthTokenSecret]);
+                                        pool.query('DELETE FROM connect_nokia WHERE fbuser = $1', [sender]).then(() => {
+                                            pool.query('INSERT INTO connect_nokia (fbuser, oauth_request_token, oauth_request_secret) VALUES ($1, $2, $3)', [sender, oAuthToken, oAuthTokenSecret]);
                                         });
                                     }
                                 });
