@@ -142,8 +142,7 @@ function handleResponse(response, sender) {
                     // Forward the message to a predefined facebook user
 
                     // Disabled while in development
-                    // facebook.sendMessage(DEFAULT_INTENT_REFER_TO, {text:'Hallo, ik heb een vraag gekregen van ' + profile.first_name + ' ' + profile.last_name + ' die ik niet kan beantwoorden:\n "' + resolvedQuery + '"'})
-                    console.log('Default intent')
+                    facebook.sendMessage(DEFAULT_INTENT_REFER_TO, { text: 'Hallo, ik heb een vraag gekregen van ' + profile.first_name + ' ' + profile.last_name + ' die ik niet kan beantwoorden:\n "' + resolvedQuery + '"' })
                 });
             }
 
