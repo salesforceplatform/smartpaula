@@ -229,6 +229,9 @@ function handleResponse(response, sender) {
                         }
                     }
                     break;
+                case "my_facebook_id":
+                    message.text += '\n' + sender;
+                    break;
                 default:
                     console.log('Received an unknown action from API.ai: "' + action + '"');
             }
@@ -683,29 +686,6 @@ app.post('/webhook/scheduler', (req, res) => {
                 })
             }
         });
-
-    /**
-    pool.query('SELECT fbuser FROM connect_nokia WHERE last_update < (CURRENT_DATE - INTERVAL \'1 week\') AND sent_message IS NULL').then(result => {
-        console.log(result);
-        result.rows.forEach(row => {
-            let user = row.fbuser;
-            if (!sessionIds.has(user)) {
-                sessionIds.set(user, uuid.v1());
-            }
-
-            let request = apiAiService.eventRequest({
-                name: 'old_measurement'
-            }, {
-                    sessionId: sessionIds.get(user)
-                });
-            request.on('response', (response) => { handleResponse(response, user); });
-            request.on('error', (error) => console.error(error));
-
-            request.end();
-            pool.query('UPDATE connect_nokia SET sent_message = true WHERE fbuser = $1', [user]);
-        })
-    })
-    */
     res.status(200).send()
 });
 

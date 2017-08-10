@@ -5,6 +5,7 @@
     "\\public",
     "\\public\\js",
     "\\src",
+    "\\src\\services",
     "\\views"
   ],
   "SelectedNode": "\\src\\app.js",
