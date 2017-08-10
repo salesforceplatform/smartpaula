@@ -152,7 +152,7 @@ function handleResponse(response, sender) {
                 // TODO: Create some way of updating questionnares and questions that works on all questionnares
                 case "pam_sum":
                     let payload = response.result.payload;
-                    let score = parameters.pam_score;
+                    let score = parameters.pam_score || 0;
 
                     if (typeof score !== 'undefined') {
                         pool.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', [sender])
