@@ -464,6 +464,18 @@ function subscribeToNokia(fbuser) {
 }
 
 /**
+ * Subscribes to all Wunderlist lists.
+ */
+function subscribeToWunderlist() {
+    pool.query("SELECT connect_wunderlist.fbuser, connect_wunderlist.access_token, wunderlist_lists.id FROM wunderlist_lists LEFT JOIN connect_wunderlist ON wunderlist_lists.fbuser = connect_wunderlist.fbuser").then(result => {
+        result.rows.forEach(row => {
+            wunderlist.createWebhook(row.access_token, row.id, HOSTNAME + 'webhook/wunderlist/' + row.fbuser);
+        })
+    })
+}
+
+
+/**
  * Checks if an object is either undefined or falsy
  * @param {any} obj Object to check
  * @returns {boolean} True if defined an thruthy, false if not defined or falsy
@@ -502,6 +514,7 @@ app.get('/', function (req, res) {
     res.send('This is Paula');
 });
 
+// Callback URL a user is sent to after logging in to their NOKIA Health account and authorized Paula
 app.get('/connect/nokia/:fbUserId', (req, res) => {
     try {
         let fbUser = req.params.fbUserId;
@@ -554,11 +567,13 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
 
 });
 
+// Page a user is sent to by Paula to connect to Wunderlist. Redirects to the wunderlist Login page
 app.get('/connect/wunderlist/:fbUserId', (req, res) => {
     res.cookie('fbuser', req.params.fbUserId, { maxAge: 1000 * 60 * 15, httpOnly: true })
         .redirect(wunderlist.getAuthUri());
 });
 
+// Callback URL a user is sent to after logging in to their Wunderlist account and authorized Paula
 app.get('/connect/wunderlist/', (req, res) => {
     try {
         let user = req.cookies.fbuser;
@@ -592,6 +607,7 @@ app.get('/connect/wunderlist/', (req, res) => {
     }
 })
 
+// Facebook API webhook
 app.get('/webhook/', (req, res) => {
     if (req.query['hub.verify_token'] == FB_VERIFY_TOKEN) {
         res.send(req.query['hub.challenge']);
@@ -604,7 +620,7 @@ app.get('/webhook/', (req, res) => {
     }
 });
 
-//ontvangen van FB bericht
+// Facebook API webhook
 app.post('/webhook/', (req, res) => {
     try {
         var data = JSONbig.parse(req.body);
@@ -638,22 +654,24 @@ app.post('/webhook/', (req, res) => {
 
 });
 
+// Scheduler Webhook
 app.post('/webhook/scheduler', (req, res) => {
+    // Get last measurements from a user, if their last measurement for that type is longer then a week ago.
     pool.query('SELECT * FROM (' +
-            '(SELECT distinct on (fbuser) measure_blood.fbuser, \'blood\' as measurement_type, measure_date, sent_message FROM measure_blood LEFT JOIN connect_nokia ON measure_blood.fbuser = connect_nokia.fbuser ORDER BY fbuser, measure_date DESC)' +
-            'UNION ALL ' +
-            '(SELECT distinct on (fbuser) measure_weight.fbuser, \'weight\' as measurement_type, measure_date, sent_message FROM measure_weight LEFT JOIN connect_nokia ON measure_weight.fbuser = connect_nokia.fbuser ORDER BY fbuser, measure_date DESC)' +
+        '(SELECT distinct on (fbuser) measure_blood.fbuser, \'blood\' as measurement_type, measure_date, sent_message FROM measure_blood LEFT JOIN connect_nokia ON measure_blood.fbuser = connect_nokia.fbuser ORDER BY fbuser, measure_date DESC)' +
+        'UNION ALL ' +
+        '(SELECT distinct on (fbuser) measure_weight.fbuser, \'weight\' as measurement_type, measure_date, sent_message FROM measure_weight LEFT JOIN connect_nokia ON measure_weight.fbuser = connect_nokia.fbuser ORDER BY fbuser, measure_date DESC)' +
         ') as latest_records  WHERE measure_date < (CURRENT_DATE - INTERVAL \'1 week\')').then(result => {
             let send = {}
             result.rows.forEach(row => {
-                console.log(row);
+                // Define what messages we need to send
                 let user = row.fbuser;
                 let sent = isDefined(row.sent_message) ? row.sent_message.split(',') : [];
                 let type = row.measurement_type;
                 if (!(user in send)) {
                     send[user] = []
                 }
-                
+                // Don't send a message if we've already sent one for this measurement
                 if (!sent.includes(type)) {
                     send[user].push(type);
                 }
@@ -689,6 +707,7 @@ app.post('/webhook/scheduler', (req, res) => {
     res.status(200).send()
 });
 
+// NOKIA Health Webhook
 app.all('/webhook/nokia/:userid/:type', (req, res) => {
     try {
         let startDate = req.body.startdate;
@@ -706,6 +725,7 @@ app.all('/webhook/nokia/:userid/:type', (req, res) => {
 
 });
 
+// Wunderlist Webhook
 app.all('/webhook/wunderlist/:fbuser', (req, res) => {
     try {
 
@@ -744,28 +764,13 @@ app.all('/webhook/wunderlist/:fbuser', (req, res) => {
     }
 });
 
-
-//bewerking van api.ai vanuit webhook alvorens terug te sturen
-//app.post('/herokuai', function (req1, res1) {
-//         try {
-//         var requestBody = req1.action;
-//         debugtekst = "herokuai webhook: " + requestBody.action;
-//            } catch (err) {
-//                console.error("Can't process request", err);
-//                debugtekst = "herokuai webhook err: " + err;
-//         }
-//});
-
-
 app.listen(REST_PORT, () => {
     console.log('Rest service ready on port ' + REST_PORT);
 });
 
+// Subscribe to the facebook API
 facebook.doSubscribeRequest();
+// Subscribe to all Nokia Users
 subscribeToNokia();
-
-pool.query("SELECT connect_wunderlist.fbuser, connect_wunderlist.access_token, wunderlist_lists.id FROM wunderlist_lists LEFT JOIN connect_wunderlist ON wunderlist_lists.fbuser = connect_wunderlist.fbuser").then(result => {
-    result.rows.forEach(row => {
-        wunderlist.createWebhook(row.access_token, row.id, HOSTNAME + 'webhook/wunderlist/' + row.fbuser);
-    })
-})
+//Subscribe to all Wunderlist lists
+subscribeToWunderlist();
