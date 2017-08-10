@@ -9,7 +9,7 @@ const WunderlistSDK = require('wunderlist');
  * @param {string} redirectUri URL a user is sent to after login in to Wunderlist and authorizing your app
  * @see https://developer.wunderlist.com/documentation
  */
-let Wunderlist = function (clientId, clientSecret, redirectUri) {
+let Wunderlist = function(clientId, clientSecret, redirectUri) {
     this._clientId = clientId;
     this._clientSecret = clientSecret;
     this._redirectUri = redirectUri;
@@ -23,18 +23,18 @@ let Wunderlist = function (clientId, clientSecret, redirectUri) {
     });
 };
 
-Wunderlist.prototype.getAuthUri = function () {
+Wunderlist.prototype.getAuthUri = function() {
     return this._wunderlistAuth.code.getUri();
 };
 
-Wunderlist.prototype.getAccessToken = function (code, userId, callback) {
+Wunderlist.prototype.getAccessToken = function(code, userId, callback) {
     return request({
         url: 'https://www.wunderlist.com/oauth/access_token',
         method: 'POST',
         json: true,
         body: {
-            client_id: '8931d36b605a3fe1900f',
-            client_secret: 'f0ea3e820e2337747b92407517144075cc2b171a1c5b566e56148ef4add8',
+            client_id: this._clientId,
+            client_secret: this._clientSecret,
             code: code
         }
     }, (error, response, body) => {
@@ -49,20 +49,20 @@ Wunderlist.prototype.getAccessToken = function (code, userId, callback) {
  * Create a new Wunderlist for a user.
  * @param {string} accessToken Access Token for the user the list should be created for.
  */
-Wunderlist.prototype.createList = function (accessToken) {
+Wunderlist.prototype.createList = function(accessToken) {
     let wunderlistAPI = new WunderlistSDK({
         'accessToken': accessToken,
         'clientID': this._clientId
     });
 
     return wunderlistAPI.http.lists.create({ title: 'Mijn boodschappen' })
-        .done(function (listData, statusCode) {
+        .done(function(listData, statusCode) {
             console.log(listData, statusCode);
             if (statusCode === 200) {
                 return listData;
             }
         })
-        .fail(function (resp, code) {
+        .fail(function(resp, code) {
             console.log(resp);
         });
 };
@@ -73,7 +73,7 @@ Wunderlist.prototype.createList = function (accessToken) {
  * @param {integer} list List to subscribe to.
  * @param {string} callbackUri URI to callback to.
  */
-Wunderlist.prototype.createWebhook = function (accessToken, list, callbackUri, callback) {
+Wunderlist.prototype.createWebhook = function(accessToken, list, callbackUri, callback) {
     return request({
         url: 'http://a.wunderlist.com/api/v1/webhooks',
         method: 'POST',
