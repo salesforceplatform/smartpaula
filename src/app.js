@@ -109,30 +109,31 @@ function handleResponse(response, sender) {
              * @type {Array}
              */
             let quickReplies = [{
-                "content_type": "text",
-                "title": "😁",
-                "payload": "4"
-            },
-            {
-                "content_type": "text",
-                "title": "🙂",
-                "payload": "3"
-            },
-            {
-                "content_type": "text",
-                "title": "😞",
-                "payload": "2"
-            },
-            {
-                "content_type": "text",
-                "title": "😡",
-                "payload": "1"
-            },
-            {
-                "content_type": "text",
-                "title": "N.v.t",
-                "payload": "0"
-            }];
+                    "content_type": "text",
+                    "title": "😁",
+                    "payload": "4"
+                },
+                {
+                    "content_type": "text",
+                    "title": "🙂",
+                    "payload": "3"
+                },
+                {
+                    "content_type": "text",
+                    "title": "😞",
+                    "payload": "2"
+                },
+                {
+                    "content_type": "text",
+                    "title": "😡",
+                    "payload": "1"
+                },
+                {
+                    "content_type": "text",
+                    "title": "N.v.t",
+                    "payload": "0"
+                }
+            ];
             console.log('Response as text message');
 
             // If the intent is one of a set of predefined "default" intents, someone needs to do a manual followup with this user.
@@ -153,7 +154,7 @@ function handleResponse(response, sender) {
                     let payload = response.result.payload;
                     let score = parameters.pam_score;
 
-                    if (isDefined(score)) {
+                    if (typeof score !== 'undefined') {
                         pool.query('SELECT id FROM vragenlijsten WHERE fbuser = $1 ORDER BY gestart DESC LIMIT 1', [sender])
                             .then(res => {
                                 let vragenlijst = res.rows[0].id;
@@ -166,7 +167,7 @@ function handleResponse(response, sender) {
                     }
                     message.quick_replies = quickReplies;
 
-                    response.result.fulfillment.messages.forEach(function (message) {
+                    response.result.fulfillment.messages.forEach(function(message) {
                         let payload = message.payload;
                         if (isDefined(payload) && isDefined(payload.vragenlijst_end) && payload.vragenlijst_end) {
                             delete message.quick_replies;
@@ -174,13 +175,13 @@ function handleResponse(response, sender) {
                     });
                     break;
 
-                // User wants to start a new questionnare
+                    // User wants to start a new questionnare
                 case "start_vragenlijst":
                     pool.query({ text: 'INSERT INTO vragenlijsten (fbuser, vragenlijst) VALUES($1, $2)', values: [sender, parameters.vragenlijst] })
                         .catch(e => console.error(e, e.stack));
                     break;
 
-                // User wants to create a new wunderlist-list
+                    // User wants to create a new wunderlist-list
                 case "create_wunderlist":
                     pool.query("SELECT * FROM connect_wunderlist WHERE fbuser = $1", [sender]).then(result => {
                         let connection = result.rows[0];
@@ -193,8 +194,8 @@ function handleResponse(response, sender) {
                                             name: list.title
                                         }
                                     }, {
-                                            sessionId: sessionIds.get(sender)
-                                        });
+                                        sessionId: sessionIds.get(sender)
+                                    });
                                     request.on('response', (response) => { handleResponse(response, sender); });
                                     request.on('error', (error) => console.error(error));
 
@@ -205,7 +206,7 @@ function handleResponse(response, sender) {
                     });
                     break;
 
-                // User wants to connect to a service
+                    // User wants to connect to a service
                 case "connect_service":
                     let service = response.result.parameters.service;
                     if (isDefined(service)) {
@@ -238,15 +239,16 @@ function handleResponse(response, sender) {
 
             if (intentName === "Connected Wunderlist") {
                 message.quick_replies = [{
-                    "content_type": "text",
-                    "title": "Nieuwe lijst aanmaken",
-                    "payload": "Nieuwe boodschappenlijst"
-                },
-                {
-                    "content_type": "text",
-                    "title": "Niet nu",
-                    "payload": "Niet nu"
-                }]
+                        "content_type": "text",
+                        "title": "Nieuwe lijst aanmaken",
+                        "payload": "Nieuwe boodschappenlijst"
+                    },
+                    {
+                        "content_type": "text",
+                        "title": "Niet nu",
+                        "payload": "Niet nu"
+                    }
+                ]
             } else if (intentName === 'PAM_vragenlijst_einde') {
                 delete message.quick_replies
             }
@@ -262,7 +264,7 @@ function handleResponse(response, sender) {
         }
 
         // Some messages Have a custom payload, we need to handle this payload;
-        response.result.fulfillment.messages.forEach(function (message) {
+        response.result.fulfillment.messages.forEach(function(message) {
             let payload = message.payload
             if (isDefined(payload)) {
                 /** @type {string} */
@@ -274,8 +276,8 @@ function handleResponse(response, sender) {
                     let request = apiAiService.eventRequest({
                         name: followUp
                     }, {
-                            sessionId: sessionIds.get(sender)
-                        });
+                        sessionId: sessionIds.get(sender)
+                    });
 
                     request.on('response', (response) => { handleResponse(response, sender); });
                     request.on('error', (error) => console.error(error));
@@ -386,8 +388,8 @@ function sendMeasurementMessage(types, user) {
     let request = apiAiService.eventRequest({
         name: event
     }, {
-            sessionId: sessionIds.get(user)
-        });
+        sessionId: sessionIds.get(user)
+    });
 
     request.on('response', (response) => { handleResponse(response, user); });
     request.on('error', (error) => console.error(error));
@@ -510,7 +512,7 @@ app.use('/static', express.static(path.resolve(__dirname, '../public')))
 app.use('/portal', require('./portal'));
 
 // Server frontpage
-app.get('/', function (req, res) {
+app.get('/', function(req, res) {
     res.send('This is Paula');
 });
 
@@ -543,8 +545,8 @@ app.get('/connect/nokia/:fbUserId', (req, res) => {
                             let request = apiAiService.eventRequest({
                                 name: 'nokia_connected'
                             }, {
-                                    sessionId: sessionIds.get(fbUser)
-                                });
+                                sessionId: sessionIds.get(fbUser)
+                            });
 
                             request.on('response', (response) => { handleResponse(response, fbUser); });
                             request.on('error', (error) => console.error(error));
@@ -588,8 +590,8 @@ app.get('/connect/wunderlist/', (req, res) => {
                         let request = apiAiService.eventRequest({
                             name: 'wunderlist_connected'
                         }, {
-                                sessionId: sessionIds.get(user)
-                            });
+                            sessionId: sessionIds.get(user)
+                        });
 
                         request.on('response', (response) => { handleResponse(response, user); });
                         request.on('error', (error) => console.error(error));
@@ -662,48 +664,48 @@ app.post('/webhook/scheduler', (req, res) => {
         'UNION ALL ' +
         '(SELECT distinct on (fbuser) measure_weight.fbuser, \'weight\' as measurement_type, measure_date, sent_message FROM measure_weight LEFT JOIN connect_nokia ON measure_weight.fbuser = connect_nokia.fbuser ORDER BY fbuser, measure_date DESC)' +
         ') as latest_records  WHERE measure_date < (CURRENT_DATE - INTERVAL \'1 week\')').then(result => {
-            let send = {}
-            result.rows.forEach(row => {
-                // Define what messages we need to send
-                let user = row.fbuser;
-                let sent = isDefined(row.sent_message) ? row.sent_message.split(',') : [];
-                let type = row.measurement_type;
-                if (!(user in send)) {
-                    send[user] = []
-                }
-                // Don't send a message if we've already sent one for this measurement
-                if (!sent.includes(type)) {
-                    send[user].push(type);
-                }
-            });
-            for (let user in send) {
-                if (!send.hasOwnProperty(user)) continue;
-
-                if (!sessionIds.has(user)) {
-                    sessionIds.set(user, uuid.v1());
-                }
-
-                send[user].forEach(type => {
-                    let request = apiAiService.eventRequest({
-                        name: 'old_measurement_' + type
-                    }, {
-                            sessionId: sessionIds.get(user)
-                        });
-                    request.on('response', (response) => { handleResponse(response, user); });
-                    request.on('error', (error) => console.error(error));
-                    request.end();
-
-                    pool.query('SELECT sent_message FROM connect_nokia WHERE fbuser = $1', [user]).then(result => {
-                        let userRecord = result.rows[0];
-                        let sentTypes = userRecord.sent_message.split(',');
-                        if (!sentTypes.includes(type)) {
-                            sentTypes.push(type);
-                        }
-                        pool.query('UPDATE connect_nokia SET sent_message = $1 WHERE fbuser = $2', [sentTypes.join(), user]);
-                    })
-                })
+        let send = {}
+        result.rows.forEach(row => {
+            // Define what messages we need to send
+            let user = row.fbuser;
+            let sent = isDefined(row.sent_message) ? row.sent_message.split(',') : [];
+            let type = row.measurement_type;
+            if (!(user in send)) {
+                send[user] = []
+            }
+            // Don't send a message if we've already sent one for this measurement
+            if (!sent.includes(type)) {
+                send[user].push(type);
             }
         });
+        for (let user in send) {
+            if (!send.hasOwnProperty(user)) continue;
+
+            if (!sessionIds.has(user)) {
+                sessionIds.set(user, uuid.v1());
+            }
+
+            send[user].forEach(type => {
+                let request = apiAiService.eventRequest({
+                    name: 'old_measurement_' + type
+                }, {
+                    sessionId: sessionIds.get(user)
+                });
+                request.on('response', (response) => { handleResponse(response, user); });
+                request.on('error', (error) => console.error(error));
+                request.end();
+
+                pool.query('SELECT sent_message FROM connect_nokia WHERE fbuser = $1', [user]).then(result => {
+                    let userRecord = result.rows[0];
+                    let sentTypes = userRecord.sent_message.split(',');
+                    if (!sentTypes.includes(type)) {
+                        sentTypes.push(type);
+                    }
+                    pool.query('UPDATE connect_nokia SET sent_message = $1 WHERE fbuser = $2', [sentTypes.join(), user]);
+                })
+            })
+        }
+    });
     res.status(200).send()
 });
 
